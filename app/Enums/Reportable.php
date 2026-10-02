@@ -3,8 +3,7 @@
 namespace App\Enums;
 
 enum Reportable: string {
-    case PUBLICACION = 'publicacion';        
+    case USUARIO = 'usuario';
     case COMENTARIO = 'comentario';
-    case USUARIO = 'usuario';        
+    case PUBLICACION = 'publicacion';
 }
-
