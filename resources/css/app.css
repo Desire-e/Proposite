@@ -1,12 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
 @import 'tailwindcss';
 
 @plugin 'tailwindcss-animate';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
-@custom-variant dark (&:is(.dark *));
 
-@theme {
+:root {
+    /* Fonts */
+    --heading-font: "Fraunces", serif;
+    --text-font: "Inter", sans-serif;    
+
+
+    /* Fondo principal de la página */
+    --background: #ffffff;
+
+    /* Color de texto principal */
+    --foreground:#000000;
+
+    /* Color principal de la marca o acciones destacadas */
+    --primary:#464EA5;
+    --primary-foreground:#ffffff;	
+
+    /* Elementos secundarios */
+    --secondary: #120F47;
+    --secondary-foreground:#ffffff;
+
+    /* Color para destacar elementos, estados o detalles */
+    --soft-accent: #EAEAFF;
+    --accent:#5956E9;	
+
+    /* Fondos discretos o elementos atenuados */
+    --muted: #AEBADC;
+    --muted-foreground:#000000;
+
+
+    /* Fondo de tarjetas */
+    /* --card */
+    /* --card-foreground */
+
+    /* Bordes de componentes */
+    /* --border */
+
+    /* Bordes o fondo de campos de formulario */
+    /* --input */
+
+    /* Contorno de foco de inputs y botones */
+    /* --ring */
+        
+    /* Acciones destructivas, como eliminar */
+    /* --destructive */
+    /* --destructive-foreground */
+
+
+    /* Operaciones completadas correctamente */
+    /* --success */
+
+    /* Advertencias */
+    /* --warning */
+
+    /* Errores */
+    /* --error */
+
+    /* Información */
+    /* --info */
+
+    /* Enlaces */
+    /* --link */
+
+    /* Capa superpuesta sobre la página */
+    /* --overlay */
+}
+
+body {
+    font-family: var(--text-font);
+}
+html {
+  scroll-behavior: smooth;
+}
+
+/* @custom-variant dark (&:is(.dark *)); */
+
+/* @theme {
     --font-sans:
         'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
@@ -14,8 +90,8 @@
     --radius-md: calc(var(--radius) - 2px);
     --radius-sm: calc(var(--radius) - 4px);
 
-    --color-background: var(--background);
-    --color-foreground: var(--foreground);
+    --color-background: var(--bg-color);
+    --color-font: var(--font-color);
 
     --color-card: var(--card);
     --color-card-foreground: var(--card-foreground);
@@ -56,7 +132,7 @@
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-ring: var(--sidebar-ring);
-}
+} */
 
 /*
   The default border color has changed to `currentColor` in Tailwind CSS v4,
@@ -66,7 +142,7 @@
   If we ever want to remove these styles, we need to add an explicit border
   color utility to any element that depends on these defaults.
 */
-@layer base {
+/* @layer base {
     *,
     ::after,
     ::before,
@@ -74,10 +150,11 @@
     ::file-selector-button {
         border-color: var(--color-gray-200, currentColor);
     }
-}
+} */
+/*
+:root {    
 
-:root {
-    --background: hsl(0, 0%, 100%);
+     --background: hsl(0, 0%, 100%);
     --foreground: hsl(0, 0%, 3.9%);
     --card: hsl(0, 0%, 100%);
     --card-foreground: hsl(0, 0%, 3.9%);
@@ -109,10 +186,10 @@
     --sidebar-accent: hsl(0, 0%, 94%);
     --sidebar-accent-foreground: hsl(0, 0%, 30%);
     --sidebar-border: hsl(0, 0%, 91%);
-    --sidebar-ring: hsl(217.2, 91.2%, 59.8%);
-}
+    --sidebar-ring: hsl(217.2, 91.2%, 59.8%); 
+}*/
 
-.dark {
+/* .dark {
     --background: hsl(0, 0%, 3.9%);
     --foreground: hsl(0, 0%, 98%);
     --card: hsl(0, 0%, 3.9%);
@@ -145,9 +222,11 @@
     --sidebar-accent-foreground: hsl(240, 4.8%, 95.9%);
     --sidebar-border: hsl(0, 0%, 15.9%);
     --sidebar-ring: hsl(217.2, 91.2%, 59.8%);
-}
+} */
 
-@layer base {
+
+
+/* @layer base {
     * {
         @apply border-border;
     }
@@ -155,4 +234,4 @@
     body {
         @apply bg-background text-foreground;
     }
-}
+} */
