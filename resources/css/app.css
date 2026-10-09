@@ -15,17 +15,22 @@
 
     /* Fondo principal de la página */
     --background: #ffffff;
-
     /* Color de texto principal */
     --foreground:#000000;
+    --soft-foreground: oklch(40.219% 0.01894 302.011);
 
     /* Color principal de la marca o acciones destacadas */
     --primary:#464EA5;
-    --primary-foreground:#ffffff;	
+    --primary-foreground:#ffffff;
 
-    /* Elementos secundarios */
+
+    --selected:oklch(93.547% 0.0206 298.053);
+    --hover:oklch(94.06% 0.00967 298.941 / 0.518);
+
+
     --secondary: #120F47;
     --secondary-foreground:#ffffff;
+    
 
     /* Color para destacar elementos, estados o detalles */
     --soft-accent: #EAEAFF;
@@ -76,8 +81,32 @@
 body {
     font-family: var(--text-font);
 }
+
 html {
   scroll-behavior: smooth;
+}
+
+@theme inline {
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-soft-foreground: var(--soft-foreground);
+
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+
+    --color-selected: var(--selected);
+    --color-hover: var(--hover);
+
+    --color-accent: var(--accent);
+    --color-soft-accent: var(--soft-accent);
+
+
+
+    --font-heading: var(--heading-font);
+    --font-text: var(--text-font);
 }
 
 /* @custom-variant dark (&:is(.dark *)); */
