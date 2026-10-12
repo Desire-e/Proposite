@@ -12,10 +12,10 @@ export function TitledCards({ cards }: {cards: TitledCardData[]} ) {
         <div className='flex flex-wrap justify-center text-center gap-10'>
             {cards.map((card) => (
                 
-                <div className='flex flex-col md:w-3xs gap-2 items-center'>
-                        {card.icon && <Icon iconNode={card.icon} className="h-5 w-5 text-primary" />}                        
-                    <p className="text-sm text-primary">{card.title.toUpperCase()}</p>
-                    <p className="text-sm ">{card.description}</p>
+                <div className='flex flex-col md:w-3xs gap-2 items-center text-accent'>
+                        {card.icon && <Icon iconNode={card.icon} className="h-5 w-5" />}                        
+                    <p className="text-sm">{card.title.toUpperCase()}</p>
+                    <p className="text-sm text-foreground">{card.description}</p>
                 </div>
         
             ))}
