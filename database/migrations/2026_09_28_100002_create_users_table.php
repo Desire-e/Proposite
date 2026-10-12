@@ -69,6 +69,8 @@ return new class extends Migration
                     ->nullOnDelete();
 
             $table->timestamps(); // created_at, updated_at
+            
+            $table->softDeletes(); // deleted_at
         });
 
         // Schema::create('password_reset_tokens', function (Blueprint $table) {

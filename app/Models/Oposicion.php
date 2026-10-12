@@ -12,7 +12,7 @@ use App\Models\Tema;
 
 
 class Oposicion extends Model {
-    use HasUuid;
+    use HasUuids;
 
     protected $table = "oposiciones";
 

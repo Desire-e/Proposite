@@ -19,10 +19,19 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
+
+        // Roles
         $middleware->alias([ 
             'admin' => EnsureIsAdmin::class, 
             'opositor' => EnsureIsOpositor::class 
         ]);
+
+        // Usuarios no autenticados (guests) que intentan acceder a rutas protegidas 
+        $middleware->redirectGuestsTo('/login');
+
+        // Usuarios autenticados que intentan acceder a rutas para invitados (guests) 
+        $middleware->redirectUsersTo('/dashboard');    
+
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
