@@ -4,11 +4,13 @@ export interface Auth {
     user: User;
 }
 
+// unused
 export interface BreadcrumbItem {
     title: string;
     href: string;
 }
 
+// unused
 export interface NavGroup {
     title: string;
     items: NavItem[];
@@ -21,6 +23,7 @@ export interface NavItem {
     isActive?: boolean;
 }
 
+// unused
 export interface SharedData {
     name: string;
     quote: { message: string; author: string };
@@ -28,6 +31,7 @@ export interface SharedData {
     [key: string]: unknown;
 }
 
+// unused
 export interface User {
     id: number;
     name: string;
