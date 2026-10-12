@@ -6,6 +6,7 @@ namespace Database\Seeders;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Database\Seeders\AvatarSeeder;
+use Database\Seeders\OposicionSeeder;
 
 /**
  * Running Seeders:
@@ -34,6 +35,7 @@ class DatabaseSeeder extends Seeder {
          */
         $this->call([
             AvatarSeeder::class,
+            OposicionSeeder::class,
         ]);
         
     }
