@@ -51,7 +51,7 @@ const authRightNavItems: NavItem[] = [
 
 
 // Las clases de Tailwind que se aplicarán al elemento de navegación activo
-const activeItemStyles = 'bg-selected text-primary';
+const activeItemStyles = 'bg-background-accent text-accent';
 
 export function AppHeader() {
     /**
@@ -126,7 +126,7 @@ export function AppHeader() {
                                                 href={item.url} 
                                                 className={cn(
                                                 'flex items-center p-2 m-2 space-x-2 font-medium rounded-xl',
-                                                'text-sm text-soft-foreground transition-colors',
+                                                'text-sm text-muted-foreground transition-colors',
                                                 'hover:bg-hover hover:text-black',
                                                 'focus:bg-hover focus:text-black focus:outline-hidden',
                                                 page.url === item.url && activeItemStyles
@@ -165,7 +165,7 @@ export function AppHeader() {
                                 href={item.url}
                                 className={cn(
                                     'h-9 inline-flex items-center justify-center rounded-full px-3',
-                                    'text-soft-foreground text-sm font-medium transition-colors',
+                                    'text-muted-foreground text-sm font-medium transition-colors',
                                     'hover:bg-hover hover:text-black',
                                     'focus:bg-hover focus:text-black',
                                     page.url === item.url && activeItemStyles
