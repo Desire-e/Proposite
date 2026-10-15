@@ -1,12 +1,7 @@
-import { Head } from '@inertiajs/react';
-
-import { AppHeader } from '@/components/AppHeader';
-import { AppFooter } from '@/components/AppFooter';
-
 import PageLayout from '@/layouts/PageLayout';
+import AppLayout from '@/layouts/AppLayout';
 
 import Hero from '@/components/Hero';
-
 import { StepsCards, type StepCardData } from '@/components/ui/StepsCards';
 import { TitledCards, type TitledCardData } from '@/components/ui/TitledCards';
 import { Users, BookOpenText, SquarePen, CalendarFold } from 'lucide-react';
@@ -16,7 +11,7 @@ import { Users, BookOpenText, SquarePen, CalendarFold } from 'lucide-react';
  */
 
 
-export default function Landing() {
+export default function Welcome() {
     
     // TODO. Datos reales
     const productsData: TitledCardData[] = [
@@ -69,15 +64,11 @@ export default function Landing() {
 
 
     return (
-        <>
-            {/* Gestionar las etiquetas <title> y <meta> del documento HTML */}
-            <Head title="Proposite" />
-            
-            <AppHeader />
+        <AppLayout headTitle="Proposite | Comunidad de opositores">
                 
             <Hero />
 
-            <PageLayout>
+            <PageLayout className='my-35 gap-50'>
                 <section className='w-full space-y-8'>
                         <h2 className='text-center text-4xl font-semibold' style={{fontFamily: "var(--heading-font)"}}>
                             Todo lo que necesitas, en un mismo lugar
@@ -85,11 +76,8 @@ export default function Landing() {
         
                         <p className='text-center'>Proposite reúne herramientas y personas para que te centres en lo importante, tu propósito.</p>
 
-                    <TitledCards 
-                    cards={productsData}
-                    />
+                    <TitledCards cards={productsData} />
                 </section>
-
 
                 <section id="how-to-start" className='w-full space-y-8'>
                     <h3 className='text-center text-4xl font-semibold' style={{fontFamily: "var(--heading-font)"}}>
@@ -98,14 +86,11 @@ export default function Landing() {
                     
                     <p className='text-center'>Así de sencillo es sumarte a tu comunidad de oposición</p>
                     
-                    <StepsCards 
-                    steps={stepsData}
-                    />
+                    <StepsCards steps={stepsData} />
                 </section>
 
             </PageLayout>
 
-            <AppFooter />
-        </>
+        </AppLayout>
     );
 }
