@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use App\Models\Oposicion;
-use App\Models\Avatar;
 use App\Models\Reporte;
 use App\Models\Publicacion;
 use App\Models\Comentario;
@@ -40,7 +39,6 @@ class Usuario extends Authenticatable {
         'biografia',
         'suspendido',
         'suspendido_por',
-        'avatar_id',
     ];
     
     public $timestamps = true;
@@ -59,10 +57,6 @@ class Usuario extends Authenticatable {
 
 
     // Relaciones
-    
-    public function avatar(): BelongsTo{
-        return $this->belongsTo(Avatar::class, 'avatar_id');
-    }
     
     public function intentosTests(): HasMany {
         return $this->hasMany(IntentoTest::class, 'usuario_id');

@@ -34,7 +34,6 @@ class DatabaseSeeder extends Seeder {
          * The call method accepts an array of seeder classes that should be executed
          */
         $this->call([
-            AvatarSeeder::class,
             OposicionSeeder::class,
         ]);
         

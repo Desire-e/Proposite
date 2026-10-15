@@ -6,6 +6,7 @@ import { Link, useForm } from '@inertiajs/react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Textarea from '@/components/ui/Textarea';
+import UserAvatar from '@/components/ui/UserAvatar';
 
 import AppLayout from '@/layouts/AppLayout';
 import PageLayout from '@/layouts/PageLayout';
@@ -13,7 +14,6 @@ import PageLayout from '@/layouts/PageLayout';
 type UserProfile = {
     name: string;
     email: string;
-    avatar: Avatar;
     biografia?: string;
     fecha_convocatoria?: string;    
     tests: number;
@@ -21,10 +21,10 @@ type UserProfile = {
     respuestas: number;
 }
 
-type Avatar = {
-    id: string;
-    nombre: string;
-    ruta_archivo: string;
+type UpdateUserForm = {
+    name?: string;
+    biografia?: string;
+    fecha_convocatoria?: string;
 }
 
 // type Flash = {
@@ -32,19 +32,10 @@ type Avatar = {
 //     error?: string;
 // }
 
-type UpdateUserForm = {
-    name?: string;
-    avatar_id?: string;
-    biografia?: string;
-    fecha_convocatoria?: string;
-}
-
 export default function Perfil(
-    { user, avatares = [], /*flash*/ } : 
-    { user: UserProfile, avatares: Avatar[], /*flash?: Flash*/}
+    { user, /*flash*/ } : 
+    { user: UserProfile, /*flash?: Flash*/}
 ) {
-
-
     /** 
      * @isDirty indica si los datos del formulario han 
      * cambiado respecto a sus valores iniciales.
@@ -54,11 +45,9 @@ export default function Perfil(
 
     const { data, setData, post, processing, errors, clearErrors, isDirty, setDefaults, } = useForm<UpdateUserForm>({
         name: user.name,
-        avatar_id: user.avatar.id,
         biografia: user.biografia ?? '',
         fecha_convocatoria: user.fecha_convocatoria ?? '',
-    });
-
+    }); 
 
     const errorsInputStyle: string = 'border-error! placeholder:text-error! focus:border-2!'; 
 
@@ -80,13 +69,10 @@ export default function Perfil(
                     {/* INFO USUARIO */}
                     
                     <section className='flex items-top gap-5'>
-                        {/* TODO. FIX EN BORDER DE IMAGEN */}
-                        <div className='h-20 aspect-square object-cover rounded-2xl bg-background-accent'>
-                            <img
-                                src={`images/${user.avatar.ruta_archivo}`}
-                                alt={`Avatar de ${user.name}`}
-                            />
-                        </div>
+                        <UserAvatar
+                            name={user.name}
+                            size="lg"
+                        />
 
                         <div className='flex flex-col'>
                             <h1 className='text-3xl font-heading font-medium'>{user.name}</h1>
@@ -143,17 +129,6 @@ export default function Perfil(
                                 />
 
                                 <InputError message={errors.name} />
-                            </div>
-
-                            {/* TODO */}
-                            {/* Avatar */}
-                            <div className='flex flex-col gap-3'>
-                                <Label htmlFor="avatar" className='text-sm font-medium'>Avatar</Label>
-                                {/* 
-                                {avatares.map(a => (
-                                    <p>{a.nombre}</p>
-                                ))} 
-                                 */}
                             </div>
 
                             {/* TODO. CREA COMPO TEXTAREA */}

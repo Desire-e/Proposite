@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 use App\Models\Usuario;
-use App\Models\Avatar;
 use App\Models\IntentoTest;
 use App\Models\Publicacion;
 use App\Models\Comentario;
@@ -26,9 +25,6 @@ class PerfilController extends Controller
     {
         $user = Auth::user();
 
-        $avatarId = $user->avatar_id;
-        $avatar = Avatar::find($avatarId);
-
         $testsRealizados = IntentoTest::where('usuario_id', $user->id)->distinct('test_id')->count('test_id');            
         
         $publicaciones = Publicacion::where('usuario_id', $user->id)->count();
@@ -39,21 +35,18 @@ class PerfilController extends Controller
             ->pluck('id'); // valores de una columna concreta
         $respuestas = Comentario::whereIn('publicacion_id', $userPublicaciones) // busca  asociados a los publicacion_id
             ->count();
-
-        $avatares = Avatar::all();
         
+
         return Inertia::render('opositor/perfil', [
             'user' => [
                 'name' => $user->name ?? null,
                 'email'=> $user->email ?? null,
-                'avatar'=> $avatar ?? null,
                 'biografia'=> $user->biografia ?? null,
                 'fecha_convocatoria'=> $user->fecha_convocatoria ?? null,
                 'tests' => $testsRealizados,
                 'publicaciones' => $publicaciones,
                 'respuestas' => $respuestas,
             ],
-            'avatares' => $avatares,
         ]);
     }
 
@@ -72,7 +65,6 @@ class PerfilController extends Controller
                 Rule::unique('usuarios', 'name') // nombre único
                     ->ignore($request->user()->id), // excluye al usuario autenticado
             ],
-            'avatar_id' => ['nullable', 'uuid', 'exists:avatares,id'],
             'biografia' => ['nullable', 'string'],
             'fecha_convocatoria' => ['nullable', 'date', 'after:today'], 
         ], [
@@ -82,14 +74,12 @@ class PerfilController extends Controller
         $user = $request->user(); // usuario autenticado que hizo la request
 
         $user->name = $validated['name'];
-        $user->avatar_id = $validated['avatar_id'];
-        $user->biografia = $validated['biografia'];
-        $user->fecha_convocatoria = $validated['fecha_convocatoria'];
+        $user->biografia = $validated['biografia'] ?? null;
+        $user->fecha_convocatoria = $validated['fecha_convocatoria'] ?? null;
         
         $user->save();
 
         return back()->with('success', 'Perfil actualizado correctamente.');
     }
-
 
 }

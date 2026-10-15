@@ -32,9 +32,7 @@ type RegisterForm = {
     name: string;
     email: string;
     password: string;
-    // rol: Rol.OPOSITOR; 
     fecha_convocatoria?: string; // por petición http viene en string
-    avatar_id?: string;
     acepta_terminos: boolean;
 }
 
@@ -70,9 +68,6 @@ export default function Register(
             name: '',
             email: '',
             password: '',
-            // rol: Rol.OPOSITOR,
-            // fecha_convocatoria
-            // avatar_id
             acepta_terminos: false,
         });
 

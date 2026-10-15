@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Usuario;
 use App\Models\Oposicion;
-use App\Models\Avatar;
 use App\Enums\Rol;
 use Illuminate\Auth\Events\Registered;
 
@@ -68,16 +67,10 @@ class RegisteredUserController extends Controller {
         $validated['password'] = Hash::make($validated['password']);
         $validated['rol'] = Rol::OPOSITOR->value;
         $validated['fecha_convocatoria'] = $validated['fecha_convocatoria'] ?? null;
-        $validated['avatar_id'] = $validated['avatar_id'] ?? null;
 
         // -- Creación de usuario válido -- 
 
         $usuario = Usuario::create($validated);
-
-        // Obtener un avatar predeterminado y asignarlo
-        $avatar = Avatar::firstOrFail();
-        $usuario->avatar_id = $avatar->id;
-        $usuario->save();
 
         // Dispara un evento de Laravel (aviso que el resto de la aplicación puede 
         // escuchar para reaccionar) que indica que se ha registrado un usuario nuevo.
