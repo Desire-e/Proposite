@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+
 use Illuminate\Http\Request;
 use Inertia\Response;
 use Illuminate\Http\RedirectResponse;
@@ -35,17 +36,20 @@ class AuthenticatedSessionController extends Controller
 
         // -- Autenticar usuario --
 
-        if (Auth::attempt($validated)) {
-            // -- Regenerar sesión --
-            $request->session()->regenerate();
+        if (!Auth::attempt($validated)) {
+            return back()->withErrors([
+                'password' => 'El usuario y/o la contraseña no son correctos',
+            ])->onlyInput('email'); // qué datos del formulario se conservan al volver a la página
 
-            // -- Redirección --
-            return redirect()->intended(route('dashboard'));
         } 
 
-        return back()->withErrors([
-            'password' => 'El usuario y/o la contraseña no son correctos',
-        ])->onlyInput('email'); // qué datos del formulario se conservan al volver a la página
+        // -- Regenerar sesión --
+
+        $request->session()->regenerate();
+
+        // -- Redirección --
+
+        return redirect()->intended(route('dashboard'));
     }
 
 
@@ -63,6 +67,6 @@ class AuthenticatedSessionController extends Controller
 
         // -- Redirección --
 
-        return redirect()->route('home');
+        return redirect()->route('welcome');
     }
 }

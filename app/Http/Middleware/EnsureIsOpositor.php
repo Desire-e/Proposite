@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Enums\Rol;
 
-class EnsureIsAdmin {
+class EnsureIsOpositor {
     /**
      * Handle an incoming request.
      *
@@ -17,7 +17,8 @@ class EnsureIsAdmin {
     public function handle(Request $request, Closure $next): Response {
 
         if ($request->user()?->rol !== Rol::OPOSITOR) {
-            return redirect()->route('home');
+            // return redirect()->route('welcome');
+            abort(403);
         }
  
         return $next($request);

@@ -25,7 +25,8 @@ class EnsureIsAdmin {
 
         // Obtiene usuario autenticado, compara su rol
         if ($request->user()?->rol !== Rol::ADMIN) {
-            return redirect()->route('home');
+            // return redirect()->route('welcome');
+            abort(403);
         }
  
         return $next($request);

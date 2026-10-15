@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Usuario;
 use App\Models\Oposicion;
+use App\Models\Avatar;
 use App\Enums\Rol;
 use Illuminate\Auth\Events\Registered;
 
@@ -73,6 +74,11 @@ class RegisteredUserController extends Controller {
 
         $usuario = Usuario::create($validated);
 
+        // Obtener un avatar predeterminado y asignarlo
+        $avatar = Avatar::firstOrFail();
+        $usuario->avatar_id = $avatar->id;
+        $usuario->save();
+
         // Dispara un evento de Laravel (aviso que el resto de la aplicación puede 
         // escuchar para reaccionar) que indica que se ha registrado un usuario nuevo.
         // Puede tener listeners asociados.
@@ -85,6 +91,6 @@ class RegisteredUserController extends Controller {
         // -- Redirección -- 
         
         // return redirect()->route('dashboard')->with('success','Usuario registrado correctamente.');
-        return to_route('home');
+        return to_route('welcome');
     }
 }

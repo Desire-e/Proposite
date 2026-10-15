@@ -3,6 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+use App\Http\Controllers\PerfilController;
+use App\Http\Controllers\Admin\PanelController as AdminPanelController;
+
 use App\Http\Controllers\PublicacionesController;
 use App\Http\Controllers\ComentariosController;
 use App\Http\Controllers\TemariosController;
@@ -22,42 +25,13 @@ use App\Http\Controllers\Admin\UsuariosController as AdminUsuariosController;
  * RUTAS PRINCIPALES 
  *****************************/
 
-//////////////////////////////////////////
-// Nota: Ejemplo de ruta con middleware 
-//////////////////////////////////////////
-/*
 
-// 'auth' - middleware predeterminado authentication
-
-Route::middleware(['auth' , 'admin'])->group(function () {
-    Route::get('/admin', [AdminController::class, 'index']);
-});
-
-// Solo administradores
-
-Route::middleware(['auth', 'admin'])->group(function () {
-    // Rutas de administración
-});
-
-// Solo opositores
-
-Route::middleware(['auth', 'opositor'])->group(function () {
-    // Rutas de opositores
-});
-
-// Cualquier usuario autenticado
-
-Route::middleware('auth')->group(function () {
-    // Rutas comunes para usuarios registrados
-});
-
-*/
 
 
 // ==================
 // Inicio
 // ==================
-
+/*
 Route::get('/', function () {
 
     // Inicio en perfil (autenticado)
@@ -67,45 +41,76 @@ Route::get('/', function () {
     return Inertia::render('welcome');
 
 })->name('home'); // nombre interno para hacer route('home')
+*/
 
+Route::get('/', function () {
 
-// ==================
-// Inicio por rol
-// ==================
-
-// TODO. Cambiar por el de abajo comentado cuando tenga las vistas
-Route::middleware(['auth'])->group(function () {
-
-    // Inicio en perfil
-    Route::get('dashboard', function () {
-
-        return Inertia::render('dashboard');
+    // Inicio en perfil (autenticado)
+    if (auth()->check()) { return redirect()->route('dashboard'); }
     
-    })->name('dashboard');
+    // Inicio en landing (no autenticado)
+    return Inertia::render('welcome');
+
+})->name('welcome'); // nombre interno para hacer route('welcome')
+
+
+
+// ==================
+// Router por rol: solo redirige
+// ==================
+
+Route::middleware('auth')->get('/dashboard', function () {
+    
+    /**
+     * TODO. Dos comprobaciones
+     * 
+     * Alias de los middlewares: mira en bootstrap/app.php cómo llamaste a los alias de 
+     * rol (admin, opositor u otros). Usa exactamente esos nombres.
+     * 
+     * Si rol está casteado a enum en el modelo, === 'administrador' será siempre falso. 
+     * En ese caso compara con el caso del enum, por ejemplo Rol::Administrado
+     */
+    return auth()->user()->rol === 'admin'
+        ? redirect()->route('admin.panel')
+        : redirect()->route('opositor.perfil');
+    
+})->name('dashboard');
+
+
+
+// ==================
+// Opositor
+// ==================
+
+Route::middleware(['auth', 'opositor'])->group(function () {
+    
+    Route::get('/perfil', [PerfilController::class, 'index'])
+        ->name('opositor.perfil');
+
+    // otras rutas ...
+
+    Route::post('/perfil', [PerfilController::class, 'update'])
+    ->name('perfil.update');
+
 });
 
 
-// Inicio correspondiente para cada tipo de usuario autenticado.
+// ==================
+// Administrador
+// ==================
 
-// Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     
-//     Route::get('/dashboard', function () {
+    // ASK. por que puso get '/'
+    Route::get('/panel', [AdminPanelController::class, 'index'])
+    ->name('panel');
 
-//         // Admin - dashboard administrativo.
-//         if (auth()->user()->rol === 'admin') {
-//             return Inertia::render('admin/dashboard');
-//         }
-//         // Opositor - en perfil / dashboard personal.
-//         if (auth()->user()->rol === 'opositor') {
-//             return Inertia::render('opositor/dashboard');
-//         }
-
-//     })->name('dashboard');
-
-// });
+    // otras rutas ...
+});
 
 
 
+///////////////////////////////////////////////////////////////////////////////
 
 // ==================
 // Opositor
@@ -228,6 +233,37 @@ Route::middleware(['auth', 'admin'])->group(function () {
         ->name('reportes.resolve');
 });
 
+
+//////////////////////////////////////////
+// Nota: Ejemplo de ruta con middleware 
+//////////////////////////////////////////
+/*
+
+// 'auth' - middleware predeterminado authentication
+
+Route::middleware(['auth' , 'admin'])->group(function () {
+    Route::get('/admin', [AdminController::class, 'index']);
+});
+
+// Solo administradores
+
+Route::middleware(['auth', 'admin'])->group(function () {
+    // Rutas de administración
+});
+
+// Solo opositores
+
+Route::middleware(['auth', 'opositor'])->group(function () {
+    // Rutas de opositores
+});
+
+// Cualquier usuario autenticado
+
+Route::middleware('auth')->group(function () {
+    // Rutas comunes para usuarios registrados
+});
+
+*/
 
 
 // Esto importa las rutas que están definidas en esos archivos.
