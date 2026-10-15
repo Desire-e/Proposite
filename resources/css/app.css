@@ -6,36 +6,110 @@
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
+* { 
+    box-sizing:border-box; 
+    border-color:var(--border); 
+}
 
-:root {
+/* body { font-family: var(--text-font); } */
+
+html { scroll-behavior: smooth; }
+
+:root { 
     /* === FUENTES ===  */
     
     --heading-font: "Fraunces", serif;
     --text-font: "Inter", sans-serif;    
 
+
     /* === COLORES === */
 
-    --background: #ffffff; /* Fondo principal de la página */
-    --foreground:#000000; /* Color de texto principal */
+    --background:#F8FAFC; 
+    --foreground:#0F172A;
+
+    /* índigo principal para botones, enlaces y acciones  */
+    --primary:#4F46E5; 
+    --primary-foreground:#fff; 
+    
+    /* índigo claro para acentos, iconos y estados activos */
+    --secondary:#818CF8;
+    --secondary-foreground:#fff; 
+
+    /* --strong-accent: #11164F; */
+
+    /* lavanda muy suave para fondos destacados y superficies secundarias. */
+    --tertiary: #EEF2FF; 
+    --tertiary-foreground:#3730A3;
+    
+    /* fondo general claro */
+    --neutral: #F8FAFC;
+    --neutral-foreground: #475569;
+
+    --border:#E2E8F0; 
+
+    --ring:#818CF8;
+
+    --error: #db040b;
+
+    --radius:1rem;
+}
+
+@theme inline { 
+    --font-heading: var(--heading-font);
+    --font-sans: var(--text-font);
+
+    --color-background: var(--background); 
+    --color-foreground: var(--foreground); 
+
+    --color-primary: var(--primary); 
+    --color-primary-foreground: var(--primary-foreground); 
+
+    --color-secondary: var(--secondary); 
+    --color-secondary-foreground: var(--secondary-foreground); 
+
+    --color-tertiary: var(--tertiary); 
+    --color-tertiary-foreground: var(--tertiary-foreground); 
+
+    --color-neutral: var(--neutral); 
+    --color-neutral-foreground: var(--neutral-foreground); 
+
+    --color-border: var(--border); 
+    
+    --color-ring: var(--ring); 
+    
+    --color-error: var(--error);
+
+
+    --radius-lg: var(--radius); 
+
+}
+
+:root {
+    
+    /* --background: #ffffff;
+    --foreground:#000000; 
 
     --primary:#464EA5;
     --primary-hover:#3b36a1;
     --primary-foreground:#ffffff;
 
     --secondary: #120F47;
-    --secondary-foreground:#ffffff;
+    --secondary-foreground:#ffffff; */
     
-    --muted: #AEBADC; /* Fondos discretos o elementos atenuados */
-    --muted-foreground:oklch(40.219% 0.01894 302.011);
-    --hover:oklch(94.06% 0.00967 298.941 / 0.518);
-    --selected:oklch(93.547% 0.0206 298.053);
+    /* Fondos discretos o elementos atenuados */
+    /* --muted: #AEBADC; 
+    --muted-foreground:oklch(43.774% 0.01668 299.321); */
+    
+    /* --hover:oklch(94.06% 0.00967 298.941 / 0.518);
+    --selected:oklch(93.547% 0.0206 298.053); */
 
-    --accent:#5b67e3;	/* Color para destacar elementos, estados o detalles */
-    --background-accent: #EAEAFF;
+    /* Color para destacar elementos, estados o detalles */
+    /* --accent:#5b67e3;	
+    --background-accent: #EAEAFF; */
 
     /* --success */
     /* --warning */
-    --error: oklch(56.189% 0.23018 28.685);
+    /* --error: oklch(56.189% 0.23018 28.685); */
 
 
     /* Fondo de tarjetas */
@@ -55,8 +129,6 @@
     /* --destructive */
     /* --destructive-foreground */
 
-
-
     /* Información */
     /* --info */
 
@@ -67,41 +139,33 @@
     /* --overlay */
 }
 
-body {
-    font-family: var(--text-font);
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
 @theme inline {
     /* === FUENTES ===  */
     
-    --font-heading: var(--heading-font);
-    --font-text: var(--text-font);
+    /* --font-heading: var(--heading-font);
+    --font-text: var(--text-font); */
 
     /* === COLORES === */
 
-    --color-background: var(--background);  /* Fondo principal de la página */
-    --color-foreground: var(--foreground);  /* Color de texto principal */
+    /* --color-background: var(--background);  
+    --color-foreground: var(--foreground); */
 
-    --color-primary: var(--primary);
+    /* --color-primary: var(--primary);
     --color-primary-hover: var(--primary-hover);
-    --color-primary-foreground: var(--primary-foreground);
+    --color-primary-foreground: var(--primary-foreground); */
 
-    --color-secondary: var(--secondary);
-    --color-secondary-foreground: var(--secondary-foreground);
+    /* --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground); */
 
-    --color-muted-background: var(--hover);
+    /* --color-muted-background: var(--hover);
     --color-muted-foreground: var(--muted-foreground);
     --color-selected: var(--selected);
-    --color-hover: var(--hover);
+    --color-hover: var(--hover); */
 
-    --color-accent: var(--accent);
-    --color-background-accent: var(--background-accent);
+    /* --color-accent: var(--accent);
+    --color-background-accent: var(--background-accent); */
 
-    --color-error: var(--error);
+    /* --color-error: var(--error); */
 }
 
 /* @custom-variant dark (&:is(.dark *)); */
