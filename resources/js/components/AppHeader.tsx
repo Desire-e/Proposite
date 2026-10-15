@@ -1,42 +1,30 @@
-// import { Breadcrumbs } from '@/components/breadcrumbs';
-// import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-// import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-// import { UserMenuContent } from '@/components/user-menu-content';
-// import { NavigationMenu, NavigationMenuItem, NavigationMenuList, navigationMenuTriggerStyle } from '@/components/ui/navigation-menu';
-// import { useInitials } from '@/hooks/use-initials';
-// import AppLogoIcon from './app-logo-icon';
-// import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { type NavItem, type SharedData } from '@/types';
 
-import { /*type BreadcrumbItem,*/ type NavItem, type SharedData } from '@/types';
+import { useEffect, useState } from "react";
 
-import {
-    UserRound, UserRoundGroup, Bolt, ChartSpline,BookOpen, LogOut,
-    Menu, House, LogIn, UserRoundPlus, Sparkles
-} from 'lucide-react';
+import { 
+    ArrowRight, Menu, X, UserRound, UserRoundGroup, Bolt, 
+    ChartSpline,BookOpen, LogOut, House, 
+    // LogIn, UserRoundPlus, Sparkles, GraduationCap
+} from "lucide-react"
 
 import { Icon } from '@/components/icon';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Link, usePage } from "@inertiajs/react";
 import { cn } from '@/lib/utils';
-import { Link, usePage } from '@inertiajs/react';
 import AppLogo from './AppLogo';
 
-/*************************
- * Elementos de navegación 
- *************************/
 
-const mainNavItems: NavItem[] = [
-    { title: 'Inicio', url: '/', icon: House, },
-    { title: 'Cómo empezar', url: '#how-to-start', icon: Sparkles, },
+
+export const mainNavItems: NavItem[] = [
+    { title: 'Cómo funciona', url: '#como-funciona', sectionId: 'como-funciona', },
+    { title: 'La comunidad', url: '#comunidad', sectionId: 'comunidad', },
+    { title: 'Beneficios', url: '#beneficios', sectionId: 'beneficios',},
+
+    // { title: 'Inicio', url: '/', icon: House, },
+    // { title: 'Cómo empezar', url: '#how-to-start', icon: Sparkles, },
 ];
-
-const rightNavItems: NavItem[] = [
-    { title: 'Registro', url: '/register', icon: UserRoundPlus, },
-    { title: 'Iniciar sesión', url: '/login', icon: LogIn, },
-];
-
-// TODO. Implementar condición - si usuario está autenticado
-const authMainNavItems: NavItem[] = [
+export const authMainNavItems: NavItem[] = [
     { title: 'Inicio', url: '/', icon: House, },
     { title: 'Foro', url: '/foro', icon: UserRoundGroup, },
     { title: 'Configuración', url: '/configuración', icon: Bolt, },
@@ -44,194 +32,319 @@ const authMainNavItems: NavItem[] = [
     { title: 'Mi temario', url: '/mi-temario', icon: BookOpen, },
 ];
 
-const authRightNavItems: NavItem[] = [
-    { title: 'Perfil', url: '/perfil', icon: UserRound, },
-    { title: 'Cerrar sesión', url: '/logout', icon: LogOut, },
-];
+// const rightNavItems: NavItem[] = [
+//     { title: 'Iniciar sesión', url: '/login', icon: LogIn },
+//     { title: 'Crear cuenta', url: '/register', icon: UserRoundPlus },
+// ];
+// const authRightNavItems: NavItem[] = [
+//     { title: 'Perfil', url: '/perfil', icon: UserRound, },
+//     { title: 'Cerrar sesión', url: '/logout', icon: LogOut, },
+// ];
 
-
-// Las clases de Tailwind que se aplicarán al elemento de navegación activo
-const activeItemStyles = 'bg-background-accent text-accent';
 
 export function AppHeader() {
-    /**
-     * TODO.
-     * 
-     * Acceso a los datos de Inertia.
-     * usePage() permite acceder a los datos de la página actual.
-     * page.props contiene propiedades enviadas por Laravel vía Inertia. Con desestructuración se extrae auth.
-     * useInitials() función que permite calcular las iniciales de un nombre. - alternativa visual al avatar
-     */
-
     const page = usePage<SharedData>();
     const { auth } = page.props;
-    // const getInitials = useInitials();
+
+    const currentPath = page.url.split(/[?#]/)[0]; // divide un objeto String en un array de subcadenas
+
+    // Estado de id/ancla activo
+    const [activeAnchor, setActiveAnchor] = useState<string | null>(null);
+
+    // Observa nav items anclas activos/inactivos de la pagina actual
+    useEffect(() => {
+        const navItems = auth.user ? authMainNavItems : mainNavItems;
+    
+        const sections = navItems
+            .filter((item) => item.sectionId)
+            .map((item) => document.getElementById(item.sectionId!))
+            .filter((section): section is HTMLElement => section !== null);
+
+        setActiveAnchor(null);
+
+        if (sections.length === 0) return;
+
+        const visibleSections = new Set<HTMLElement>();
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    const section = entry.target as HTMLElement;
+
+                    if (entry.isIntersecting) {
+                        visibleSections.add(section);
+                    } else {
+                        visibleSections.delete(section);
+                    }
+                });
+
+                const currentSection = [...visibleSections].sort(
+                    (a, b) =>
+                        Math.abs(a.getBoundingClientRect().top - 100) -
+                        Math.abs(b.getBoundingClientRect().top - 100),
+                )[0];
+
+                setActiveAnchor(currentSection?.id ?? null);
+            },
+            {
+                rootMargin: '-15% 0px -65% 0px',
+                threshold: 0,
+            },
+        );
+
+        sections.forEach((section) => observer.observe(section));
+
+        return () => observer.disconnect();
+    }, [currentPath, auth.user]);
+
+
+    // Mobile navigation
+    const [open, setOpen] = useState(false)
+    const closeMenu = () => setOpen(false)
+
+    useEffect(() => {
+        if (!open) return;
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                closeMenu();
+            }
+        };
+
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+
+        document.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            document.body.style.overflow = previousOverflow;
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [open]);
+
+    const activeItemStyles = 'text-primary';
+
+    function isItemActive(item: NavItem): boolean {
+        if (item.sectionId) {
+            return activeAnchor === item.sectionId;
+        } else if (item.url.startsWith('#')) {
+            return false;
+        } else if (item.url === '/') {
+            return currentPath === '/';
+        } else {
+            return (
+                currentPath === item.url ||
+                currentPath.startsWith(`${item.url}/`)
+            );
+        }
+    }
+
+
     return (
-        <header className="border-b-[2px] border-black/10">
-            <div className="mx-auto flex h-[10vh] items-center justify-between px-4 md:max-w-7xl">
-                
-                <Link href="/" prefetch className="flex h-full items-center space-x-2">
-                    <AppLogo lightMode={true} />
-                </Link>
+        <>
+        <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-background/95 backdrop-blur">
+            <div className="mx-auto flex min-h-20 max-w-7xl items-center justify-between gap-6 px-5 lg:px-10">
 
-                
+                <AppLogo lightMode={true} />
 
-                {/* MOBILE MENU */}
-                
-                <div className="lg:hidden">
-                    {/* -- Panel deslizante lateral -- */}
+                {/* -- Desktop center navigation -- */}
 
-                    <Sheet>
-                        {/* -- Botón hamburguer -- */}
-                    
-                        {/* SheetTrigger asChild quita el botón por defecto, renderiza en su 
-                        lugar el <Button> pasado como hijo directamente como disparador */}
-                        <SheetTrigger asChild>
-                            <Button variant="ghost" size="icon" className="mr-2 h-[34px] w-[34px]">
-                                <Menu className="h-5 w-5" />
-                            </Button>
-                        </SheetTrigger>
+                <nav 
+                    className="hidden items-center gap-8 text-sm font-medium text-slate-600 lg:flex" 
+                    aria-label="Navegación principal"
+                >
+                    {(auth.user ? authMainNavItems : mainNavItems).map((item, i) =>{
+
+                        const isActive = isItemActive(item);
                         
-                        {/* -- Contenido del panel -- */}
-                    
-                        <SheetContent 
-                            side="right" 
-                            className="flex h-full w-64 md:w-100 flex-col items-stretch justify-between bg-background"
-                        >
-                            
-                            {/* Título para accesibilidad oculto */}
-                            <SheetTitle className="sr-only">Menu de Navegación</SheetTitle>
-                            
-                            <SheetHeader className="flex justify-start text-left">
-                                <Link href="/" prefetch>
-                                    <img 
-                                    src='/images/proposite-logo-icon.svg' 
-                                    className="w-8 object-contain" 
-                                    alt="Logo de Proposite" 
-                                    />
-                                </Link>
-                            </SheetHeader>
-                            
-                            {/* -- Navegación -- */}
-                            <nav className="mt-6 flex h-full flex-1 flex-col">
-                                <div className="flex h-full flex-col justify-between text-sm">
-
-                                    <div className="flex flex-col">
-                                        {(auth.user ? 
-                                        [...authMainNavItems, ...authRightNavItems] : // Autenticado 
-                                        [...mainNavItems, ...rightNavItems])        // No autenticado
-                                        .map((item) => (
-                                            <Link 
-                                                key={item.title} 
-                                                href={item.url} 
-                                                className={cn(
-                                                'flex items-center p-2 m-2 space-x-2 font-medium rounded-xl',
-                                                'text-sm text-muted-foreground transition-colors',
-                                                'hover:bg-hover hover:text-black',
-                                                'focus:bg-hover focus:text-black focus:outline-hidden',
-                                                page.url === item.url && activeItemStyles
-                                            )}>
-                                                {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
-                                                <span>{item.title}</span>
-                                            </Link>
-                                        ))}
-                                    </div>
-
-                                </div>
-                            </nav>
-
-                        </SheetContent>
-
-                    </Sheet>
-                    
-                </div>
-
-
-                
-                {/* DESKTOP CENTER NAVIGATION */}
-
-                <nav className="hidden h-full min-w-0 flex-1 items-center justify-center lg:flex">
-                    <div className="relative flex h-full min-w-0 flex-1 items-center justify-center">
-                        
-                        <div className="flex h-full items-stretch space-x-2 
-                        group flex-1 list-none items-center justify-center">
-                            {(auth.user ? 
-                            authMainNavItems : 
-                            mainNavItems)
-                            .map((item) => (
-
-                            <div key={item.title} className="relative flex h-full items-center">
-                                <Link
-                                href={item.url}
+                        return ( 
+                            <Link 
+                                key={i} href={item.url}
+                                aria-current={ 
+                                    isActive ? item.sectionId 
+                                    ? 'location' : 'page' : undefined
+                                }
+                                onClick={() => { if (item.sectionId) { setActiveAnchor(item.sectionId); }}}
                                 className={cn(
-                                    'h-9 inline-flex items-center justify-center rounded-full px-3',
-                                    'text-muted-foreground text-sm font-medium transition-colors',
-                                    'hover:bg-hover hover:text-black',
-                                    'focus:bg-hover focus:text-black',
-                                    page.url === item.url && activeItemStyles
+                                    'inline-flex items-center rounded-full px-3 py-2 transition-colors',
+                                    isActive ? activeItemStyles : 'text-slate-600 hover:text-primary',
                                 )}
-                                >
-                                    {item.icon && <Icon iconNode={item.icon} className="mr-2 h-4 w-4" />}
-                                    {item.title}
-                                </Link>
-                            </div>
-
-                            ))}
-                        </div>
-                    </div>
+                             >
+                                {item.title}
+                            </Link>
+                        )
+                    })}
                 </nav>
 
-                    
 
-                {/* DESKTOP RIGHT NAVIGATION */}
-                <div className="hidden lg:flex items-center space-x-2 shrink-0 ml-auto">
-                    <div className="flex items-center">
+                {/* -- Desktop right navigation -- */}
 
-                        <div className="flex gap-6">
-                            {(auth.user ? 
-                            authRightNavItems : 
-                            rightNavItems)
-                            .map((item) => (
+                {(!auth.user ? (
+                <div className="hidden items-center gap-3 lg:flex">
+                    <Link 
+                        href="/login"
+                        className="rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-700 
+                        transition duration-300 hover:bg-tertiary hover:text-primary"
+                    >
+                        Iniciar sesión
+                    </Link>
 
-                            <Link href={item.url} key={item.title} className="flex items-center gap-2">
-                                {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" /> }
-                                { !auth.user && item.title}
-                            </Link>
-
-                            ))}
-                        </div>
-                        
-                    </div>
-
-                    
-                    {/* TODO. Mostrar foto de perfil ... */}
-                    {/* 
-                    {auth.user && (
-
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="size-10 rounded-full p-1">
-                                <Avatar className="size-8 overflow-hidden rounded-full">
-                                    <AvatarImage
-                                        src={auth.user.avatar}
-                                        alt={auth.user.name}
-                                    />
-                                    <AvatarFallback className="rounded-lg">
-                                        {getInitials(auth.user.name)}
-                                    </AvatarFallback>
-                                </Avatar>
-                            </Button>
-                        </DropdownMenuTrigger>
-
-                        <DropdownMenuContent className="w-56" align="end">
-                            <UserMenuContent user={auth.user} />
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                    ) */}
-                        
+                    <Link 
+                        href="/register"
+                        className="inline-flex items-center gap-2 rounded-lg bg-primary 
+                        px-4 py-2.5 text-sm font-semibold text-white shadow-sm 
+                        transition duration-300 hover:bg-[#4338CA]"
+                    >
+                        Crear cuenta <ArrowRight aria-hidden="true" size={16} />
+                    </Link>
                 </div>
+                ) : (
+                <div className="hidden items-center gap-3 md:flex">
+                    <Link href='/perfil' className="flex items-center gap-2">
+                        <Icon iconNode={UserRound} className="h-5 w-5" />
+                        Perfil
+                    </Link>
+
+                    <Link href='/logout' className="flex items-center gap-2">
+                        <Icon iconNode={LogOut} className="h-5 w-5" />
+                        Cerrar sesión
+                    </Link>
+                </div>
+                ))}
+
+                {/* -- Mobile navigation -- */}
+
+                <Button
+                    type="button"
+                    className="rounded-lg p-2 text-slate-700 transition hover:bg-tertiary lg:hidden"
+                    onClick={() => setOpen((value) => !value)}
+                    aria-expanded={open}
+                    aria-controls="mobile-navigation"
+                    aria-label="Abrir menú"
+                >
+                    <Menu aria-hidden="true" />
+                </Button>
 
             </div>
         </header>
-    );
+
+        {/* -- Mobile navigation -- */}
+
+        {/* Overlay: oscurece el fondo e intercepta los clics */}
+        <button
+            type="button"
+            aria-label="Cerrar menú"
+            tabIndex={open ? 0 : -1}
+            onClick={closeMenu}
+            className={`
+                lg:hidden fixed inset-0 z-50 bg-slate-950/40
+                transition-opacity duration-300 ease-in-out
+                ${open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}
+            `}
+            aria-hidden={!open}
+        />
+
+        {/* -- Mobile navigation -- */}
+
+        {/* Panel lateral */}
+        <nav
+            id="mobile-navigation"
+            aria-label="Navegación móvil"
+            aria-hidden={!open}
+            inert={!open}
+            className={`
+                lg:hidden fixed inset-y-0 right-0 z-50
+                flex h-dvh w-[min(85vw,24rem)] flex-col
+                overflow-y-auto bg-background shadow-2xl
+                transition-transform duration-300 ease-in-out
+                ${open ? "translate-x-0" : "translate-x-full"}
+            `}
+        >
+            {/* Cabecera del panel */}
+            <div className="flex min-h-20 items-center justify-between border-b border-slate-200 px-5">
+                <span className="font-heading text-xl font-bold tracking-tight text-slate-900">
+                    proposite
+                </span>
+
+                <Button
+                    type="button"
+                    onClick={closeMenu}
+                    className="rounded-lg p-2 text-slate-700 transition hover:bg-tertiary"
+                    aria-label="Cerrar menú"
+                >
+                    <X aria-hidden="true" />
+                </Button>
+            </div>
+
+            {/* Navegación */}
+            <div className="flex flex-1 flex-col gap-2 overflow-y-auto px-5 py-5 text-sm font-medium text-slate-700">
+                {auth.user ? (<>
+                <Link
+                    href="/perfil"
+                    onClick={closeMenu}
+                    className="rounded-lg px-3 py-3 transition hover:bg-tertiary hover:text-primary"
+                >
+                    Mi perfil
+                </Link>
+                {authMainNavItems.map((item) => (
+                <Link
+                    key={item.title}
+                    href={item.url}
+                    onClick={closeMenu}
+                    className="rounded-lg px-3 py-3 transition hover:bg-tertiary hover:text-primary"
+                >
+                    {item.title}
+                </Link>
+                ))}
+                </>) : (<>
+                {mainNavItems.map((item) => (
+                <a
+                    key={item.title}
+                    href={item.url}
+                    onClick={closeMenu}
+                    className="rounded-lg px-3 py-3 transition hover:bg-tertiary hover:text-primary"
+                >
+                    {item.title}
+                </a>
+                ))}</>
+                )}
+            </div>
+
+            {/* Acciones inferiores */}
+            <div className="flex flex-col gap-3 border-t border-slate-200 p-5">
+                {auth.user ? (<>
+                <Link                    
+                    href={route('logout')}
+                    method="post"
+                    as="button"
+                    onClick={closeMenu}
+                    className="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 font-semibold text-slate-700 transition hover:bg-tertiary"
+                >
+                    <LogOut size={18} aria-hidden="true" />
+                    Cerrar sesión
+                </Link>
+                </>) : (<>
+                <Link
+                    href={route('login')}
+                    onClick={() => { closeMenu(); }}
+                    className="w-full rounded-lg px-4 py-3 font-semibold text-primary 
+                    transition hover:bg-tertiary"
+                >
+                    Iniciar sesión
+                </Link>
+
+                <Link
+                    href={route('register')}
+                    onClick={() => { closeMenu(); }}
+                    className="w-full rounded-lg bg-primary px-4 py-3 font-semibold text-white 
+                    transition hover:bg-[#4338CA]"
+                >
+                    Crear cuenta
+                </Link>
+                </>
+                )}
+            </div>
+        </nav>
+        </>
+    )
 }
