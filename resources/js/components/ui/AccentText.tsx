@@ -3,7 +3,7 @@ export default function AccentText(
 {children: React.ReactNode, underline?: boolean}) {
     return (
         <span 
-            className={`text-accent 
+            className={`text-tertiary-foreground font-medium
             ${underline ? 'underline decoration-accent underline-offset-4' : ''}`}
         >
             {children}

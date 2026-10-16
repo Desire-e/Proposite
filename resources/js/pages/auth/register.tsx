@@ -1,19 +1,16 @@
+import { FormEventHandler, useState } from 'react';
 import { Link, useForm } from '@inertiajs/react';
+import { ArrowLeft, ChevronDown, Eye, EyeOff, GraduationCap, ChevronRight
+} from 'lucide-react';
 
-import { FormEventHandler } from 'react';
-import { useState } from 'react';
-
-import { ArrowLeft, ChevronRight, ChevronDown, GraduationCap } from 'lucide-react';
-// import { LoaderCircle } from 'lucide-react';
-
+// import AppLayout from '@/layouts/AppLayout';
+import { AuthLayout, type asideContentData } from '@/layouts/AuthLayout';
 import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import AccentText from '@/components/ui/AccentText';
 
-import AppLayout from '@/layouts/AppLayout';
-import AuthLayout from '@/layouts/AuthLayout';
 
 import {
     DropdownMenu,
@@ -23,31 +20,36 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 
-// Laravel asignará el rol opositor al crear la cuenta, en lugar de confiar en el valor recibido del cliente
-// enum Rol { ADMIN = "administrador", OPOSITOR = "opositor" }
+const aside: asideContentData = {
+    brow: "Un camino compartido",
+    title: "Tu camino empieza aquí.",
+    description: "Crea tu espacio y empieza a opositar con una comunidad que te entiende.",
+    phrase: '“Los días pesan menos cuando no los recorres solo.”',
+} 
 
+const errorsInputStyle: string = 'border-error! placeholder:text-error! focus:border-2!'; 
+
+type Oposicion = {
+    id: string;
+    nombre: string;
+};
+
+type RegisterProps = {
+    oposiciones: Oposicion[];
+};
 
 type RegisterForm = {
     oposicion_id: string;
     name: string;
     email: string;
     password: string;
-    fecha_convocatoria?: string; // por petición http viene en string
     acepta_terminos: boolean;
-}
-
-type Oposicion = {
-    id: string;
-    nombre: string;
-};
-type RegisterProps = {
-    oposiciones: Oposicion[];
 };
 
-export default function Register(
-    { oposiciones = [] }: RegisterProps
-) {
-    
+export default function Register({
+    oposiciones = [],
+}: RegisterProps) {
+
     /**
      * Hook useForm
      * 
@@ -60,7 +62,7 @@ export default function Register(
      * @reset Para restablecer uno o más campos a valores iniciales. 
      */
 
-    const { data, setData, post, processing, errors, clearErrors, reset } = 
+    const { data, setData, post, processing, errors, clearErrors, reset,} = 
         // Indica a useForm qué estructura de datos debe gestionar
         useForm<RegisterForm>({
             // Datos iniciales
@@ -72,132 +74,152 @@ export default function Register(
         });
 
 
-    const errorsInputStyle: string = 'border-error! placeholder:text-error! focus:border-2!'; 
+    const [showPassword, setShowPassword] = useState(false);
 
-    const submit: FormEventHandler = (e) => {
-        e.preventDefault();
+    const [openDropdown, setOpenDropdown] = useState(false);
+    const selectedOposicion = oposiciones.find((oposicion) => (oposicion.id === data.oposicion_id));
 
-        post(
-            route('register'), 
+
+
+    const submit: FormEventHandler = (event) => {
+        event.preventDefault();
+
+        post(route('register'), 
             // Opciones
             {
                 // onFinish Se ejecuta cuando la petición de Inertia termina, con o sin éxito
-                onFinish: () => reset('password'), 
+                onFinish: () => reset('password'),
             }
         );
     };
 
 
-    const [openDropdown, setOpenDropdown] = useState(false);
-    
-    const selectedOposicion = oposiciones.find((oposicion) => (oposicion.id === data.oposicion_id));
-
-    
     return (
-        <>
-            <AppLayout headTitle='Registro de nueva cuenta' className='lg:flex-row!'>
-                
-                {/* TODO. Cambiar imagen placeholder a otra */}
-                <div className="relative w-full shrink-0 lg:w-1/2">
-                    <img 
-                        src="/images/placeholder.png" alt="" 
-                        // lg:absolute lg:inset-0 lg:h-full la imagen ocupa el espacio de su contenedor en escritorio.
-                        // object-cover mantiene las proporciones de la imagen
-                        className="block h-40 w-full object-cover lg:absolute lg:inset-0 lg:h-full"
-                    />
-                </div>
+        <AuthLayout
+            headTitle="Crear cuenta"
+            className="!min-h-screen !bg-neutral"
+            asideContent={aside}  
+        >
 
-                <AuthLayout>
+            <section className="flex items-center justify-center px-6 py-10 sm:px-10">
+                <div className="w-full max-w-md">
+                    <div className="mb-8 flex items-center justify-between lg:hidden">
+                        <Link
+                            href={route('welcome')}
+                            className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-foreground"
+                        >
+                            <ArrowLeft className="size-4" />
+                            Volver
+                        </Link>
 
-                    <Link 
-                        href={route('welcome')}
-                        className="absolute lg:-top-[-30px] -top-[-20px] lg:right-[50px] right-[20px] 
-                        flex inline-flex gap-2 items-center text-sm text-muted-foreground 
-                        transition-colors hover:text-foreground"
-                    >
-                        <ArrowLeft className='size-4' />
-                        Volver
-                    </Link>
-                    
-
-                    <div className={`flex flex-col gap-4 pb-5 ${processing ? 'opacity-50!' : ''}`}>
-                        <h1 className="text-3xl font-bold">Crear cuenta</h1>
-                        <h2 className="md:text-sm text-base">Bienvenido a Proposite. Completa los datos para unirte.</h2>
+                        <span className="font-serif text-xl font-bold text-primary">
+                            proposite
+                        </span>
                     </div>
-                    
 
-                    <form 
-                        className= {` flex flex-col gap-6 ${processing ? 'opacity-50!' : ''}`} onSubmit={submit} 
-                        noValidate // omite validación nativa del navegador
+                    <div className="mb-7">
+                        <span className="text-xs font-bold uppercase tracking-[0.18em] text-secondary">
+                            Da el primer paso
+                        </span>
+
+                        <h2 className="mt-3 font-serif text-4xl font-bold tracking-tight text-foreground">
+                            Crear cuenta
+                        </h2>
+
+                        <p className="mt-2 text-sm leading-6 text-neutral-foreground">
+                            Únete a una comunidad que entiende tu objetivo.
+                        </p>
+                    </div>
+
+                    <form
+                        onSubmit={submit}
+                        noValidate
+                        className="flex flex-col gap-4"
                     >
-
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-2 text-sm font-medium text-foreground">
                             <Input
-                                className={`${errors.name ? errorsInputStyle : ''}`}
-                                id="name"
-                                type="text"
-                                autoComplete="name"
                                 value={data.name}
-                                onChange={(e) => {
-                                    setData('name', e.target.value)
+                                placeholder="Nombre"
+                                autoComplete="name"
+                                disabled={processing}
+                                className={`${errors.email ? errorsInputStyle : ''}`}
+                                onChange={(event) => {
+                                    setData('name', event.target.value);
                                     clearErrors('name');
                                 }}
-                                disabled={processing} 
-                                placeholder="Nombre"
                             />
-                            <InputError message={errors.name} />
+
+                            <InputError className='!font-normal' message={errors.name} />
                         </div>
 
-                        <div className="flex flex-col gap-2">
+
+                        <div className="flex flex-col gap-2 text-sm font-medium text-foreground">
                             <Input
-                                className={`${errors.email ? errorsInputStyle : ''}`}
-                                id="email"
+                                value={data.email}
+                                placeholder="Email"
                                 type="email"
                                 autoComplete="email"
-                                value={data.email}
-                                onChange={(e) => {
-                                    setData('email', e.target.value)
+                                disabled={processing}
+                                className={`${errors.email ? errorsInputStyle : ''}`}
+                                onChange={(event) => {
+                                    setData('email', event.target.value);
                                     clearErrors('email');
                                 }}
-                                disabled={processing} 
-                                placeholder="Email"
                             />
-                            <InputError message={errors.email} />
+
+                            <InputError className='!font-normal' message={errors.email} />
                         </div>
 
-                        <div className="flex flex-col gap-2">
-                            <Input
-                                className={`${errors.password ? errorsInputStyle : ''}`}
-                                id="password"
-                                type="password"
-                                // el tipo de dato introducido para poder rellenar automáticamente información guardada
-                                autoComplete="new-password" 
-                                value={data.password}
-                                onChange={(e) => {
-                                    setData('password', e.target.value)
-                                    clearErrors('password');
-                                }}
-                                disabled={processing} 
-                                placeholder="Contraseña"
-                            />
-                            <InputError message={errors.password} />
+
+                        <div className="flex flex-col gap-2 text-sm font-medium text-foreground">
+                            <div className="relative">
+                                <Input
+                                    className={`${errors.password ? errorsInputStyle : ''}`}
+                                    type={ showPassword ? 'text' : 'password'}
+                                    autoComplete="new-password"
+                                    value={data.password}
+                                    disabled={processing}
+                                    placeholder="Contraseña"
+                                    onChange={(event) => { 
+                                        setData('password', event.target.value,);
+                                        clearErrors('password');
+                                    }}
+                                />
+
+                                <Button
+                                    type="button"
+                                    aria-label={ showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña' }
+                                    onClick={() => setShowPassword((value) => !value,)}
+                                    className={`${errors.email ? errorsInputStyle : ''}
+                                    absolute right-3 top-1/2 -translate-y-1/2 
+                                    text-neutral-foreground hover:text-primary`}
+                                >
+                                    {showPassword ? 
+                                    (<EyeOff className="size-4" />) : 
+                                    (<Eye className="size-4" />)}
+                                </Button>
+                            </div>
+                            <InputError className='!font-normal' message={errors.password} />
                         </div>
 
-                        <div className="flex flex-col gap-2">
+
+                        <div className="flex flex-col gap-2 text-sm font-medium text-foreground">
                             <DropdownMenu open={openDropdown} onOpenChange={setOpenDropdown}>
                                 <DropdownMenuTrigger asChild>
                                     <button
                                         type="button" disabled={processing} 
                                         aria-label="Elegir oposición" aria-invalid={Boolean(errors.oposicion_id)}
-                                        className={`w-full bg-background inline-flex justify-between items-center px-3 py-2 
-                                        text-muted-foreground/80 md:text-sm text-base border-1 rounded-sm border-muted-foreground/30 
-                                        hover:bg-gray-100 focus:border-muted-foreground focus:outline-hidden focus:bg-hover 
-                                        disabled:cursor-not-allowed disabled:opacity-50 
-                                        ${ selectedOposicion && "text-foreground!"}
-                                        ${errors.oposicion_id ? errorsInputStyle : ''} `}
+                                        className={`inline-flex justify-between items-center px-3 py-2 w-full bg-white 
+                                        appearance-none rounded-sm text-sm border border-border outline-none 
+                                        transition focus:border-primary focus:ring-2 focus:ring-ring/30
+                                        disabled:cursor-not-allowed disabled:opacity-50
+                                        ${errors.oposicion_id ? errorsInputStyle : ''}`}
                                     >
                                         <div className='flex gap-2 items-center text-left'>
-                                            <GraduationCap className='md:size-5 size:8' strokeWidth={1.5} />
+                                            <GraduationCap 
+                                                className='pointer-events-none size-5 text-secondary' 
+                                                strokeWidth={1.5} 
+                                            />
                                             {/* nombre de la oposición seleccionada */}
                                             {selectedOposicion?.nombre ?? 'Elige tu oposición'}
                                         </div>
@@ -209,13 +231,13 @@ export default function Register(
                                 </DropdownMenuTrigger>
                                 
                                 <DropdownMenuContent 
-                                    className="bg-background border-1 rounded-sm border-muted-foreground/30"
+                                    className="bg-white border-1 rounded-sm border-muted-foreground/30"
                                     align="center"
                                 >
                                     {oposiciones.map((oposicion) => (
 
                                     <DropdownMenuItem 
-                                        className='hover:bg-hover text-foreground md:text-sm text-base
+                                        className='hover:bg-background text-foreground md:text-sm text-base
                                         focus:bg-hover focus:text-accent-foreground'
                                         key={oposicion.id} 
                                         onSelect={() => {
@@ -229,61 +251,62 @@ export default function Register(
                                     ))}
                                 </DropdownMenuContent>
                             </DropdownMenu>
-
-                            <p className='text-sm text-muted-foreground'>
-                                Selecciona la oposición a la que te estás presentando
-                            </p>
-
-                            <InputError message={errors.oposicion_id} />
+                            <InputError className='!font-normal' message={errors.oposicion_id} />
                         </div>
 
-                        <div className="flex flex-col gap-2">
-                            <div className="flex items-center gap-2 text-sm">
-                                <Checkbox 
+
+                        <p className="-mt-2 text-xs font-normal text-neutral-foreground">
+                            Selecciona la oposición a la que te estás
+                            presentando.
+                        </p>
+
+                        <div className="flex flex-col items-start gap-2 mt-2 text-sm font-normal 
+                        leading-5 text-neutral-foreground">
+                            <label htmlFor="terminos" className='text-sm flex gap-3 items-center'> 
+                                <Checkbox
                                     id="terminos"
                                     checked={data.acepta_terminos}
+                                    disabled={processing}
                                     onCheckedChange={(checked) => {
-                                        setData('acepta_terminos', checked === true);
+                                        setData('acepta_terminos', checked === true,);
                                         clearErrors('acepta_terminos');
                                     }}
-                                    disabled={processing}
                                 />
-                                
-                                <label htmlFor="terminos" className='md:text-sm text-base'> 
-                                    Acepto los {' '}
-                                    <AccentText underline={true}>términos y condiciones</AccentText>
-                                </label>
-                            </div>
-
-                            <InputError message={errors.acepta_terminos} />
+                                <span>
+                                    Acepto los{' '}
+                                    <AccentText underline={true}>
+                                        <a href="#terminos">
+                                            Términos y condiciones.
+                                        </a>
+                                    </AccentText>
+                                </span>
+                            </label>
+                            <InputError className='!font-normal' message={errors.acepta_terminos} />
                         </div>
 
-                        <Button 
-                            type="submit" 
-                            className="mt-5 w-full md:text-base text-lg p-6 " 
+
+                        <Button
+                            type="submit"
                             disabled={processing}
+                            className="mt-2 h-12 w-full rounded-xl bg-primary font-semibold 
+                            text-primary-foreground shadow-lg shadow-primary/20 transition hover:bg-tertiary-foreground"
                         >
-                            {/* {processing && <LoaderCircle className="h-4 w-4 animate-spin" />} */}
-                            Registrarme
+                            {processing ? 'Creando cuenta…' : 'Crear mi cuenta'}
                         </Button>
                     </form>
 
+                    <div className="my-6 h-px bg-border" />
 
-                    <hr className={`text-current/30 ${processing ? 'opacity-50!' : ''}`}  />
-
-
-                    <div className={`flex items-center gap-2 text-sm ${processing ? 'opacity-50!' : ''}`}>
-                        ¿Tienes ya una cuenta?
-                        {' '}
+                    <p className="text-sm text-neutral-foreground text-center">
+                        ¿Ya tienes una cuenta?{' '}
                         <AccentText underline={true}>
-                            <Link href={route('login')}>Inicia sesión</Link>
+                            <Link href={route('login')}>
+                                Inicia sesión
+                            </Link>
                         </AccentText>
-                    </div>
-
-                </AuthLayout>
-            </AppLayout>
-
-        </>
-
+                    </p>
+                </div>
+            </section>
+        </AuthLayout>
     );
 }

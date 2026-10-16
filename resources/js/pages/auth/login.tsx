@@ -1,139 +1,150 @@
-import AppLayout from '@/layouts/AppLayout';
-import AuthLayout from '@/layouts/AuthLayout';
+import { FormEventHandler, useState } from 'react';
+import { Link, useForm } from '@inertiajs/react';
+import { ArrowLeft, Eye, EyeOff, } from 'lucide-react';
 
-import { Link, useForm, } from '@inertiajs/react';
-// import { LoaderCircle } from 'lucide-react';
-import { FormEventHandler } from 'react';
-
+import { AuthLayout, type asideContentData } from '@/layouts/AuthLayout';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-
-import { ArrowLeft } from 'lucide-react';
 import AccentText from '@/components/ui/AccentText';
-
 
 type LoginForm = {
     email: string;
     password: string;
-    // remember: boolean;
-}
+};
 
-// interface LoginProps {
-//     status?: string;
-//     canResetPassword?: boolean;
-// }
+const aside: asideContentData = {
+    brow: "Tu preparación continúa",
+    title: "Que bien verte de nuevo.",
+    description: "Retoma tu preparación, consulta tu progreso y sigue avanzando acompañado por la comunidad.",
+    phrase: "Comunidad, recursos y constancia en un mismo lugar.",
+} 
+
+const errorsInputStyle: string = 'border-error! placeholder:text-error! focus:border-2!'; 
 
 
-export default function Login ( /* { loginData }: { loginData: LoginForm } */ ) {
-// export default function Login ({ status, canResetPassword }: LoginProps) { 
+export default function Login() {
+    const { data, setData, post, processing, errors, clearErrors, reset, } = 
+    useForm<LoginForm>({
+        email: '',
+        password: '',
+    });
 
-    const { data, setData, post, processing, errors, clearErrors, reset } = 
-        useForm<LoginForm>({
-            email: '',
-            password: '',
-            // remember: false,
+    const [showPassword, setShowPassword] = useState(false);
+
+    const submit: FormEventHandler = (event) => {
+        event.preventDefault();
+
+        post(route('login'), {
+            onFinish: () => reset('password'),
         });
-
-
-    const submit: FormEventHandler = (e) => {
-        e.preventDefault();
-        post(
-            route('login'), 
-            { onFinish: () => reset('password'), }
-        );
     };
 
-    
-    const errorsInputStyle: string = 'border-error! placeholder:text-error! focus:border-2!'; 
-
-
     return (
-        <>
-            <AppLayout headTitle='Inicio de sesión' className='bg-muted-background'>
-                <AuthLayout className='my-17'>
-                    
-                    <Link 
-                        href={route('welcome')}
-                        className="absolute lg:-top-[-30px] -top-[-20px] lg:right-[50px] right-[20px] 
-                        flex inline-flex gap-2 items-center text-sm text-muted-foreground 
-                        transition-colors hover:text-foreground"
-                    >
-                        <ArrowLeft className='size-4' />
-                        Volver
-                    </Link>
-                    
+            <AuthLayout 
+                headTitle="Inicio de sesión" 
+                className="!min-h-screen !bg-neutral"
+                asideContent={aside}    
+            >
 
-                    <div className="flex flex-col gap-3 pb-5 text-center">
-                        <h1 className="text-3xl font-bold">Inicio de sesión</h1>
-                        <h2 className="text-sm">Bienvenido de nuevo ¡Sigamos avanzando!</h2>
-                    </div>
-                    
-
-                    <form className="flex flex-col gap-6" onSubmit={submit} noValidate>
-                        <div className="flex flex-col gap-2">
-                            <Input
-                                className={`${errors.email ? errorsInputStyle : ''}`}
-                                id="email"
-                                type="email"
-                                autoComplete="email"
-                                value={data.email}
-                                onChange={(e) => {
-                                    setData('email', e.target.value)
-                                    clearErrors('email');
-                                }}
-                                disabled={processing} 
-                                placeholder="Email"
-                            />
-                            <InputError message={errors.email} />
+                <section className="flex items-center justify-center px-6 py-10 sm:px-10">
+                    <div className="w-full max-w-md">
+                        <div className="mb-10 flex items-center justify-between lg:hidden">
+                            <Link
+                                href={route('welcome')}
+                                className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-foreground"
+                            >
+                                <ArrowLeft className="size-4" /> Volver
+                            </Link>
                         </div>
 
-                        <div className="flex flex-col gap-2">
-                            <Input
-                                className={`${errors.password ? errorsInputStyle : ''}`}
-                                id="password"
-                                type="password"
-                                autoComplete="password" 
-                                value={data.password}
-                                onChange={(e) => {
-                                    setData('password', e.target.value)
-                                    clearErrors('password');
-                                }}
-                                disabled={processing} 
-                                placeholder="Contraseña"
-                            />
-                            <InputError message={errors.password} />
+                        <div className="mb-8">
+                            <span className="inline-flex items-center gap-2 
+                            text-xs font-bold uppercase tracking-[0.18em] text-secondary">
+                                <span className="size-2 rounded-full bg-secondary" />
+                                Proposite
+                            </span>
+                            <h2 className="mt-3 font-heading text-4xl font-bold tracking-tight text-foreground">
+                                Inicio de sesión
+                            </h2>
+                            <p className="mt-2 text-sm leading-6 text-neutral-foreground">
+                                Bienvenido de nuevo. Sigamos avanzando.
+                            </p>
                         </div>
 
+                        <form onSubmit={submit} noValidate className="flex flex-col gap-5">
+                            <div className="flex flex-col gap-2 text-sm font-medium text-foreground">
+                                <Input
+                                    className={`${errors.email ? errorsInputStyle : ''}`}
+                                    id="email"
+                                    type="email"
+                                    autoComplete="email"
+                                    value={data.email}
+                                    aria-invalid={Boolean(errors.email)}
+                                    onChange={(e) => {
+                                        setData('email', e.target.value)
+                                        clearErrors('email');
+                                    }}
+                                    disabled={processing} 
+                                    placeholder="Email"
+                                />
+                                <InputError className='!font-normal' message={errors.email} />
+                            </div>
 
-                        
-                        {/* REMEMBER ME
-                        <div className="flex items-center space-x-3">
-                            <Checkbox id="remember" name="remember" />
-                            <Label htmlFor="remember">Remember me</Label>
-                        </div> */}
+                            <div className="flex flex-col gap-2 text-sm font-medium text-foreground">
 
+                                <div className="relative">
+                                    <Input
+                                        className={`${errors.password ? errorsInputStyle : ''}`}
+                                        type={ showPassword ? 'text' : 'password' }
+                                        autoComplete="current-password"
+                                        value={data.password}
+                                        disabled={processing}
+                                        placeholder="Contraseña"
+                                        aria-invalid={Boolean(errors.password)}
+                                        onChange={(event) => {
+                                            setData('password', event.target.value,);
+                                            clearErrors('password');
+                                        }}
+                                    />
 
-                        <Button type="submit" className="mt-5 w-full md:text-md text-base p-6" disabled={processing}>
-                            {/* {processing && <LoaderCircle className="h-4 w-4 animate-spin" />} */}
-                            Iniciar sesión
-                        </Button>
-                    </form>
+                                    <Button
+                                        type="button"
+                                        aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña' }
+                                        onClick={() => setShowPassword((value) => !value,)}
+                                        className={`${errors.email ? errorsInputStyle : ''}
+                                        absolute right-3 top-1/2 -translate-y-1/2 
+                                        text-neutral-foreground hover:text-primary`}
+                                    >
+                                        {showPassword ? 
+                                        ( <EyeOff className="size-4" />) : 
+                                        ( <Eye className="size-4" /> )}
+                                    </Button>
+                                </div>
+                                <InputError className='!font-normal' message={errors.password} />
+                            </div>
 
-                    <hr className='text-current/30' />
+                            <Button
+                                type="submit"
+                                disabled={processing}
+                                className="mt-3 h-12 w-full rounded-xl bg-primary font-semibold 
+                                text-primary-foreground shadow-lg shadow-primary/20 
+                                transition hover:bg-tertiary-foreground"
+                            >
+                                {processing ? 'Entrando…' : 'Iniciar sesión'}
+                            </Button>
+                        </form>
 
-                    <div className="flex items-center gap-2 text-sm">
-                        ¿No tienes una cuenta? {' '}
+                        <div className="my-7 h-px bg-border" />
 
-                        <AccentText underline={true}>
-                            <Link href={route('register')}>Iniciar sesión</Link>
-                        </AccentText>
+                        <p className="text-sm text-neutral-foreground">
+                            ¿No tienes una cuenta?{' '}
+                            <AccentText underline={true}>
+                                <Link href={route('register')}>Regístrate</Link>
+                            </AccentText>
+                        </p>
                     </div>
-
-                </AuthLayout>
-            </AppLayout>
-        </>
-        
-      
+                </section>
+            </AuthLayout>
     );
 }
