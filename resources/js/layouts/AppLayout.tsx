@@ -3,25 +3,21 @@ import { Head } from '@inertiajs/react';
 import { AppHeader } from '@/components/AppHeader';
 import { AppFooter } from '@/components/AppFooter';
 
-
 export default function AppLayout(
-    {children, headTitle, className=''}: 
-    {children: React.ReactNode, headTitle: string, className?: string}
-) {
+    { children, headTitle, className = '', }: 
+    { children: React.ReactNode; headTitle: string; className?: string;}) 
+{
     return (
-        <div className='flex flex-col min-w-full min-h-screen'>
-            
-            {/* Gestionar las etiquetas <title> y <meta> del documento HTML */}
+        <div className={`min-h-screen bg-background text-slate-900 ${className}`}>
             <Head title={headTitle} />
-            
+
             <AppHeader />
-            
-            <div className={`flex flex-col ${className}`}>
+
+            <main>
                 {children}
-            </div>
+            </main>
 
             <AppFooter />
-        
         </div>
     );
 }

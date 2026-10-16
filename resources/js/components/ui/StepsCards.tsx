@@ -1,30 +1,29 @@
-export interface StepCardData {
-    number: number;
+export type StepCardData = {
+    number: string;
     title: string;
     description: string;
 }
 
 export function StepsCards({ steps }: {steps: StepCardData[]} ) {
     return (
-        <div className='flex flex-wrap justify-center gap-10'>
+        <div className="mt-10 grid gap-4 md:grid-cols-4">
             {steps.map((step) => (
-
-                <div 
-                    key={`${step.number}-${step.title}`} 
-                    className='flex h-auto w-2xs p-6 gap-5
-                    border-2 border-black/20 border-[1px] rounded-lg'
+                <article
+                    key={step.number}
+                    className="rounded-2xl border border-border bg-white p-6"
                 >
-                    <div className='flex flex-col shrink-0 
-                    w-10 h-10 text-center bg-background-accent rounded-full 
-                    text-accent text-xl/10 font-semibold font-heading'>
+                    <span className="text-3xl font-bold text-secondary">
                         {step.number}
-                    </div>
-                    <div>
-                        <p className='font-semibold '>{step.title}</p>
-                        <p className='text-sm text-muted-foreground'>{step.description}</p>
-                    </div>
-                </div>
-        
+                    </span>
+
+                    <h3 className="mt-5 font-bold text-foreground">
+                        {step.title}
+                    </h3>
+
+                    <p className="mt-2 text-sm leading-6 text-neutral-foreground">
+                        {step.description}
+                    </p>
+                </article>
             ))}
         </div>
     );

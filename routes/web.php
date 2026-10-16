@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Models\Usuario;
 
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\Admin\PanelController as AdminPanelController;
@@ -27,21 +28,9 @@ use App\Http\Controllers\Admin\UsuariosController as AdminUsuariosController;
 
 
 
-
 // ==================
 // Inicio
 // ==================
-/*
-Route::get('/', function () {
-
-    // Inicio en perfil (autenticado)
-    if (auth()->check()) { return redirect()->route('dashboard'); }
-
-    // Inicio en landing (no autenticado)
-    return Inertia::render('welcome');
-
-})->name('home'); // nombre interno para hacer route('home')
-*/
 
 Route::get('/', function () {
 
@@ -49,7 +38,9 @@ Route::get('/', function () {
     if (auth()->check()) { return redirect()->route('dashboard'); }
     
     // Inicio en landing (no autenticado)
-    return Inertia::render('welcome');
+    return Inertia::render('welcome', [
+        'usersNumber' => Usuario::count(),
+    ]);
 
 })->name('welcome'); // nombre interno para hacer route('welcome')
 

@@ -6,9 +6,8 @@ export default function AppLogo({lightMode}: {lightMode: boolean}) {
     return (
             <Link
                 href="/" 
-                // onClick={onProfile} 
                 className="group inline-flex items-center gap-3 text-left" 
-                aria-label="Abrir perfil"
+                aria-label="Ir al home"
             >
                 <span 
                     className={`flex size-10 items-center justify-center rounded-xl 
