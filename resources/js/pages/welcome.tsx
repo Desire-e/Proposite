@@ -5,7 +5,7 @@ import { TitledCards, type TitledCardData } from '@/components/ui/TitledCards';
 import { StepsCards, type StepCardData } from '@/components/ui/StepsCards';
 
 
-const benefits: TitledCardData[] = [
+const comoFunciona: TitledCardData[] = [
     { 
         icon: MessageCircle, 
         title: 'Comparte sin filtros', 
@@ -23,7 +23,7 @@ const benefits: TitledCardData[] = [
     },
 ];
 
-const steps: StepCardData[] = [
+const pasos: StepCardData[] = [
     {
         number: '01', 
         title: 'Regístrate', 
@@ -68,12 +68,12 @@ export default function Welcome() {
                     </p>
                 </div>
 
-                <TitledCards cards={benefits} />
+                <TitledCards cards={comoFunciona} />
             </section>
 
 
             <section
-                id="how-to-start"
+                id="como-empezar"
                 className="bg-tertiary px-5 py-24"
             >
                 <div className="mx-auto max-w-7xl">
@@ -85,7 +85,7 @@ export default function Welcome() {
                         Tu camino, paso a paso.
                     </h2>
 
-                    <StepsCards steps={steps} />
+                    <StepsCards steps={pasos} />
                 </div>
             </section>
 

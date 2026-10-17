@@ -31,11 +31,8 @@ export function AppFooter() {
                     <Link className="inline-flex items-center gap-1 hover:text-white" href="#como-funciona">
                         Cómo funciona <ArrowUpRight size={14} />
                     </Link>
-                    <Link className="inline-flex items-center gap-1 hover:text-white" href="#comunidad">
-                        La comunidad <ArrowUpRight size={14} />
-                    </Link>
-                    <Link className="inline-flex items-center gap-1 hover:text-white" href="#beneficios">
-                        Beneficios <ArrowUpRight size={14} />
+                    <Link className="inline-flex items-center gap-1 hover:text-white" href="#como-empezar">
+                        Cómo empezar <ArrowUpRight size={14} />
                     </Link>
                 </div>
             </div>
