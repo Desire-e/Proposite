@@ -2,11 +2,9 @@ import { type NavItem, type SharedData } from '@/types';
 
 import { useEffect, useState } from "react";
 
-import { 
-    ArrowRight, Menu, X, UserRound, UserRoundGroup, Bolt, 
-    ChartSpline,BookOpen, LogOut, House, 
-    // LogIn, UserRoundPlus, Sparkles, GraduationCap
-} from "lucide-react"
+import { ArrowRight, Menu, X, UserRoundGroup, ChartSpline,BookOpen, LogOut } from "lucide-react"
+
+import UserAvatar from './ui/UserAvatar';
 
 import { Icon } from '@/components/icon';
 import { Button } from '@/components/ui/button';
@@ -18,28 +16,14 @@ import AppLogo from './AppLogo';
 
 export const mainNavItems: NavItem[] = [
     { title: 'Cómo funciona', url: '#como-funciona', sectionId: 'como-funciona', },
-    { title: 'La comunidad', url: '#comunidad', sectionId: 'comunidad', },
-    { title: 'Beneficios', url: '#beneficios', sectionId: 'beneficios',},
-
-    // { title: 'Inicio', url: '/', icon: House, },
-    // { title: 'Cómo empezar', url: '#how-to-start', icon: Sparkles, },
+    { title: 'Cómo empezar', url: '#como-empezar', sectionId: 'como-empezar', },
 ];
 export const authMainNavItems: NavItem[] = [
-    { title: 'Inicio', url: '/', icon: House, },
     { title: 'Foro', url: '/foro', icon: UserRoundGroup, },
-    { title: 'Configuración', url: '/configuración', icon: Bolt, },
+    // { title: 'Configuración', url: '/configuración', icon: Bolt, },
     { title: 'Estadísticas', url: '/estadisticas', icon: ChartSpline, },
     { title: 'Mi temario', url: '/mi-temario', icon: BookOpen, },
 ];
-
-// const rightNavItems: NavItem[] = [
-//     { title: 'Iniciar sesión', url: '/login', icon: LogIn },
-//     { title: 'Crear cuenta', url: '/register', icon: UserRoundPlus },
-// ];
-// const authRightNavItems: NavItem[] = [
-//     { title: 'Perfil', url: '/perfil', icon: UserRound, },
-//     { title: 'Cerrar sesión', url: '/logout', icon: LogOut, },
-// ];
 
 
 export function AppHeader() {
@@ -199,15 +183,14 @@ export function AppHeader() {
                     </Link>
                 </div>
                 ) : (
-                <div className="hidden items-center gap-3 md:flex">
+
+                <div className="hidden items-center gap-7 md:flex">
                     <Link href='/perfil' className="flex items-center gap-2">
-                        <Icon iconNode={UserRound} className="h-5 w-5" />
-                        Perfil
+                        <UserAvatar size='md'/>
                     </Link>
 
-                    <Link href='/logout' className="flex items-center gap-2">
-                        <Icon iconNode={LogOut} className="h-5 w-5" />
-                        Cerrar sesión
+                    <Link className="flex items-center gap-2 cursor-pointer" method="post" href={route('logout')} as="button">
+                        <Icon iconNode={LogOut} className="h-4 w-4" />
                     </Link>
                 </div>
                 ))}
@@ -245,6 +228,8 @@ export function AppHeader() {
         />
 
         {/* -- Mobile navigation -- */}
+        
+        {/* TODO. ARREGLA OVERFLOW */}
 
         {/* Panel lateral */}
         <nav
@@ -261,10 +246,20 @@ export function AppHeader() {
             `}
         >
             {/* Cabecera del panel */}
-            <div className="flex min-h-20 items-center justify-between border-b border-slate-200 px-5">
-                <span className="font-heading text-xl font-bold tracking-tight text-slate-900">
-                    proposite
-                </span>
+            <div className="flex min-h-20 items-center justify-between border-b border-slate-200 p-5">
+                
+                {(!auth.user ? (
+                    <span className="font-heading text-xl font-bold tracking-tight text-slate-900">
+                        proposite
+                    </span>
+                ) : (
+                    <Link 
+                        href='/perfil' 
+                        className="max-w-fit flex items-center gap-2 font-heading text-lg font-bold tracking-tight text-slate-900"
+                    >
+                        <UserAvatar size='md'/> {auth.user.name}
+                    </Link>
+                ))}
 
                 <Button
                     type="button"
@@ -279,13 +274,6 @@ export function AppHeader() {
             {/* Navegación */}
             <div className="flex flex-1 flex-col gap-2 overflow-y-auto px-5 py-5 text-sm font-medium text-slate-700">
                 {auth.user ? (<>
-                <Link
-                    href="/perfil"
-                    onClick={closeMenu}
-                    className="rounded-lg px-3 py-3 transition hover:bg-tertiary hover:text-primary"
-                >
-                    Mi perfil
-                </Link>
                 {authMainNavItems.map((item) => (
                 <Link
                     key={item.title}
@@ -313,15 +301,14 @@ export function AppHeader() {
             {/* Acciones inferiores */}
             <div className="flex flex-col gap-3 border-t border-slate-200 p-5">
                 {auth.user ? (<>
-                <Link                    
-                    href={route('logout')}
-                    method="post"
+                    
+                <Link 
+                    className="flex items-center gap-2 cursor-pointer text-sm" 
+                    method="post" 
+                    href={route('logout')} 
                     as="button"
-                    onClick={closeMenu}
-                    className="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 font-semibold text-slate-700 transition hover:bg-tertiary"
                 >
-                    <LogOut size={18} aria-hidden="true" />
-                    Cerrar sesión
+                    <Icon iconNode={LogOut} className="h-4 w-4" /> Cerrar sesión
                 </Link>
                 </>) : (<>
                 <Link
