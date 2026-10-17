@@ -1,5 +1,7 @@
+import { usePage } from '@inertiajs/react';
+import { type SharedData } from '@/types';
+
 type UserAvatarProps = {
-    name: string;
     size?: 'sm' | 'md' | 'lg';
     className?: string;
 };
@@ -11,6 +13,8 @@ const sizes = {
 };
 
 function getInitials(name: string): string {
+
+
     const words = name.trim().split(/\s+/).filter(Boolean);
 
     if (words.length === 0) {
@@ -29,10 +33,14 @@ function getInitials(name: string): string {
 }
 
 export default function UserAvatar({
-    name,
     size = 'md',
     className = '',
 }: UserAvatarProps) {
+
+    const { auth } = usePage<SharedData>().props;
+    const name = auth.user?.name ?? '';
+
+
     return (
         <div
             role="img"
