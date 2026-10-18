@@ -27,7 +27,6 @@ const aside: asideContentData = {
     phrase: '“Los días pesan menos cuando no los recorres solo.”',
 } 
 
-const errorsInputStyle: string = 'border-error! placeholder:text-error! focus:border-2!'; 
 
 type Oposicion = {
     id: string;
@@ -112,7 +111,7 @@ export default function Register({
                             Volver
                         </Link>
 
-                        <span className="font-serif text-xl font-bold text-primary">
+                        <span className="font-heading text-xl font-bold text-primary">
                             proposite
                         </span>
                     </div>
@@ -122,7 +121,7 @@ export default function Register({
                             Da el primer paso
                         </span>
 
-                        <h2 className="mt-3 font-serif text-4xl font-bold tracking-tight text-foreground">
+                        <h2 className="mt-3 font-heading text-4xl font-bold tracking-tight text-foreground">
                             Crear cuenta
                         </h2>
 
@@ -142,11 +141,11 @@ export default function Register({
                                 placeholder="Nombre"
                                 autoComplete="name"
                                 disabled={processing}
-                                className={`${errors.email ? errorsInputStyle : ''}`}
                                 onChange={(event) => {
                                     setData('name', event.target.value);
                                     clearErrors('name');
                                 }}
+                                errors={errors.name ? true : false}
                             />
 
                             <InputError className='!font-normal' message={errors.name} />
@@ -160,11 +159,11 @@ export default function Register({
                                 type="email"
                                 autoComplete="email"
                                 disabled={processing}
-                                className={`${errors.email ? errorsInputStyle : ''}`}
                                 onChange={(event) => {
                                     setData('email', event.target.value);
                                     clearErrors('email');
                                 }}
+                                errors={errors.email ? true : false}
                             />
 
                             <InputError className='!font-normal' message={errors.email} />
@@ -174,7 +173,6 @@ export default function Register({
                         <div className="flex flex-col gap-2 text-sm font-medium text-foreground">
                             <div className="relative">
                                 <Input
-                                    className={`${errors.password ? errorsInputStyle : ''}`}
                                     type={ showPassword ? 'text' : 'password'}
                                     autoComplete="new-password"
                                     value={data.password}
@@ -184,13 +182,14 @@ export default function Register({
                                         setData('password', event.target.value,);
                                         clearErrors('password');
                                     }}
+                                    errors={errors.password ? true : false}
                                 />
 
                                 <Button
                                     type="button"
                                     aria-label={ showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña' }
                                     onClick={() => setShowPassword((value) => !value,)}
-                                    className={`${errors.email ? errorsInputStyle : ''}
+                                    className={`${errors.password ? 'text-error!' : ''}
                                     absolute right-3 top-1/2 -translate-y-1/2 
                                     text-neutral-foreground hover:text-primary`}
                                 >
@@ -213,7 +212,7 @@ export default function Register({
                                         appearance-none rounded-sm text-sm border border-border outline-none 
                                         transition focus:border-primary focus:ring-2 focus:ring-ring/30
                                         disabled:cursor-not-allowed disabled:opacity-50
-                                        ${errors.oposicion_id ? errorsInputStyle : ''}`}
+                                        ${errors.oposicion_id ? 'border-error! placeholder:text-error! focus:border-2!' : ''}`}
                                     >
                                         <div className='flex gap-2 items-center text-left'>
                                             <GraduationCap 

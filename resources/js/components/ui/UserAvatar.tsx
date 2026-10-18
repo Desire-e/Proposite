@@ -42,12 +42,20 @@ export default function UserAvatar({
 
 
     return (
-        <div
+        // <div
+        //     role="img"
+        //     aria-label={`Avatar de ${name}`}
+        //     className={`flex shrink-0 items-center justify-center
+        //         bg-primary/10 text-primary font-heading font-semibold
+        //         select-none ${sizes[size]} ${className}`}
+        // >
+        <div 
             role="img"
             aria-label={`Avatar de ${name}`}
-            className={`flex shrink-0 items-center justify-center
-                bg-primary/10 text-primary font-heading font-semibold
-                select-none ${sizes[size]} ${className}`}
+            className={`grid  shrink-0 place-items-center 
+                font-heading font-bold text-primary bg-primary/10 
+                border-1 border-primary! 
+            ${sizes[size]} ${className}`}
         >
             {getInitials(name)}
         </div>
