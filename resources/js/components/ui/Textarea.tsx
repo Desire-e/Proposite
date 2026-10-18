@@ -11,20 +11,11 @@ interface TextareaProps {
     placeholder?: string; 
     content?: string; 
     disabled?: boolean,
+    errors?: boolean;
 }
 
 export default function Textarea(
-    { 
-        id,
-        value,
-        onChange,
-        className,
-        rows = 4,
-        cols,
-        placeholder,
-        // content,
-        disabled = false,
-    }: TextareaProps 
+    { id, value, onChange, className, rows = 4, cols, placeholder, disabled = false, errors = false,}: TextareaProps 
 ) {
     return (
         <textarea
@@ -32,13 +23,13 @@ export default function Textarea(
             value={value ?? ''}
             onChange={onChange}
             className={cn(
-                'flex w-full rounded-sm border-1 border-muted-foreground/30 bg-background px-3 py-2',
+                'flex w-full rounded-sm border-1 border-border bg-white px-3 py-2',
                 'file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground',
                 'placeholder:text-muted-foreground/80',
-                'focus:outline-hidden focus:border-muted-foreground',
+                'outline-none transition focus:border-primary focus:ring-4 focus:ring-secondary/20',
                 'disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
                 className,
-                // 'bg-transparent'
+                errors ? 'border-error! placeholder:text-error! focus:ring-4 focus:ring-error/20' : '',
             )}
             rows={rows} 
             cols={cols}

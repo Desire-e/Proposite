@@ -8,7 +8,7 @@ export default function AppLayout(
     { children: React.ReactNode; headTitle: string; className?: string;}) 
 {
     return (
-        <div className={`min-h-screen bg-background text-slate-900 ${className}`}>
+        <div className={`min-h-screen bg-background text-foreground ${className}`}>
             <Head title={headTitle} />
 
             <AppHeader />

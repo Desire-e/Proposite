@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Models\Usuario;
+use App\Enums\Rol;
 
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\Admin\PanelController as AdminPanelController;
@@ -53,7 +54,7 @@ Route::get('/', function () {
 Route::middleware('auth')->get('/dashboard', function () {
     
     /**
-     * TODO. Dos comprobaciones
+     * Comprobaciones de rol
      * 
      * Alias de los middlewares: mira en bootstrap/app.php cómo llamaste a los alias de 
      * rol (admin, opositor u otros). Usa exactamente esos nombres.
@@ -61,7 +62,7 @@ Route::middleware('auth')->get('/dashboard', function () {
      * Si rol está casteado a enum en el modelo, === 'administrador' será siempre falso. 
      * En ese caso compara con el caso del enum, por ejemplo Rol::Administrado
      */
-    return auth()->user()->rol === 'admin'
+    return auth()->user()->rol === Rol::ADMIN
         ? redirect()->route('admin.panel')
         : redirect()->route('opositor.perfil');
     
@@ -73,15 +74,21 @@ Route::middleware('auth')->get('/dashboard', function () {
 // Opositor
 // ==================
 
-Route::middleware(['auth', 'opositor'])->group(function () {
+Route::middleware(['auth', 'opositor'])->name('opositor.')->group(function () {
     
     Route::get('/perfil', [PerfilController::class, 'index'])
-        ->name('opositor.perfil');
+        ->name('perfil'); // opositor.perfil
 
-    // otras rutas ...
+
+    Route::get('/perfil-edit', [PerfilController::class, 'edit'])
+    ->name('perfil.edit');
 
     Route::post('/perfil', [PerfilController::class, 'update'])
     ->name('perfil.update');
+
+    
+    Route::get('/temario', [TemariosController::class, 'index'])
+    ->name('temario');
 
 });
 
@@ -92,7 +99,6 @@ Route::middleware(['auth', 'opositor'])->group(function () {
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     
-    // ASK. por que puso get '/'
     Route::get('/panel', [AdminPanelController::class, 'index'])
     ->name('panel');
 
@@ -109,27 +115,27 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 // TODO. Revisar
 Route::middleware(['auth', 'opositor'])->group(function () {
     // Foro / publicaciones
-    Route::get('/publicaciones', [PublicacionesController::class, 'index'])
-        ->name('publicaciones.index');
+    Route::get('/foro', [ForosController::class, 'index'])
+        ->name('foro.index');
 
-    Route::get('/publicaciones/create', [PublicacionesController::class, 'create'])
-        ->name('publicaciones.create');
+    Route::get('/foro/create', [ForosController::class, 'create'])
+        ->name('foro.create');
 
-    Route::post('/publicaciones', [PublicacionesController::class, 'store'])
-        ->name('publicaciones.store');
+    Route::post('/foro', [ForosController::class, 'store'])
+        ->name('foro.store');
 
-    Route::get('/publicaciones/{publicacion}', [PublicacionesController::class, 'show'])
-        ->name('publicaciones.show');
+    Route::get('/foro/{publicacion}', [ForosController::class, 'show'])
+        ->name('foro.show');
 
-    Route::delete('/publicaciones/{publicacion}', [PublicacionesController::class, 'destroy'])
-        ->name('publicaciones.destroy');
+    Route::delete('/foro/{publicacion}', [ForosController::class, 'destroy'])
+        ->name('foro.destroy');
 
-    Route::post('/publicaciones/{publicacion}/reaccion', [PublicacionesController::class, 'toggleReaccion'])
-        ->name('publicaciones.reaccion');
+    Route::post('/foro/{publicacion}/reaccion', [ForosController::class, 'toggleReaccion'])
+        ->name('foro.reaccion');
 
 
     // Comentarios
-    Route::post('/publicaciones/{publicacion}/comentarios', [ComentariosController::class, 'store'])
+    Route::post('/foro/{publicacion}/comentarios', [ComentariosController::class, 'store'])
         ->name('comentarios.store');
 
     Route::delete('/comentarios/{comentario}', [ComentariosController::class, 'destroy'])

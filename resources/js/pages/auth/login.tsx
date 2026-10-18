@@ -20,7 +20,6 @@ const aside: asideContentData = {
     phrase: "Comunidad, recursos y constancia en un mismo lugar.",
 } 
 
-const errorsInputStyle: string = 'border-error! placeholder:text-error! focus:border-2!'; 
 
 
 export default function Login() {
@@ -75,7 +74,6 @@ export default function Login() {
                         <form onSubmit={submit} noValidate className="flex flex-col gap-5">
                             <div className="flex flex-col gap-2 text-sm font-medium text-foreground">
                                 <Input
-                                    className={`${errors.email ? errorsInputStyle : ''}`}
                                     id="email"
                                     type="email"
                                     autoComplete="email"
@@ -85,6 +83,7 @@ export default function Login() {
                                         setData('email', e.target.value)
                                         clearErrors('email');
                                     }}
+                                    errors={errors.email ? true : false}
                                     disabled={processing} 
                                     placeholder="Email"
                                 />
@@ -95,7 +94,6 @@ export default function Login() {
 
                                 <div className="relative">
                                     <Input
-                                        className={`${errors.password ? errorsInputStyle : ''}`}
                                         type={ showPassword ? 'text' : 'password' }
                                         autoComplete="current-password"
                                         value={data.password}
@@ -106,13 +104,14 @@ export default function Login() {
                                             setData('password', event.target.value,);
                                             clearErrors('password');
                                         }}
+                                        
                                     />
 
                                     <Button
                                         type="button"
                                         aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña' }
                                         onClick={() => setShowPassword((value) => !value,)}
-                                        className={`${errors.email ? errorsInputStyle : ''}
+                                        className={`${errors.password ? 'text-error!' : ''}
                                         absolute right-3 top-1/2 -translate-y-1/2 
                                         text-neutral-foreground hover:text-primary`}
                                     >

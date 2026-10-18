@@ -100,9 +100,16 @@ class Usuario extends Authenticatable {
         return $this->hasMany(Comentario::class, 'usuario_id');
     }
 
-    public function temarioMarcado(): BelongsToMany {
-        return $this->belongsToMany(Tema::class, 'check_temario')
-                ->withPivot('checked'); 
+    // Temario, marcado o no
+    public function checkTemario(): BelongsToMany {
+        return $this->belongsToMany(Tema::class, 'checks_temario', 'usuario_id', 'temario_id')
+            ->withPivot('checked');
+    }
+
+    // Temario, solo el marcado como estudiado
+    public function checkedTemario(): BelongsToMany {
+        return $this->checkTemario()
+            ->wherePivot('checked', true);
     }
 
     // ================
