@@ -2,6 +2,7 @@ import { ArrowRight, CalendarDays, Edit3, GraduationCap, Target, Trophy, Users, 
 import { Link } from '@inertiajs/react';
 import AppLayout from '@/layouts/AppLayout';
 import UserAvatar from "@/components/ui/UserAvatar";
+import ProfileCard from "@/components/ui/ProfileCard";
 
 type Oposicion = {
     nombre: string;
@@ -144,33 +145,9 @@ export default function Perfil({ user }: PerfilProps) {
                 </section>
 
 
-
                 <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-                    {/* TODO.  */}
-                    {/* ProfileCard.tsx */}
-
-                    {/* Progress */}
-                    <section className="rounded-2xl border border-border bg-white p-5 md:p-6">
-                        <div className="flex items-start justify-between gap-3">
-                            <div>
-                                <span className="text-xs font-extrabold uppercase tracking-[0.13em] text-secondary">
-                                    Tu preparación
-                                </span>
-
-                                <h2 className="mb-0 mt-2 font-heading text-2xl font-bold tracking-[-0.04em]">
-                                    Avance del temario
-                                </h2>
-                            </div>
-
-                            <Link
-                                href={route('temarios.index')}
-                                className="inline-flex shrink-0 items-center gap-1 text-xs font-bold text-primary"
-                            >
-                                Ver temario
-                                <ArrowRight size={14} />
-                            </Link>
-                        </div>
-
+                    <ProfileCard brow={"Tu preparación"} title={"Avance del temario"} 
+                    link={{label:"Ver temario", route: "temarios.index" }}>
                         <div className="my-6 flex items-center gap-4 sm:gap-6">
                             <div 
                                 style={{
@@ -198,48 +175,12 @@ export default function Perfil({ user }: PerfilProps) {
                                 <p className="mb-3 mt-2 text-xs leading-relaxed text-neutral-foreground">
                                     Has estudiado {user.progreso.temas_estudiados} de {user.progreso.total_temas} temas del temario oficial.
                                 </p>
-
-                                
-                                {/* <div
-                                    className="h-[7px] overflow-hidden rounded-full bg-tertiary"
-                                    role="progressbar"
-                                    aria-label="Temario completado"
-                                    aria-valuenow={user.progreso.porcentaje}
-                                    aria-valuemin={0}
-                                    aria-valuemax={100}
-                                >
-                                    <span 
-                                        style={{ width: `${user.progreso.porcentaje}%` }}
-                                        className="block h-full rounded-full bg-primary" 
-                                    />
-                                </div> */}
                             </div>
                         </div>
-                    </section>
+                    </ProfileCard>
 
-                    {/* Statistics */}
-                    <section className="rounded-2xl border border-border bg-white p-5 md:p-6">
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <span className="text-xs font-extrabold uppercase tracking-[0.13em] text-secondary">
-                                    Tu rendimiento
-                                </span>
-
-                                <h2 className="mb-0 mt-2 font-heading text-2xl font-bold tracking-[-0.04em]">
-                                    Una mirada rápida
-                                </h2>
-                            </div>
-
-
-                            <Link
-                                href={route('temarios.index')}
-                                className="inline-flex shrink-0 items-center gap-1 text-xs font-bold text-primary"
-                            >
-                                Ver estadísticas
-                                <ArrowRight size={14} />
-                            </Link>
-                        </div>
-
+                    <ProfileCard  brow={"Tu rendimiento"} title={"Una mirada rápida"}>
+                        <>
                         <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-2.5">
                             <div className="rounded-[11px] bg-neutral px-2 py-3.5 sm:px-3">
                                 <span className="block font-bold font-heading text-2xl font-bold text-primary">
@@ -273,7 +214,6 @@ export default function Perfil({ user }: PerfilProps) {
                         </div>
 
                         <div className="mt-5 flex items-center gap-2 border-t border-border pt-4 text-xs text-neutral-foreground">
-                            {/* TODO. Insertar datos con seeder en Laravel */}
                             {user.tema_mas_fuerte ? 
                             (<>
                                 <Trophy size={16} className="shrink-0 text-secondary" />
@@ -287,25 +227,11 @@ export default function Perfil({ user }: PerfilProps) {
                                 <span>Aún no has realizado ningún test.</span>                                
                             )}
                         </div>
-                    </section>
-
-
-                    {/* TODO. Laravel, last 2 publicaciones / comentarios */}
-                    <section className="rounded-2xl border border-border bg-white p-5 md:p-6">
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <span className="text-xs font-extrabold uppercase tracking-[0.13em] text-secondary">
-                                    En comunidad
-                                </span>
-
-                                <h2 className="mb-0 mt-2 font-heading text-2xl font-bold tracking-[-0.04em]">
-                                    Tu actividad reciente
-                                </h2>
-                            </div>
-                        </div>
-
+                        </>
+                    </ProfileCard>
+                    
+                    <ProfileCard brow={"En comunidad"} title={"Tu actividad reciente"}>
                         <div className="my-6 flex flex-col gap-5">
-
                             {user.actividad_reciente.length > 0 ? (
                             user.actividad_reciente.map((actividad) =>{
                                 const accion = actividad.tipo === 'comentario' ? "Comentaste" : "Publicaste";
@@ -330,18 +256,9 @@ export default function Perfil({ user }: PerfilProps) {
                                 </div>
                             )}
                         </div>
+                    </ProfileCard>
+                    
 
-                        {/* <button
-                            type="button"
-                            className="inline-flex items-center gap-2 border-0 bg-transparent p-0 text-xs font-bold text-primary"
-                        >
-                            Ver toda mi actividad
-                            <ExternalLink size={14} />
-                        </button> */}
-                    </section>
-
-
-                    {/* Community */}
                     <aside className="relative overflow-hidden rounded-2xl border border-border bg-primary 
                     p-5 md:p-6 text-secondary-foreground flex flex-col justify-between">
                         <div className="absolute right-[26px] top-6 grid size-[45px] place-items-center rounded-full 
