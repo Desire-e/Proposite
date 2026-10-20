@@ -2,7 +2,7 @@ import { type NavItem, type SharedData } from '@/types';
 
 import { useEffect, useState } from "react";
 
-import { ArrowRight, Menu, X, UserRoundGroup, ChartSpline,BookOpen, LogOut } from "lucide-react"
+import { ArrowRight, Menu, X, LogOut } from "lucide-react"
 
 import UserAvatar from './ui/UserAvatar';
 
@@ -19,10 +19,11 @@ export const mainNavItems: NavItem[] = [
     { title: 'Cómo empezar', url: '#como-empezar', sectionId: 'como-empezar', },
 ];
 export const authMainNavItems: NavItem[] = [
-    { title: 'Foro', url: '/foro', icon: UserRoundGroup, },
+    { title: 'Foro', url: '/foro', },
     // { title: 'Configuración', url: '/configuración', icon: Bolt, },
-    { title: 'Estadísticas', url: '/estadisticas', icon: ChartSpline, },
-    { title: 'Mi temario', url: '/mi-temario', icon: BookOpen, },
+    // { title: 'Estadísticas', url: '/estadisticas', icon: ChartSpline, },
+    { title: 'Temario oficial', url: '/temario', },
+    { title: 'Tests', url: '/estadisticas', },
 ];
 
 
