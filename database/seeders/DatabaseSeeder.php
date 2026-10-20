@@ -5,8 +5,10 @@ namespace Database\Seeders;
 // use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Database\Seeders\AvatarSeeder;
 use Database\Seeders\OposicionSeeder;
+use Database\Seeders\TemarioAuxiliarAdministrativoSeeder;
+use Database\Seeders\TemarioMaestroPrimariaSeeder;
+use Database\Seeders\TemarioPoliciaNacionalSeeder;
 
 /**
  * Running Seeders:
@@ -35,6 +37,10 @@ class DatabaseSeeder extends Seeder {
          */
         $this->call([
             OposicionSeeder::class,
+            TemarioAuxiliarAdministrativoSeeder::class,
+            TemarioMaestroPrimariaSeeder::class,
+            TemarioPoliciaNacionalSeeder::class,
+            RecursoSeeder::class,
         ]);
         
     }
