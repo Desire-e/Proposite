@@ -147,7 +147,7 @@ export default function Perfil({ user }: PerfilProps) {
 
                 <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[1.2fr_0.8fr]">
                     <ProfileCard brow={"Tu preparación"} title={"Avance del temario"} 
-                    link={{label:"Ver temario", route: "temarios.index" }}>
+                    link={{label:"Ver temario", route: "temario.index" }}>
                         <div className="my-6 flex items-center gap-4 sm:gap-6">
                             <div 
                                 style={{

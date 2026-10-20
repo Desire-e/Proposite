@@ -38,7 +38,7 @@ class Oposicion extends Model {
         return $this->hasMany(Publicacion::class, 'oposicion_id');
     }
 
-    public function temarios(): HasMany {
+    public function temario(): HasMany {
         return $this->hasMany(Tema::class, 'oposicion_id');
     }
 

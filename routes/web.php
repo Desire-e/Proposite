@@ -75,10 +75,10 @@ Route::middleware('auth')->get('/dashboard', function () {
 // ==================
 
 Route::middleware(['auth', 'opositor'])->name('opositor.')->group(function () {
-    
+
+    // Perfil 
     Route::get('/perfil', [PerfilController::class, 'index'])
         ->name('perfil'); // opositor.perfil
-
 
     Route::get('/perfil-edit', [PerfilController::class, 'edit'])
     ->name('perfil.edit');
@@ -86,9 +86,16 @@ Route::middleware(['auth', 'opositor'])->name('opositor.')->group(function () {
     Route::post('/perfil', [PerfilController::class, 'update'])
     ->name('perfil.update');
 
+});
+
+Route::middleware(['auth', 'opositor'])->group(function () {
     
+    // Temario
     Route::get('/temario', [TemariosController::class, 'index'])
-    ->name('temario');
+        ->name('temario.index');
+
+    Route::patch('/temario/check', [TemariosController::class, 'toggleCheck'])
+        ->name('temario.check');
 
 });
 
@@ -142,12 +149,7 @@ Route::middleware(['auth', 'opositor'])->group(function () {
         ->name('comentarios.destroy');
 
 
-    // Temario
-    Route::get('/temarios', [TemariosController::class, 'index'])
-        ->name('temarios.index');
 
-    Route::patch('/temarios/{temario}/check', [TemariosController::class, 'toggleCheck'])
-        ->name('temarios.check');
 
 
     // Recursos

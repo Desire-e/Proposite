@@ -23,6 +23,7 @@ class Tema extends Model {
 
     protected $fillable = [
         'oposicion_id',
+        'bloque',
         'numero_tema', 
         'titulo', 
     ];
