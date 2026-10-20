@@ -93,7 +93,7 @@ export default function Perfil({ user }: PerfilProps) {
                     </div>
 
                     <div className="flex md:flex-row flex-col gap-6 items-center justify-between">
-                        <div className="flex flex-col gap-2 md:w-[50%] lg:w-[60%]">
+                        <div className="flex flex-col gap-2 lg:w-[50%] lg:w-[60%]">
                             
                             <div className="flex gap-4 sm:gap-5">
                                 <UserAvatar 
