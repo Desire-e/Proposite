@@ -185,7 +185,7 @@ export function AppHeader() {
                 </div>
                 ) : (
 
-                <div className="hidden items-center gap-7 md:flex">
+                <div className="hidden items-center gap-7 lg:flex">
                     <Link href='/perfil' className="flex items-center gap-2">
                         <UserAvatar size='md'/>
                     </Link>
