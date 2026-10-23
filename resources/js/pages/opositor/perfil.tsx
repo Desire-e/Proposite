@@ -194,6 +194,7 @@ export default function Perfil({ user, es_propio }: PerfilProps) {
                                 <UserAvatar
                                     size="lg"
                                     className="md:row-span-2"
+                                    username={user.name}
                                 />
 
                                 <h1 className="min-w-0 break-words font-heading text-3xl font-bold leading-tight
