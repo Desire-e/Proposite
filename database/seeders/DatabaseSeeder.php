@@ -9,6 +9,8 @@ use Database\Seeders\OposicionSeeder;
 use Database\Seeders\TemarioAuxiliarAdministrativoSeeder;
 use Database\Seeders\TemarioMaestroPrimariaSeeder;
 use Database\Seeders\TemarioPoliciaNacionalSeeder;
+use Database\Seeders\RecursoSeeder;
+use Database\Seeders\PublicacionSeeder;
 
 /**
  * Running Seeders:
@@ -41,6 +43,7 @@ class DatabaseSeeder extends Seeder {
             TemarioMaestroPrimariaSeeder::class,
             TemarioPoliciaNacionalSeeder::class,
             RecursoSeeder::class,
+            PublicacionSeeder::class,
         ]);
         
     }

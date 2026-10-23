@@ -41,7 +41,6 @@ class Publicacion extends Model {
     protected $fillable = [
         'usuario_id',
         'oposicion_id', 
-        'titulo', 
         'contenido',
     ];
     
@@ -80,11 +79,8 @@ class Publicacion extends Model {
         return $this->hasMany(Comentario::class, 'publicacion_id');
     }
 
-    // colección de Usuario, cada uno con
-    // $publicacion->usuariosMeSirvio()->wherePivot('checked', true)
-    public function usuariosMeSirvio(): BelongsToMany {
-        return $this->belongsToMany(Usuario::class, 'me_sirvio', 'publicacion_id', 'usuario_id')
-                ->withPivot('checked'); 
+    public function meSirvio(): BelongsToMany
+    {
+        return $this->belongsToMany(Usuario::class, 'me_sirvio', 'publicacion_id', 'usuario_id');
     }
-
 }

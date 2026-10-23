@@ -117,7 +117,7 @@ export default function Index(
     const toggleCheck = (id: string, currentChecked: boolean) => {
 
         // Actualización local instantánea
-        setLocalChecked(id, !currentChecked!);
+        setLocalChecked(id, !currentChecked);
 
         // Actualización servidor
         // PATCH = cambios parciales

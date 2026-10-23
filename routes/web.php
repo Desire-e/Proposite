@@ -6,21 +6,23 @@ use App\Models\Usuario;
 use App\Enums\Rol;
 
 use App\Http\Controllers\PerfilController;
+use App\Http\Controllers\TemariosController;
+use App\Http\Controllers\ForosController;
+
 use App\Http\Controllers\Admin\PanelController as AdminPanelController;
 
-use App\Http\Controllers\PublicacionesController;
-use App\Http\Controllers\ComentariosController;
-use App\Http\Controllers\TemariosController;
-use App\Http\Controllers\RecursosController;
-use App\Http\Controllers\TestsController;
-use App\Http\Controllers\IntentosTestController;
-use App\Http\Controllers\EstadisticasController;
-use App\Http\Controllers\ReportesController;
+// use App\Http\Controllers\PublicacionesController;
+// use App\Http\Controllers\ComentariosController;
+// use App\Http\Controllers\RecursosController;
+// use App\Http\Controllers\TestsController;
+// use App\Http\Controllers\IntentosTestController;
+// use App\Http\Controllers\EstadisticasController;
+// use App\Http\Controllers\ReportesController;
 
-use App\Http\Controllers\Admin\RecursosController as AdminRecursosController;
-use App\Http\Controllers\Admin\ReportesController as AdminReportesController;
-use App\Http\Controllers\Admin\TestsController as AdminTestsController;
-use App\Http\Controllers\Admin\UsuariosController as AdminUsuariosController;
+// use App\Http\Controllers\Admin\RecursosController as AdminRecursosController;
+// use App\Http\Controllers\Admin\ReportesController as AdminReportesController;
+// use App\Http\Controllers\Admin\TestsController as AdminTestsController;
+// use App\Http\Controllers\Admin\UsuariosController as AdminUsuariosController;
 
 
 /*****************************
@@ -90,12 +92,33 @@ Route::middleware(['auth', 'opositor'])->name('opositor.')->group(function () {
 
 Route::middleware(['auth', 'opositor'])->group(function () {
     
-    // Temario
+    // --- Temario
+    
     Route::get('/temario', [TemariosController::class, 'index'])
         ->name('temario.index');
 
     Route::patch('/temario/check', [TemariosController::class, 'toggleCheck'])
         ->name('temario.check');
+
+    // --- Foro
+    
+    Route::get('/foro', [ForosController::class, 'index'])
+        ->name('foro.index');
+
+    Route::post('/foro', [ForosController::class, 'insertPublicacion'])
+        ->name('foro.publicacion.insertPublicacion');
+
+    Route::delete('/foro/publicaciones/{publicacion}/eliminar', [ForosController::class, 'deletePublicacion'])
+        ->name('foro.publicacion.eliminar');
+
+    Route::post('/foro/publicaciones/{publicacion}/reportar', [ForosController::class, 'reportPublicacion'])
+        ->name('foro.publicacion.reportar');
+
+    Route::post('/foro/publicaciones/{publicacion}/me-sirvio', [ForosController::class, 'toggleMeSirvio'])
+    ->name('foro.publicacion.meSirvio');
+
+    // --- Tests
+
 
 });
 
@@ -122,65 +145,64 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 // TODO. Revisar
 Route::middleware(['auth', 'opositor'])->group(function () {
     // Foro / publicaciones
-    Route::get('/foro', [ForosController::class, 'index'])
-        ->name('foro.index');
 
-    Route::get('/foro/create', [ForosController::class, 'create'])
-        ->name('foro.create');
 
-    Route::post('/foro', [ForosController::class, 'store'])
-        ->name('foro.store');
+    // Route::get('/foro/create', [ForosController::class, 'create'])
+    //     ->name('foro.create');
 
-    Route::get('/foro/{publicacion}', [ForosController::class, 'show'])
-        ->name('foro.show');
+    // Route::post('/foro', [ForosController::class, 'store'])
+    //     ->name('foro.store');
 
-    Route::delete('/foro/{publicacion}', [ForosController::class, 'destroy'])
-        ->name('foro.destroy');
+    // Route::get('/foro/{publicacion}', [ForosController::class, 'show'])
+    //     ->name('foro.show');
 
-    Route::post('/foro/{publicacion}/reaccion', [ForosController::class, 'toggleReaccion'])
-        ->name('foro.reaccion');
+    // Route::delete('/foro/{publicacion}', [ForosController::class, 'destroy'])
+    //     ->name('foro.destroy');
+
+    // Route::post('/foro/{publicacion}/reaccion', [ForosController::class, 'toggleReaccion'])
+    //     ->name('foro.reaccion');
 
 
     // Comentarios
-    Route::post('/foro/{publicacion}/comentarios', [ComentariosController::class, 'store'])
-        ->name('comentarios.store');
+    // Route::post('/foro/{publicacion}/comentarios', [ComentariosController::class, 'store'])
+    //     ->name('comentarios.store');
 
-    Route::delete('/comentarios/{comentario}', [ComentariosController::class, 'destroy'])
-        ->name('comentarios.destroy');
+    // Route::delete('/comentarios/{comentario}', [ComentariosController::class, 'destroy'])
+    //     ->name('comentarios.destroy');
 
 
 
 
 
     // Recursos
-    Route::get('/recursos', [RecursosController::class, 'index'])
-        ->name('recursos.index');
+    // Route::get('/recursos', [RecursosController::class, 'index'])
+    //     ->name('recursos.index');
 
 
     // Tests
-    Route::get('/tests', [TestsController::class, 'index'])
-        ->name('tests.index');
+    // Route::get('/tests', [TestsController::class, 'index'])
+    //     ->name('tests.index');
 
-    Route::get('/tests/{test}', [TestsController::class, 'show'])
-        ->name('tests.show');
+    // Route::get('/tests/{test}', [TestsController::class, 'show'])
+    //     ->name('tests.show');
 
 
     // Intentos de test
-    Route::post('/tests/{test}/intentos', [IntentosTestController::class, 'store'])
-        ->name('intentos.store');
+    // Route::post('/tests/{test}/intentos', [IntentosTestController::class, 'store'])
+    //     ->name('intentos.store');
 
-    Route::get('/intentos/{intento}', [IntentosTestController::class, 'show'])
-        ->name('intentos.show');
+    // Route::get('/intentos/{intento}', [IntentosTestController::class, 'show'])
+    //     ->name('intentos.show');
 
 
     // Estadísticas
-    Route::get('/estadisticas', [EstadisticasController::class, 'show'])
-        ->name('estadisticas.show');
+    // Route::get('/estadisticas', [EstadisticasController::class, 'show'])
+    //     ->name('estadisticas.show');
 
 
     // Reportes
-    Route::post('/reportes', [ReportesController::class, 'store'])
-        ->name('reportes.store');
+    // Route::post('/reportes', [ReportesController::class, 'store'])
+    //     ->name('reportes.store');
 });
 
 
@@ -192,44 +214,44 @@ Route::middleware(['auth', 'opositor'])->group(function () {
 Route::middleware(['auth', 'admin'])->group(function () {
 
     // Usuarios
-    Route::get('/usuarios', [AdminUsuariosController::class, 'index'])
-        ->name('usuarios.index');
+    // Route::get('/usuarios', [AdminUsuariosController::class, 'index'])
+    //     ->name('usuarios.index');
 
-    Route::patch('/usuarios/{usuario}/suspension', [AdminUsuariosController::class, 'toggleSuspendido'])
-        ->name('usuarios.suspension');
+    // Route::patch('/usuarios/{usuario}/suspension', [AdminUsuariosController::class, 'toggleSuspendido'])
+    //     ->name('usuarios.suspension');
 
 
     // Tests
-    Route::get('/tests/create', [AdminTestsController::class, 'create'])
-        ->name('tests.create');
+    // Route::get('/tests/create', [AdminTestsController::class, 'create'])
+    //     ->name('tests.create');
 
-    Route::post('/tests', [AdminTestsController::class, 'store'])
-        ->name('tests.store');
+    // Route::post('/tests', [AdminTestsController::class, 'store'])
+    //     ->name('tests.store');
 
-    Route::get('/tests/{test}/edit', [AdminTestsController::class, 'edit'])
-        ->name('tests.edit');
+    // Route::get('/tests/{test}/edit', [AdminTestsController::class, 'edit'])
+    //     ->name('tests.edit');
 
-    Route::put('/tests/{test}', [AdminTestsController::class, 'update'])
-        ->name('tests.update');
+    // Route::put('/tests/{test}', [AdminTestsController::class, 'update'])
+    //     ->name('tests.update');
 
-    Route::delete('/tests/{test}', [AdminTestsController::class, 'destroy'])
-        ->name('tests.destroy');
+    // Route::delete('/tests/{test}', [AdminTestsController::class, 'destroy'])
+        // ->name('tests.destroy');
 
 
     // Recursos
-    Route::post('/recursos', [AdminRecursosController::class, 'store'])
-        ->name('recursos.store');
+    // Route::post('/recursos', [AdminRecursosController::class, 'store'])
+    //     ->name('recursos.store');
 
-    Route::delete('/recursos/{recurso}', [AdminRecursosController::class, 'destroy'])
-        ->name('recursos.destroy');
+    // Route::delete('/recursos/{recurso}', [AdminRecursosController::class, 'destroy'])
+    //     ->name('recursos.destroy');
 
 
     // Reportes
-    Route::get('/reportes', [AdminReportesController::class, 'index'])
-        ->name('reportes.index');
+    // Route::get('/reportes', [AdminReportesController::class, 'index'])
+    //     ->name('reportes.index');
 
-    Route::patch('/reportes/{reporte}/resolver', [AdminReportesController::class, 'resolve'])
-        ->name('reportes.resolve');
+    // Route::patch('/reportes/{reporte}/resolver', [AdminReportesController::class, 'resolve'])
+    //     ->name('reportes.resolve');
 });
 
 

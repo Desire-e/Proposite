@@ -2,18 +2,18 @@ import { usePage } from '@inertiajs/react';
 import { type SharedData } from '@/types';
 
 type UserAvatarProps = {
+    username?: string;
     size?: 'sm' | 'md' | 'lg';
     className?: string;
 };
 
 const sizes = {
-    sm: 'size-8 text-xs rounded-lg',
+    sm: 'size-10 text-xs rounded-[11px]',
     md: 'size-12 text-base rounded-xl',
     lg: 'size-20 text-2xl rounded-2xl',
 };
 
 function getInitials(name: string): string {
-
 
     const words = name.trim().split(/\s+/).filter(Boolean);
 
@@ -33,12 +33,15 @@ function getInitials(name: string): string {
 }
 
 export default function UserAvatar({
+    username = '',
     size = 'md',
     className = '',
 }: UserAvatarProps) {
 
     const { auth } = usePage<SharedData>().props;
-    const name = auth.user?.name ?? '';
+    const name = username.trim() !== '' ? 
+        username.trim() : 
+        auth.user?.name ?? ''; 
 
 
     return (
