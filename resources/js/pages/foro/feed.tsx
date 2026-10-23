@@ -52,7 +52,7 @@ type ForoProps = {
 }
 
 
-export default function Foro(
+export default function Feed(
     { oposicion, publicaciones = [], miembros = 0 }: ForoProps
 ) {
 
@@ -264,7 +264,7 @@ export default function Foro(
                         {/* Crear publicación */}
                         <div className="rounded-2xl border border-border bg-white p-5">
                             <div className="flex md:flex-row flex-col items-start gap-3">
-                                <UserAvatar size='sm' />
+                                <UserAvatar size='sm' userId={auth.user.id} username={auth.user.name} />
 
                                 <form className="min-w-0 flex-1" noValidate onSubmit={insertPublicacion}>
                                     <Label htmlFor="contenido" className="sr-only">
@@ -360,7 +360,7 @@ export default function Foro(
                                 <article key={publicacion.id} className="rounded-2xl border border-border bg-white p-5">
                                     <div className="flex md:flex-row flex-col items-start gap-3">
 
-                                        <UserAvatar username={publicacion.usuario.name}/>
+                                        <UserAvatar userId={publicacion.usuario.id} username={publicacion.usuario.name} />
 
                                         <div className="min-w-0 flex-1">
                                             <div className="flex items-start justify-between gap-3">
@@ -370,10 +370,9 @@ export default function Foro(
                                                     </p>
                                                 </div>
 
-                                                {/* Eliminar publicación */}
+                                                {/* Eliminar / Reportar publicación */}
                                                 <div>
-                                                    <DropdownMenu 
-                                                    >
+                                                    <DropdownMenu>
                                                         <DropdownMenuTrigger asChild>
                                                             <button 
                                                             type="button" 

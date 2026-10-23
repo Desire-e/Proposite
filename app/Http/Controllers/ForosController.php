@@ -38,7 +38,7 @@ class ForosController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return Inertia::render('foro', [
+        return Inertia::render('foro/feed', [
             'oposicion' => $oposicion,
             'publicaciones' => $publicaciones ?? [],
             'miembros' => $oposicion->usuarios
