@@ -186,9 +186,7 @@ export function AppHeader() {
                 ) : (
 
                 <div className="hidden items-center gap-7 lg:flex">
-                    <Link href='/perfil' className="flex items-center gap-2">
-                        <UserAvatar size='md'/>
-                    </Link>
+                    <UserAvatar size='md' userId={auth.user.id} username={auth.user.name} />
 
                     <Link className="flex items-center gap-2 cursor-pointer" method="post" href={route('logout')} as="button">
                         <Icon iconNode={LogOut} className="h-4 w-4" />
@@ -230,8 +228,6 @@ export function AppHeader() {
 
         {/* -- Mobile navigation -- */}
         
-        {/* TODO. ARREGLA OVERFLOW */}
-
         {/* Panel lateral */}
         <nav
             id="mobile-navigation"
@@ -254,12 +250,9 @@ export function AppHeader() {
                         proposite
                     </span>
                 ) : (
-                    <Link 
-                        href='/perfil' 
-                        className="max-w-fit flex items-center gap-2 font-heading text-lg font-bold tracking-tight text-slate-900"
-                    >
-                        <UserAvatar size='md'/> {auth.user.name}
-                    </Link>
+                    <>
+                    <UserAvatar size='md' userId={auth.user.id} username={auth.user.name} /> {auth.user.name}
+                    </>
                 ))}
 
                 <Button

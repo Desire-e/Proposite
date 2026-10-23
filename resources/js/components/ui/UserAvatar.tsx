@@ -1,8 +1,10 @@
 import { usePage } from '@inertiajs/react';
 import { type SharedData } from '@/types';
+import { Link } from '@inertiajs/react';
 
 type UserAvatarProps = {
     username?: string;
+    userId?: string;
     size?: 'sm' | 'md' | 'lg';
     className?: string;
 };
@@ -33,7 +35,8 @@ function getInitials(name: string): string {
 }
 
 export default function UserAvatar({
-    username = '',
+    username = '', 
+    userId,
     size = 'md',
     className = '',
 }: UserAvatarProps) {
@@ -44,23 +47,28 @@ export default function UserAvatar({
         auth.user?.name ?? ''; 
 
 
-    return (
-        // <div
-        //     role="img"
-        //     aria-label={`Avatar de ${name}`}
-        //     className={`flex shrink-0 items-center justify-center
-        //         bg-primary/10 text-primary font-heading font-semibold
-        //         select-none ${sizes[size]} ${className}`}
-        // >
-        <div 
+    const avatar = (
+        <div
             role="img"
             aria-label={`Avatar de ${name}`}
-            className={`grid  shrink-0 place-items-center 
-                font-heading font-bold text-primary bg-primary/10 
-                border-1 border-primary! 
-            ${sizes[size]} ${className}`}
+            className={`grid shrink-0 place-items-center font-heading font-bold text-primary
+                bg-primary/10 border-1 border-primary! ${sizes[size]} ${className}`}
         >
             {getInitials(name)}
         </div>
     );
+
+    // Si no se proporciona id, devuelve avatar no clickable
+    if (!userId) return avatar;
+
+    // Si es el propio usuario, lleva a su perfil, si no, a perfil ajeno
+    const href = userId === auth.user?.id
+        ? route('opositor.perfil')
+        : route('opositor.perfil.show', userId);
+
+    return (
+        <Link href={href} aria-label={`Ver perfil de ${name}`}>
+            {avatar}
+        </Link>
+    );        
 }
