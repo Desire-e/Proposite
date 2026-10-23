@@ -78,16 +78,25 @@ Route::middleware('auth')->get('/dashboard', function () {
 
 Route::middleware(['auth', 'opositor'])->name('opositor.')->group(function () {
 
-    // Perfil 
+    // --- Perfil propio
     Route::get('/perfil', [PerfilController::class, 'index'])
         ->name('perfil'); // opositor.perfil
 
-    Route::get('/perfil-edit', [PerfilController::class, 'edit'])
-    ->name('perfil.edit');
+    // Editar perfil
+    Route::get('/perfil/edit', [PerfilController::class, 'edit'])
+        ->name('perfil.edit');
 
     Route::post('/perfil', [PerfilController::class, 'update'])
-    ->name('perfil.update');
+        ->name('perfil.update');
 
+
+    // --- Perfil ajeno
+    Route::get('/opositores/{usuario}', [PerfilController::class, 'show'])
+        ->name('perfil.show');
+
+    Route::post('/opositores/{usuario}/reportar', [PerfilController::class, 'report'])
+        ->name('perfil.reportar');
+        
 });
 
 Route::middleware(['auth', 'opositor'])->group(function () {

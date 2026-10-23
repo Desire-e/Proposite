@@ -13,6 +13,7 @@ use App\Models\Tema;
 use App\Models\IntentoTest;
 use App\Models\Publicacion;
 use App\Models\Comentario;
+use App\Enums\Rol;
 
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -22,48 +23,137 @@ use Illuminate\Http\RedirectResponse;
 
 class PerfilController extends Controller
 {
+
     /**
-     * Carga los datos del usuario y renderiza perfil
+     * Mostrar perfil según usuario
+     * Determina si el perfil es del @param Usuario (@return Redirect a su perfil) 
+     * o si es otro usuario (@return RedirectResponse a perfil ajeno)
      */
-    public function index(): Response 
+
+    public function show(Usuario $usuario): Response|RedirectResponse
     {
-        $user = Auth::user();
+        // Si es el propio usuario, a su perfil normal
+        if ($usuario->is(Auth::user())) {
+            return redirect()->route('opositor.perfil.index');
+        }
 
-        $oposicion = $user->oposicion;
-
-        // Los intentos se calculan una vez y se reutilizan en 3 estadísticas
-        $ultimosIntentos = $this->ultimosIntentos($user);
-
+        // No exponer admins ni suspendidos
+        abort_if($usuario->rol === Rol::ADMIN || $usuario->suspendido, 404);
 
         return Inertia::render('opositor/perfil', [
-            'user' => [
-                'name' => $user->name,
-                'oposicion' => $oposicion,
-                'biografia' => $user->biografia ?? null,
-                'signed_up_at' => $user->created_at,
-                'anio_convocatoria' => $user->fecha_convocatoria
-                    ? date("Y", strtotime($user->fecha_convocatoria))
-                    : null,
-
-                // ['total_temas', 'temas_estudiados', 'porcentaje']
-                'progreso' => $this->progresoTemario($user), 
-                // ['tests_realizados', 'tests_aprobados', 'nota_media']
-                'estadisticas' => $this->estadisticasTests($ultimosIntentos),
-                // ['titulo', 'nota_media']
-                'tema_mas_fuerte' => $this->temaMasFuerte($ultimosIntentos),
-                // [ ['id', 'tipo', 'texto', 'created_at'], [ ... ] ]
-                'actividad_reciente' => $this->actividadReciente($user),
-            ],
+            'user' => $this->datosPerfil($usuario),
+            'es_propio' => false,
         ]);
     }
-    
-
-    /************************
-     * FUNCIONES AUXILIARES DE INDEX
-     *************************/
 
     /**
-     * @param Usuario 
+     * Mostrar perfil propio
+     */
+    public function index(): Response
+    {
+        return Inertia::render('opositor/perfil', [
+            'user' => $this->datosPerfil(Auth::user()),
+            'es_propio' => true,
+        ]);
+    }
+
+    public function report(Request $request, Usuario $usuario): RedirectResponse
+    {
+        $userReporta = $request->user(); 
+        
+        if ($usuario->id === $userReporta->id) {
+            return back()->with('aviso', [
+                'tipo' => 'warning',
+                'mensaje' => 'No puedes reportarte a tí mismo ',
+            ]);
+        }
+
+        if ($usuario->oposicion_id !== $userReporta->oposicion_id) {
+            return back()->with('aviso', [
+                'tipo' => 'warning',
+                'mensaje' => 'No puedes reportar usuarios de otra oposición.',
+            ]);
+        }
+
+        $yaReportado = $usuario->reportesRecibidos()->where('usuario_reporta_id', $userReporta->id)->exists();
+
+        if ($yaReportado) {
+            return back()->with('aviso', [
+                'tipo' => 'warning',
+                'mensaje' => 'Ya habías reportado a este usuario.',
+            ]);
+        }
+        
+        $validated = $request->validate(
+            ['motivo' => ['required', 'string', 'max:1000']],
+            ['motivo.required' => 'Indica el motivo del reporte.']
+        );
+
+        $usuario->reportesRecibidos()->create([
+            'usuario_reporta_id' => $userReporta->id,
+            'motivo' => $validated['motivo'],
+        ]);
+
+        return back()->with('aviso', [
+            'tipo' => 'success',
+            'mensaje' => 'Gracias, hemos recibido tu reporte.',
+        ]);
+    }
+
+    /**
+     * Función auxiliar de index()
+     * 
+     * Recoge los datos a insertar en el perfil de @param Usuario 
+     */
+
+    private function datosPerfil(Usuario $user): array
+    {
+        // último intento de cada test que ha hecho el usuario
+        $ultimosIntentos = $this->ultimosIntentosTest($user);
+
+        return [
+            'id' => $user->id,
+            'name' => $user->name,
+            'oposicion' => $user->oposicion->only(['nombre', 'descripcion']),
+            'biografia' => $user->biografia ?? null,
+            'signed_up_at' => $user->created_at,
+            'anio_convocatoria' => $user->fecha_convocatoria ? 
+                $user->fecha_convocatoria->format('Y') : 
+                null,
+            'progreso' => $this->progresoTemario($user),
+            'estadisticas' => $this->estadisticasTests($ultimosIntentos),
+            'tema_mas_fuerte' => $this->temaMasFuerte($ultimosIntentos),
+            'actividad_reciente' => $this->actividadReciente($user),
+        ];
+    }
+
+
+    /**
+     * Función auxiliar de index()
+     * 
+     * @return Collection del último intento de cada test que ha 
+     * hecho el @param Usuario 
+     */
+    private function ultimosIntentosTest(Usuario $user): Collection
+    {
+        $ultimosIntentosTest = $user->intentosTests()
+            // carga el test al que pertenece cada intento, y el temario asociado a ese test.    
+            ->with('test.temario')
+            // ordena intento de nuevo a viejo
+            ->orderByDesc('created_at')->get() 
+            // quita intentos en tests eliminados
+            ->filter(fn ($intento) => $intento->test !== null)
+            // se queda con el primero de cada test, el más nuevo
+            ->unique('test_id');
+
+        return $ultimosIntentosTest;  
+    }
+
+
+    /**
+     * Función auxiliar de index()
+     * 
+     * Obtiene @param Usuario y mide progreso de temas marcados estudiados
      * @return array de Temas estudiados, porcentaje de temas estudiados,
      * total de temas de la oposición,
      */
@@ -87,28 +177,11 @@ class PerfilController extends Controller
         ];
     }
 
-    /**
-     * @param Usuario 
-     * @return Collection del último intento de cada test que ha 
-     * hecho el usuario
-     */
-    private function ultimosIntentos(Usuario $user): Collection
-    {
-        $ultimosIntentosTest = $user->intentosTests()
-            // carga el test al que pertenece cada intento, y el temario asociado a ese test.    
-            ->with('test.temario')
-            // ordena intento de nuevo a viejo
-            ->orderByDesc('created_at')->get() 
-            // quita intentos en tests eliminados
-            ->filter(fn ($intento) => $intento->test !== null)
-            // se queda con el primero de cada test, el más nuevo
-            ->unique('test_id');
-
-        return $ultimosIntentosTest;  
-    }
 
     /**
-     * @param Collection de ultimosIntentos()
+     * Función auxiliar de index()
+     * 
+     * @param Collection de ultimosIntentosTest()
      * @return array de Tests realizados, tests aprobados, y nota media 
      * de todos los tests
      */
@@ -134,8 +207,11 @@ class PerfilController extends Controller
         ];
     }
 
+
     /**
-     * @param Collection de ultimosIntentos()
+     * Función auxiliar de index()
+     * 
+     * @param Collection de ultimosIntentosTest() del usuario
      * @return array de tema con mejor nota media 
      * @return null si no hay datos
      */
@@ -162,10 +238,12 @@ class PerfilController extends Controller
         return $mejorNotaTema;
     }
 
+
     /**
-     * @param Usuario
+     * Función auxiliar de index()
+     * 
      * @return Collection de las 2 últimas publicaciones 
-     * o comentarios del usuario
+     * o comentarios del @param Usuario
      */
     private function actividadReciente(Usuario $user): Collection
     {
@@ -174,7 +252,7 @@ class PerfilController extends Controller
             ->map(fn ($p) => [
                 'id' => $p->id,
                 'tipo' => 'publicacion',
-                'texto' => $p->titulo,
+                'texto' => $p->contenido,
                 'created_at' => $p->created_at,
             ]);
 
@@ -190,8 +268,6 @@ class PerfilController extends Controller
         return $publicaciones->concat($comentarios)
             ->sortByDesc('created_at')->take(2)->values();
     }
-
-
 
 
     /**
@@ -238,7 +314,7 @@ class PerfilController extends Controller
         
         $user->save();
 
-        return to_route('opositor.perfil')->with('success', 'Perfil actualizado correctamente.');
+        return to_route('opositor.perfil.index')->with('success', 'Perfil actualizado correctamente.');
     }
 
 }
