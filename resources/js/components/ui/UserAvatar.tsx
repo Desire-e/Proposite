@@ -63,8 +63,8 @@ export default function UserAvatar({
 
     // Si es el propio usuario, lleva a su perfil, si no, a perfil ajeno
     const href = userId === auth.user?.id
-        ? route('opositor.perfil')
-        : route('opositor.perfil.show', userId);
+        ? route('perfil.show')
+        : route('opositores.show', userId);
 
     return (
         <Link href={href} aria-label={`Ver perfil de ${name}`}>

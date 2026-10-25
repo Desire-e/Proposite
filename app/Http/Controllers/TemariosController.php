@@ -52,7 +52,7 @@ class TemariosController extends Controller
             'checked' => (bool) ($checkedTemario[$tema->id] ?? false), // devuelve el estado guardado o false si no existe
         ]);
 
-        return Inertia::render('temario', [
+        return Inertia::render('temario/index', [
             'temario' => $temario, 
             'oposicion' => $oposicion,
         ]);

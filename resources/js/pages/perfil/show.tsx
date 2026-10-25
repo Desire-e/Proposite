@@ -120,7 +120,7 @@ export default function Perfil({ user, es_propio }: PerfilProps) {
         if (!userToReport) return;
 
         reportForm.post(
-            route('opositor.perfil.reportar', userToReport), 
+            route('opositores.reportes.insert', userToReport), 
             {
                 preserveScroll: true,
                 onSuccess: ()=> closeReport(),
@@ -256,7 +256,7 @@ export default function Perfil({ user, es_propio }: PerfilProps) {
                         </div>
                         ) : (
                         <Link
-                            href={route('opositor.perfil.edit')}
+                            href={route('perfil.edit')}
                             className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-border 
                             px-4 py-3 text-xs font-semibold text-primary transition-colors hover:bg-tertiary"
                         >

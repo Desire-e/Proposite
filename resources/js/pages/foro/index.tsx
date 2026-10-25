@@ -1,6 +1,5 @@
 import {  
     ArrowRight, Bell, Heart, MessageCircle, MoreHorizontal, Send,  Sparkles, UserRound,
-    // ShieldCheck, ChevronDown, Search,
 } from 'lucide-react';
 import { Link, router, useForm, usePage } from '@inertiajs/react';
 import { type SharedData } from '@/types';
@@ -108,7 +107,7 @@ export default function Feed(
         event.preventDefault();
 
         post(
-            route('foro.publicacion.insertPublicacion'), 
+            route('foro.publicaciones.insert'), 
             { onSuccess: () => reset('contenido'), }
         );
     };
@@ -125,7 +124,7 @@ export default function Feed(
         if (!postToDelete) return;
 
         deleteForm.delete(
-            route('foro.publicacion.eliminar', postToDelete), 
+            route('foro.publicaciones.delete', postToDelete), 
             {
                 preserveScroll: true,
                 only: ['publicaciones'],
@@ -154,7 +153,7 @@ export default function Feed(
         if (!postToReport) return;
 
         reportForm.post(
-            route('foro.publicacion.reportar', postToReport), 
+            route('foro.publicaciones.reportes.insert', postToReport), 
             {
                 preserveScroll: true,
                 onSuccess: closeReport,
@@ -169,7 +168,7 @@ export default function Feed(
 
     const toggleMeSirvio = (publicacion: Publicacion) => {
         router.post(
-            route('foro.publicacion.meSirvio', publicacion.id), 
+            route('foro.publicaciones.me-sirvio.toggle', publicacion.id), 
             {}, 
             { 
                 preserveScroll: true, 
@@ -179,6 +178,7 @@ export default function Feed(
             }
         );
     }
+    
 
     return (
         <AppLayout headTitle={`Foro de ${oposicion.nombre} | Proposite`}>
@@ -357,10 +357,15 @@ export default function Feed(
                                 const esAutor = publicacion.usuario.id === auth.user.id;
                                 
                                 return (
-                                <article key={publicacion.id} className="rounded-2xl border border-border bg-white p-5">
+                                <article key={publicacion.id} className="relative rounded-2xl border border-border bg-white p-5">
                                     <div className="flex md:flex-row flex-col items-start gap-3">
 
-                                        <UserAvatar userId={publicacion.usuario.id} username={publicacion.usuario.name} />
+                                        <div className="relative z-10">
+                                            <UserAvatar 
+                                                userId={publicacion.usuario.id} 
+                                                username={publicacion.usuario.name} 
+                                            />
+                                        </div>
 
                                         <div className="min-w-0 flex-1">
                                             <div className="flex items-start justify-between gap-3">
@@ -371,7 +376,7 @@ export default function Feed(
                                                 </div>
 
                                                 {/* Eliminar / Reportar publicación */}
-                                                <div>
+                                                <div className='relative z-10'>
                                                     <DropdownMenu>
                                                         <DropdownMenuTrigger asChild>
                                                             <button 
@@ -412,10 +417,12 @@ export default function Feed(
                                                 </div>
                                             </div>
                                             
-                                            {/* TODO. Poner link a la publicacion */}
-                                            <p className="mt-4 text-sm leading-7 text-foreground">
-                                                {publicacion.contenido}
-                                            </p>
+                                            <Link
+                                                href={route('foro.publicaciones.show', publicacion.id)}
+                                                className="block after:absolute after:inset-0 after:content-['']"
+                                            >
+                                                <p className="mt-4 text-sm leading-7 text-foreground">{publicacion.contenido}</p>
+                                            </Link>
 
                                             {/* {post.tag && (
                                                 <span className="mt-4 inline-flex rounded-full bg-tertiary px-2.5 py-1 text-[11px] font-bold text-tertiary-foreground">
@@ -424,7 +431,8 @@ export default function Feed(
                                             )} */}
 
                                             {/* Acciones de la publicación */} 
-                                            <div className="mt-5 flex items-center gap-5 border-t border-border pt-4 text-xs text-neutral-foreground">
+                                            <div className="relative z-10 mt-5 flex items-center gap-5 
+                                            border-t border-border pt-4 text-xs text-neutral-foreground">
                                                 <button
                                                     type="button"
                                                     onClick={() => toggleMeSirvio(publicacion)}
@@ -435,20 +443,15 @@ export default function Feed(
                                                 >
                                                     <span>{publicacion.me_sirvio_count}</span>
                                                     <Heart className="size-4" fill={publicacion.me_sirvio_activo ? 'currentColor' : 'none'} />
-                                                    Me sirvió
                                                 </button>
                                                 
-                                                {/* TODO. Ruta a /publicacion/{id}#comentarios */} 
-
-                                                <button type="button" className="inline-flex items-center gap-1.5 hover:text-primary">
+                                                <Link
+                                                    href={`${route('foro.publicaciones.show', publicacion.id)}#comentarios`} 
+                                                    className="inline-flex items-center gap-1.5 hover:text-primary"
+                                                >
                                                     {publicacion.comentarios_count} 
                                                     <MessageCircle className="size-4" />
-                                                    Comentarios
-                                                </button> 
-                                                {/* <button type="button" className="inline-flex items-center gap-1.5 hover:text-primary">
-                                                    <MessageCircle className="size-4" />
-                                                    {post.comments} comentarios
-                                                </button> */}
+                                                </Link>
                                             </div>
                                         </div>
                                     </div>

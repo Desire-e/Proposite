@@ -29,8 +29,6 @@ use App\Http\Controllers\Admin\PanelController as AdminPanelController;
  * RUTAS PRINCIPALES 
  *****************************/
 
-
-
 // ==================
 // Inicio
 // ==================
@@ -48,11 +46,7 @@ Route::get('/', function () {
 })->name('welcome'); // nombre interno para hacer route('welcome')
 
 
-
-// ==================
 // Router por rol: solo redirige
-// ==================
-
 Route::middleware('auth')->get('/dashboard', function () {
     
     /**
@@ -66,42 +60,41 @@ Route::middleware('auth')->get('/dashboard', function () {
      */
     return auth()->user()->rol === Rol::ADMIN
         ? redirect()->route('admin.panel')
-        : redirect()->route('opositor.perfil');
+        // : redirect()->route('opositor.perfil');
+        : redirect()->route('perfil.show');
     
 })->name('dashboard');
-
 
 
 // ==================
 // Opositor
 // ==================
 
-Route::middleware(['auth', 'opositor'])->name('opositor.')->group(function () {
-
-    // --- Perfil propio
-    Route::get('/perfil', [PerfilController::class, 'index'])
-        ->name('perfil'); // opositor.perfil
-
-    // Editar perfil
-    Route::get('/perfil/edit', [PerfilController::class, 'edit'])
-        ->name('perfil.edit');
-
-    Route::post('/perfil', [PerfilController::class, 'update'])
-        ->name('perfil.update');
-
-
-    // --- Perfil ajeno
-    Route::get('/opositores/{usuario}', [PerfilController::class, 'show'])
-        ->name('perfil.show');
-
-    Route::post('/opositores/{usuario}/reportar', [PerfilController::class, 'report'])
-        ->name('perfil.reportar');
-        
-});
 
 Route::middleware(['auth', 'opositor'])->group(function () {
+
+    // ====== Perfil propio ======
+
+    Route::get('/perfil', [PerfilController::class, 'show'])
+        ->name('perfil.show');
     
-    // --- Temario
+    // Editar perfil
+    Route::get('/perfil/editar', [PerfilController::class, 'edit'])
+        ->name('perfil.edit');
+
+    Route::patch('/perfil', [PerfilController::class, 'update'])
+        ->name('perfil.update');
+
+    // ====== Perfil ajeno ======
+    
+    Route::get('/opositores/{usuario}', [PerfilController::class, 'show'])
+        ->name('opositores.show');
+
+    Route::post('/opositores/{usuario}/reportes', [PerfilController::class, 'insertReporte'])
+        ->name('opositores.reportes.insert');
+
+
+    // ====== Temario ======
     
     Route::get('/temario', [TemariosController::class, 'index'])
         ->name('temario.index');
@@ -109,25 +102,60 @@ Route::middleware(['auth', 'opositor'])->group(function () {
     Route::patch('/temario/check', [TemariosController::class, 'toggleCheck'])
         ->name('temario.check');
 
-    // --- Foro
-    
-    Route::get('/foro', [ForosController::class, 'index'])
-        ->name('foro.index');
 
-    Route::post('/foro', [ForosController::class, 'insertPublicacion'])
-        ->name('foro.publicacion.insertPublicacion');
+    // ====== Foro ======
 
-    Route::delete('/foro/publicaciones/{publicacion}/eliminar', [ForosController::class, 'deletePublicacion'])
-        ->name('foro.publicacion.eliminar');
+    Route::prefix('foro')->name('foro.')->group(function () {
+        
+        Route::get('/', [ForosController::class, 'index'])
+            ->name('index');
 
-    Route::post('/foro/publicaciones/{publicacion}/reportar', [ForosController::class, 'reportPublicacion'])
-        ->name('foro.publicacion.reportar');
+        Route::prefix('publicaciones')->name('publicaciones.')->group(function () {
 
-    Route::post('/foro/publicaciones/{publicacion}/me-sirvio', [ForosController::class, 'toggleMeSirvio'])
-    ->name('foro.publicacion.meSirvio');
+            Route::post('/', [ForosController::class, 'insertPublicacion'])
+                ->name('insert'); // foro.publicaciones.insert
 
-    // --- Tests
+            Route::get('/{publicacion}', [ForosController::class, 'showPublicacion'])
+                ->name('show'); // foro.publicaciones.show
 
+            Route::delete('/{publicacion}', [ForosController::class, 'deletePublicacion'])
+                ->name('delete'); // foro.publicaciones.delete
+
+            Route::post('/{publicacion}/reportes', [ForosController::class, 'reportPublicacion'])
+                ->name('reportes.insert'); // foro.publicaciones.reportes.insert
+
+            Route::post('/{publicacion}/me-sirvio', [ForosController::class, 'toggleMeSirvio'])
+                ->name('me-sirvio.toggle'); // foro.publicaciones.me-sirvio.toggle
+            
+            Route::post('/{publicacion}/comentarios', [ForosController::class, 'insertComentario'])
+                ->name('comentarios.insert'); // foro.publicaciones.comentarios.insert
+        });
+    });
+
+
+    // ====== Tests ======
+
+    Route::prefix('tests')->name('tests.')->group(function () {
+        
+        // Listado de tests
+        Route::get('/', [TestsController::class, 'index'])
+            ->name('index'); // tests.index
+
+        // Vista previa del test
+        Route::get('/{test}/show', [TestsController::class, 'show'])
+            ->name('show'); // tests.show
+
+        // Realizando test
+        Route::get('/{test}', [TestsController::class, 'createResultados'])
+            ->name('resultados.create'); // tests.resultados.create
+
+        Route::post('/{test}', [TestsController::class, 'insertResultados'])
+            ->name('resultados.insert'); // tests.resultados.insert
+
+        // Fin test
+        Route::get('/{test}/resultados', [TestsController::class, 'showResultados'])
+            ->name('resultados.show'); // tests.resultados.show
+    });
 
 });
 
@@ -145,81 +173,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 });
 
 
-
-///////////////////////////////////////////////////////////////////////////////
-
-// ==================
-// Opositor
-// ==================
 // TODO. Revisar
-Route::middleware(['auth', 'opositor'])->group(function () {
-    // Foro / publicaciones
 
-
-    // Route::get('/foro/create', [ForosController::class, 'create'])
-    //     ->name('foro.create');
-
-    // Route::post('/foro', [ForosController::class, 'store'])
-    //     ->name('foro.store');
-
-    // Route::get('/foro/{publicacion}', [ForosController::class, 'show'])
-    //     ->name('foro.show');
-
-    // Route::delete('/foro/{publicacion}', [ForosController::class, 'destroy'])
-    //     ->name('foro.destroy');
-
-    // Route::post('/foro/{publicacion}/reaccion', [ForosController::class, 'toggleReaccion'])
-    //     ->name('foro.reaccion');
-
-
-    // Comentarios
-    // Route::post('/foro/{publicacion}/comentarios', [ComentariosController::class, 'store'])
-    //     ->name('comentarios.store');
-
-    // Route::delete('/comentarios/{comentario}', [ComentariosController::class, 'destroy'])
-    //     ->name('comentarios.destroy');
-
-
-
-
-
-    // Recursos
-    // Route::get('/recursos', [RecursosController::class, 'index'])
-    //     ->name('recursos.index');
-
-
-    // Tests
-    // Route::get('/tests', [TestsController::class, 'index'])
-    //     ->name('tests.index');
-
-    // Route::get('/tests/{test}', [TestsController::class, 'show'])
-    //     ->name('tests.show');
-
-
-    // Intentos de test
-    // Route::post('/tests/{test}/intentos', [IntentosTestController::class, 'store'])
-    //     ->name('intentos.store');
-
-    // Route::get('/intentos/{intento}', [IntentosTestController::class, 'show'])
-    //     ->name('intentos.show');
-
-
-    // Estadísticas
-    // Route::get('/estadisticas', [EstadisticasController::class, 'show'])
-    //     ->name('estadisticas.show');
-
-
-    // Reportes
-    // Route::post('/reportes', [ReportesController::class, 'store'])
-    //     ->name('reportes.store');
-});
-
-
-
-// ==================
-// Administrador
-// ==================
-// TODO. Revisar
 Route::middleware(['auth', 'admin'])->group(function () {
 
     // Usuarios

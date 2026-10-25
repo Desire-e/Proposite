@@ -25,39 +25,38 @@ class PerfilController extends Controller
 {
 
     /**
-     * Mostrar perfil según usuario
-     * Determina si el perfil es del @param Usuario (@return Redirect a su perfil) 
-     * o si es otro usuario (@return RedirectResponse a perfil ajeno)
+     * Mostrar perfil según usuario.
+     * 
+     * Determina si el perfil es del @param Usuario 
+     * (@return RedirectResponse y @return Response a su perfil) , o si 
+     * es otro usuario (@return Response a perfil ajeno).
      */
-
-    public function show(Usuario $usuario): Response|RedirectResponse
+    public function show(?Usuario $usuario = null): Response|RedirectResponse
     {
-        // Si es el propio usuario, a su perfil normal
-        if ($usuario->is(Auth::user())) {
-            return redirect()->route('opositor.perfil.index');
+        $auth = Auth::user();
+
+        // Redirección a perfil propio
+        if ($usuario?->is($auth)) {
+            return redirect()->route('perfil.show');
         }
 
-        // No exponer admins ni suspendidos
-        abort_if($usuario->rol === Rol::ADMIN || $usuario->suspendido, 404);
+        // Decidir de quién es el perfil
+        $esPropio = $usuario === null;
+        $perfil = $usuario ?? $auth;
+        
+        // Restricciones solo para perfiles ajenos
+        if (!$esPropio) {
+            abort_if($perfil->rol === Rol::ADMIN || $perfil->suspendido, 404);
+        }
 
-        return Inertia::render('opositor/perfil', [
-            'user' => $this->datosPerfil($usuario),
-            'es_propio' => false,
+        return Inertia::render('perfil/show', [
+            'user' => $this->datosPerfil($perfil),
+            'es_propio' => $esPropio,
         ]);
     }
 
-    /**
-     * Mostrar perfil propio
-     */
-    public function index(): Response
-    {
-        return Inertia::render('opositor/perfil', [
-            'user' => $this->datosPerfil(Auth::user()),
-            'es_propio' => true,
-        ]);
-    }
 
-    public function report(Request $request, Usuario $usuario): RedirectResponse
+    public function insertReporte(Request $request, Usuario $usuario): RedirectResponse
     {
         $userReporta = $request->user(); 
         
@@ -101,7 +100,7 @@ class PerfilController extends Controller
     }
 
     /**
-     * Función auxiliar de index()
+     * Función auxiliar de show()
      * 
      * Recoge los datos a insertar en el perfil de @param Usuario 
      */
@@ -129,7 +128,7 @@ class PerfilController extends Controller
 
 
     /**
-     * Función auxiliar de index()
+     * Función auxiliar de show()
      * 
      * @return Collection del último intento de cada test que ha 
      * hecho el @param Usuario 
@@ -151,7 +150,7 @@ class PerfilController extends Controller
 
 
     /**
-     * Función auxiliar de index()
+     * Función auxiliar de show()
      * 
      * Obtiene @param Usuario y mide progreso de temas marcados estudiados
      * @return array de Temas estudiados, porcentaje de temas estudiados,
@@ -179,7 +178,7 @@ class PerfilController extends Controller
 
 
     /**
-     * Función auxiliar de index()
+     * Función auxiliar de show()
      * 
      * @param Collection de ultimosIntentosTest()
      * @return array de Tests realizados, tests aprobados, y nota media 
@@ -209,7 +208,7 @@ class PerfilController extends Controller
 
 
     /**
-     * Función auxiliar de index()
+     * Función auxiliar de show()
      * 
      * @param Collection de ultimosIntentosTest() del usuario
      * @return array de tema con mejor nota media 
@@ -240,7 +239,7 @@ class PerfilController extends Controller
 
 
     /**
-     * Función auxiliar de index()
+     * Función auxiliar de show()
      * 
      * @return Collection de las 2 últimas publicaciones 
      * o comentarios del @param Usuario
@@ -278,7 +277,7 @@ class PerfilController extends Controller
     {
         $user = Auth::user();
 
-        return Inertia::render('opositor/perfil-edit', [
+        return Inertia::render('perfil/edit', [
             'user' => [
                 'name' => $user->name ?? null,
                 'email'=> $user->email ?? null,
@@ -314,7 +313,7 @@ class PerfilController extends Controller
         
         $user->save();
 
-        return to_route('opositor.perfil.index')->with('success', 'Perfil actualizado correctamente.');
+        return to_route('perfil.show')->with('success', 'Perfil actualizado correctamente.');
     }
 
 }

@@ -31,7 +31,7 @@ export default function Edit({ user }: EditProps) {
      * como nuevos valores iniciales. 
      */
 
-    const { data, setData, post, processing, errors, clearErrors, isDirty, setDefaults, } = useForm<EditableUserData>({
+    const { data, setData, patch, processing, errors, clearErrors, isDirty, setDefaults, } = useForm<EditableUserData>({
         name: user.name,
         biografia: user.biografia ?? '',
         fecha_convocatoria: user.fecha_convocatoria ?? '',
@@ -40,7 +40,7 @@ export default function Edit({ user }: EditProps) {
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        post(route('opositor.perfil.update'), {
+        patch(route('perfil.update'), {
             onSuccess: () => {
                 setDefaults();
             },
@@ -52,7 +52,7 @@ export default function Edit({ user }: EditProps) {
         <AppLayout headTitle={'Editar perfil | Proposite'}>
             <div className="mx-auto max-w-3xl my-5">
                 <Link
-                    href={route('opositor.perfil')}
+                    href={route('perfil.show')}
                     className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-foreground 
                     transition hover:text-primary"
                 >
@@ -143,7 +143,7 @@ export default function Edit({ user }: EditProps) {
 
                         <div className="flex flex-col-reverse gap-3 border-t border-border pt-6 sm:flex-row sm:justify-end">
                             <Link
-                                href={route('opositor.perfil')}
+                                href={route('perfil.show')}
                                 className="rounded-xl px-5 py-3 text-center text-sm font-semibold text-neutral-foreground 
                                 transition hover:bg-tertiary"
                             >
