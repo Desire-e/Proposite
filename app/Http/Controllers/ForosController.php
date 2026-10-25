@@ -28,7 +28,7 @@ class ForosController extends Controller
         $user = Auth::user();
         $oposicion = $user->oposicion;
         $publicaciones = $oposicion->publicaciones()
-            ->with('usuario')
+            ->with('usuario:id,name')
             ->withCount(['comentarios', 'meSirvio'])
             // Subconsulta por fila, evita N+1. No se lanza una consulta aparte por cada publicación
             ->withExists([ 
@@ -38,7 +38,7 @@ class ForosController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return Inertia::render('foro/feed', [
+        return Inertia::render('foro/index', [
             'oposicion' => $oposicion,
             'publicaciones' => $publicaciones ?? [],
             'miembros' => $oposicion->usuarios
@@ -106,8 +106,12 @@ class ForosController extends Controller
 
         $publicacion->delete(); // soft delete: rellena deleted_at
 
-        return back();
+        return to_route('foro.index');
     }
+
+    /**
+     * Reportar publicacion
+     */
 
     public function reportPublicacion(Request $request, Publicacion $publicacion): RedirectResponse
     {
@@ -156,19 +160,70 @@ class ForosController extends Controller
     /**
      * Mostrar una publicacion con sus comentarios
      */
-    public function show($publicacionId): Response
+
+    public function showPublicacion(Request $request, Publicacion $publicacion): Response
     {
-        // 
+        // TODO. crear página de redirección ante error 403
+
+        abort_if($publicacion->oposicion_id !== $request->user()->oposicion_id, 403);
+
+        return Inertia::render('foro/publicaciones/show', [
+            'usuario_autor' => $publicacion->usuario->only([
+                'id', 
+                'name'
+            ]),
+            'publicacion' => $publicacion->only([
+                'id', 
+                'oposicion_id', 
+                'contenido', 
+                'created_at', 
+            ]),
+            'me_sirvio' => $publicacion->meSirvio()->count(),
+            'me_sirvio_activo' => $publicacion->meSirvio()
+                ->where('usuarios.id', $request->user()->id)
+                ->exists(),
+
+            'comentarios' => $publicacion->comentarios()
+                ->with('usuario:id,name')
+                ->orderBy('created_at', 'desc')
+                ->get(),
+        ]);
     }
     
 
     /**
      * Comentar
      */
-    public function insertComentario(Request $request): RedirectResponse
+    public function insertComentario(Request $request, Publicacion $publicacion): RedirectResponse
     {
-        // 
+
+        $user = $request->user();
+
+        if ($publicacion->oposicion_id !== $user->oposicion_id) {
+            return back()->with('aviso', [
+                'tipo' => 'warning',
+                'mensaje' => 'No puedes comentar en publicaciones de otra oposición.',
+            ]);
+        }
+        
+        $validated = $request->validate([
+            'contenido' => ['required', 'string', ],
+        ],
+        ['contenido.required' => 'Debe escribir antes de comentar.']
+        );
+        
+        
+        Comentario::create([
+            'usuario_id' => $user->id,
+            'publicacion_id' => $publicacion->id,
+            'contenido' => $validated['contenido'],
+        ]);
+
+        return back();
     }
 
-
+    /**
+     * TODO. Reportar comentario
+     */
+    
 }

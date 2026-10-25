@@ -11,6 +11,7 @@ use Database\Seeders\TemarioMaestroPrimariaSeeder;
 use Database\Seeders\TemarioPoliciaNacionalSeeder;
 use Database\Seeders\RecursoSeeder;
 use Database\Seeders\PublicacionSeeder;
+use Database\Seeders\ComentarioSeeder;
 
 /**
  * Running Seeders:
@@ -44,6 +45,7 @@ class DatabaseSeeder extends Seeder {
             TemarioPoliciaNacionalSeeder::class,
             RecursoSeeder::class,
             PublicacionSeeder::class,
+            ComentarioSeeder::class,
         ]);
         
     }
