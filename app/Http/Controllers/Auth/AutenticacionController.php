@@ -4,19 +4,20 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\Auth\AutenticacionRequest;
 
 use Illuminate\Http\Request;
 use Inertia\Response;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 
-class AuthenticatedSessionController extends Controller
+class AutenticacionController extends Controller
 {
     /**
      * Muestra página login
      */
-
-    public function login(Request $request): Response {
+    public function login(): Response 
+    {
         // Devuelve la página de Inertia cuyo nombre es auth/login (resources/js/pages/auth/login.tsx)
         return Inertia::render('auth/login');
     }
@@ -24,31 +25,22 @@ class AuthenticatedSessionController extends Controller
     /**
      * Maneja request de login
      */
-    
-    public function authenticate(Request $request): RedirectResponse 
+    public function authenticate(AutenticacionRequest $request): RedirectResponse
     {
-        // -- Validar usuario --
+        // Validar usuario
+        $validated = $request->validated();
 
-        $validated = $request->validate([
-            'email' => 'required',
-            'password' => 'required',
-        ],);
-
-        // -- Autenticar usuario --
-
+        // Autenticar usuario
         if (!Auth::attempt($validated)) {
-            return back()->withErrors([
-                'password' => 'El usuario y/o la contraseña no son correctos',
-            ])->onlyInput('email'); // qué datos del formulario se conservan al volver a la página
+            return back()
+                ->withErrors(['password' => 'El usuario y/o la contraseña no son correctos',])
+                ->onlyInput('email'); // qué datos del formulario se conservan al volver a la página
+        }
 
-        } 
-
-        // -- Regenerar sesión --
-
+        // Regenerar sesión
         $request->session()->regenerate();
 
-        // -- Redirección --
-
+        // Redirección
         return redirect()->intended(route('dashboard'));
     }
 
@@ -56,17 +48,14 @@ class AuthenticatedSessionController extends Controller
     /**
      * Maneja request de logout
      */
-
     public function logout(Request $request): RedirectResponse
     {
-        // -- Cerrar e invalidar la sesión, regenear CSRF  --
-        
+        // Cerrar e invalidar la sesión, regenear CSRF
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        // -- Redirección --
-
+        // Redirección
         return redirect()->route('welcome');
     }
 }

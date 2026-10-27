@@ -3,17 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\DB;
-// use Illuminate\Support\Collection;
-// use Illuminate\Validation\Rule;
-
 use App\Models\Tema;
 
-use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\RedirectResponse;
+use App\Http\Requests\ToggleTemaRequest;
 
 
 class TemariosController extends Controller
@@ -21,35 +16,32 @@ class TemariosController extends Controller
     /**
      * Carga los datos del temario y renderiza
      */
-
-    public function index(): Response 
+    public function index(Request $request): Response 
     {
-        $oposicion = Auth::user()->oposicion;
+        $user = $request->user();
+        $oposicion = $user->oposicion;
 
-        $temario = $oposicion->temario()
-            // se carga también los recursos relacionados con cada tema
-            ->with('recursos') 
-            ->get()
-            ->sort(fn (Tema $a, Tema $b) =>
-                    // comparar textos siguiendo un orden natural
-                    strnatcmp($a->numero_tema, $b->numero_tema)
-            )
-            // se reinician los índices del array para que quede ordenado también
-            ->values();
-
-        // Temarios marcados como estudiados
-        $checkedTemario = Auth::user()->checkedTemario() 
+        // Temas marcados como estudiados
+        $checked = $user->checkedTemario() 
             // guardar el estado de cada tema en una colección indexada por el ID del tema. [ '1'=>true, '1.1.'=> false, ... ]
             ->pluck('checks_temario.checked', 'temarios.id');
 
         // Temario, con recursos y estados marcados de cada uno 
-        $temario = $temario->map(fn (Tema $tema) => [
+        $temario = $oposicion->temario()
+            // se carga también los recursos relacionados con cada tema
+            ->with('recursos') 
+            ->get()
+            // comparar textos siguiendo un orden natural
+            ->sortBy('numero_tema', SORT_NATURAL)
+            // se reinician los índices del array para que quede ordenado también
+            ->values()
+            ->map(fn (Tema $tema) => [
             'id' => $tema->id,
             'bloque' => $tema->bloque,
             'numero_tema' => $tema->numero_tema,
             'titulo' => $tema->titulo,
             'recursos' => $tema->recursos ?? null,
-            'checked' => (bool) ($checkedTemario[$tema->id] ?? false), // devuelve el estado guardado o false si no existe
+            'checked' => (bool) ($checked[$tema->id] ?? false), // devuelve el estado guardado o false si no existe
         ]);
 
         return Inertia::render('temario/index', [
@@ -62,31 +54,26 @@ class TemariosController extends Controller
     /**
      * Cambiar checklist
      */
-    
-    public function toggleCheck(Request $request): RedirectResponse
+    public function toggleCheck(ToggleTemaRequest $request): RedirectResponse
     {
-        $user = Auth::user();
+        $user = $request->user();
 
-        $validated = $request->validate([
-            'checked' => ['required', 'boolean'],
-            'tema' => [
-                'required',
-                // el tema debe existir y ser de la oposición del usuario
-                Rule::exists('temarios', 'id')
-                    ->where('oposicion_id', $user->oposicion_id),
-            ],
-        ]);
+        // Qué tema es y cambio de estado pedido 
+        $temaId = $request->validated()['tema'];
+        $checked =  $request->boolean('checked');
 
-        DB::table('checks_temario')->updateOrInsert(
-            // condiciones para buscar la fila en tabla checks_temario 
-            ['usuario_id' => $user->id, 'temario_id' => $validated['tema']],
-            // valores a actualizar/insertar
-            ['checked' => $validated['checked']],
-        );
-        
+        $existeFila = $user->checkedTemario()->where('temarios.id', $temaId)->exists();
+
+        // actualiza registro anterior
+        if($existeFila){
+            $user->checkedTemario()->updateExistingPivot($temaId, ['checked'=>$checked]);
+        }
+        // inserta nuevo registro
+        else {
+            $user->checkedTemario()->attach($temaId, ['checked'=>$checked]);
+        }
+
         // vuelve a la misma página y React recibe el temario actualizado.
         return back();
     }
-
-
 }
