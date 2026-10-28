@@ -198,7 +198,8 @@ export function AppHeader() {
 
                 <Button
                     type="button"
-                    className="rounded-lg p-2 text-slate-700 transition hover:bg-tertiary lg:hidden"
+                    variant="ghost"
+                    className="text-slate-700 transition hover:bg-tertiary lg:hidden"
                     onClick={() => setOpen((value) => !value)}
                     aria-expanded={open}
                     aria-controls="mobile-navigation"
@@ -251,12 +252,14 @@ export function AppHeader() {
                     </span>
                 ) : (
                     <>
-                    <UserAvatar size='md' userId={auth.user.id} username={auth.user.name} /> {auth.user.name}
+                    <UserAvatar size='md' userId={auth.user.id} username={auth.user.name} /> 
+                    {auth.user.name}
                     </>
                 ))}
 
                 <Button
                     type="button"
+                    variant="ghost"
                     onClick={closeMenu}
                     className="rounded-lg p-2 text-slate-700 transition hover:bg-tertiary"
                     aria-label="Cerrar menú"
@@ -295,7 +298,7 @@ export function AppHeader() {
             {/* Acciones inferiores */}
             <div className="flex flex-col gap-3 border-t border-slate-200 p-5">
                 {auth.user ? (<>
-                    
+                
                 <Link 
                     className="flex items-center gap-2 cursor-pointer text-sm" 
                     method="post" 
