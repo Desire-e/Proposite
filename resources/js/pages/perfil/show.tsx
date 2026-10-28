@@ -1,7 +1,7 @@
 import { ArrowRight, CalendarDays, Edit3, GraduationCap, Target, Trophy, Users, MoreHorizontal } from "lucide-react";
 import AppLayout from '@/layouts/AppLayout';
 import UserAvatar from "@/components/ui/UserAvatar";
-import ProfileCard from "@/components/ui/ProfileCard";
+import ProfileCard from "@/components/perfil/ProfileCard";
 import {
     DropdownMenu,
     DropdownMenuTrigger,
@@ -120,7 +120,7 @@ export default function Perfil({ user, es_propio }: PerfilProps) {
         if (!userToReport) return;
 
         reportForm.post(
-            route('opositores.reportes.insert', userToReport), 
+            route('opositores.reportes.store', userToReport), 
             {
                 preserveScroll: true,
                 onSuccess: ()=> closeReport(),
@@ -150,8 +150,8 @@ export default function Perfil({ user, es_propio }: PerfilProps) {
             <FeedbackModal
                 open={userToReport !== null}
                 tone="warning"
-                title="Reportar publicación"
-                description="Cuéntanos qué ocurre. Un moderador la revisará."
+                title="Reportar usuario"
+                description="Cuéntanos qué ocurre. Un moderador lo revisará."
                 confirmLabel="Enviar reporte"
                 processing={reportForm.processing}
                 onConfirm={reportUsuario}

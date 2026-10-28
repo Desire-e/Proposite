@@ -109,7 +109,7 @@ export default function Publicacion({
         if (!postToReport) return;
 
         reportForm.post(
-            route('foro.publicaciones.reportes.insert', postToReport), 
+            route('foro.publicaciones.reportes.store', postToReport), 
             {
                 preserveScroll: true,
                 onSuccess: () => closeReport(), 
@@ -127,11 +127,11 @@ export default function Publicacion({
     // TODO. Mensaje status   
     // const [notice, setNotice] = useState('')
 
-    const insertComentario: FormEventHandler = (event) => {
+    const storeComentario: FormEventHandler = (event) => {
         event.preventDefault();
 
         post(
-            route('foro.publicaciones.comentarios.insert', publicacion), 
+            route('foro.publicaciones.comentarios.store', publicacion), 
             { 
                 preserveScroll: true,
                 onSuccess: () => {
@@ -183,7 +183,7 @@ export default function Publicacion({
                 open={postToReport !== null}
                 tone="warning"
                 title="Reportar publicación"
-                description="Cuéntanos qué ocurre. Un moderador la revisará."
+                description="Cuéntanos qué ocurre. Un moderador lo revisará."
                 confirmLabel="Enviar reporte"
                 processing={reportForm.processing}
                 onConfirm={reportPublicacion}
@@ -330,7 +330,7 @@ export default function Publicacion({
                                 username={auth.user.name} 
                             />
                             {/* TODO. form insertar comentario */}
-                            <form className="min-w-0 flex-1" noValidate onSubmit={insertComentario}>
+                            <form className="min-w-0 flex-1" noValidate onSubmit={storeComentario}>
                                 <Label htmlFor="contenido" className="sr-only">
                                     Escribe un comentario
                                 </Label>

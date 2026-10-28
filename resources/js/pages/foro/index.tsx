@@ -103,11 +103,11 @@ export default function Feed(
     const { data, setData, post, processing, errors, clearErrors, reset, isDirty} = 
         useForm<{contenido: string}>({contenido: '', });
 
-    const insertPublicacion: FormEventHandler = (event) => {
+    const storePublicacion: FormEventHandler = (event) => {
         event.preventDefault();
 
         post(
-            route('foro.publicaciones.insert'), 
+            route('foro.publicaciones.store'), 
             { onSuccess: () => reset('contenido'), }
         );
     };
@@ -153,7 +153,7 @@ export default function Feed(
         if (!postToReport) return;
 
         reportForm.post(
-            route('foro.publicaciones.reportes.insert', postToReport), 
+            route('foro.publicaciones.reportes.store', postToReport), 
             {
                 preserveScroll: true,
                 onSuccess: closeReport,
@@ -201,7 +201,7 @@ export default function Feed(
                 open={postToReport !== null}
                 tone="warning"
                 title="Reportar publicación"
-                description="Cuéntanos qué ocurre. Un moderador la revisará."
+                description="Cuéntanos qué ocurre. Un moderador lo revisará."
                 confirmLabel="Enviar reporte"
                 processing={reportForm.processing}
                 onConfirm={reportPublicacion}
@@ -266,7 +266,7 @@ export default function Feed(
                             <div className="flex md:flex-row flex-col items-start gap-3">
                                 <UserAvatar size='sm' userId={auth.user.id} username={auth.user.name} />
 
-                                <form className="min-w-0 flex-1" noValidate onSubmit={insertPublicacion}>
+                                <form className="min-w-0 flex-1" noValidate onSubmit={storePublicacion}>
                                     <Label htmlFor="contenido" className="sr-only">
                                         Crear una publicación
                                     </Label>

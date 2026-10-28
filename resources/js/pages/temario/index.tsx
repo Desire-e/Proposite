@@ -35,7 +35,7 @@ type Bloque = {
 
 
 
-export default function Index(
+export default function Temario(
     {temario, oposicion}: {temario: Tema[], oposicion: Oposicion}
     // { _opposition, callLabel = 'Convocatoria 2026', _topics, studiedTopicIds = [], urls = {}, }:  
     // SyllabusIndexProps

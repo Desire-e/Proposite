@@ -109,10 +109,11 @@ export default function Login() {
 
                                     <Button
                                         type="button"
+                                        variant="ghost"
                                         aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña' }
                                         onClick={() => setShowPassword((value) => !value,)}
                                         className={`${errors.password ? 'text-error!' : ''}
-                                        absolute right-3 top-1/2 -translate-y-1/2 
+                                        absolute right-0 top-1/2 -translate-y-1/2 
                                         text-neutral-foreground hover:text-primary`}
                                     >
                                         {showPassword ? 

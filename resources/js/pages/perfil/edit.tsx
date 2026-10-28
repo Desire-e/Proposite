@@ -9,13 +9,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Textarea from '@/components/ui/Textarea';
 
-type EditableUserData = {
+type EditPerfilForm = {
     name: string;
-    biografia?: string;
-    fecha_convocatoria?: string
+    biografia?: string | null;
+    fecha_convocatoria?: string | null;
 }
 
-type EditProps = { user: EditableUserData; };
+type EditProps = { user: EditPerfilForm; };
 
 // type Flash = {
 //     success?: string;
@@ -31,7 +31,7 @@ export default function Edit({ user }: EditProps) {
      * como nuevos valores iniciales. 
      */
 
-    const { data, setData, patch, processing, errors, clearErrors, isDirty, setDefaults, } = useForm<EditableUserData>({
+    const { data, setData, patch, processing, errors, clearErrors, isDirty, setDefaults } = useForm<EditPerfilForm>({
         name: user.name,
         biografia: user.biografia ?? '',
         fecha_convocatoria: user.fecha_convocatoria ?? '',
@@ -76,7 +76,7 @@ export default function Edit({ user }: EditProps) {
                     </div>
 
 
-                    <form className='flex flex-col items-top mt-10 gap-6' onSubmit={submit} noValidate>
+                    <form className='flex flex-col mt-10 gap-6' onSubmit={submit} noValidate>
                         <div className='flex flex-col gap-2'>
                             <Label htmlFor="name" className='text-sm font-semibold'>
                                 Nombre
@@ -85,7 +85,6 @@ export default function Edit({ user }: EditProps) {
                                 id="name"
                                 type="text"
                                 autoComplete="name"
-                                defaultValue={user.name}
                                 value={data.name}
                                 onChange={(e) => {
                                     setData('name', e.target.value)
@@ -106,7 +105,7 @@ export default function Edit({ user }: EditProps) {
 
                             <Textarea
                                 id="biografia"
-                                value={data.biografia}
+                                value={data.biografia ?? ''}
                                 onChange={(e) => {
                                     setData('biografia', e.target.value);
                                     clearErrors('biografia');
@@ -117,6 +116,7 @@ export default function Edit({ user }: EditProps) {
                                 disabled={processing} 
                             >
                             </Textarea>
+                            <InputError message={errors.biografia} /> 
                         </div>
 
                         <div className='flex flex-col w-fit gap-2'>
@@ -127,8 +127,7 @@ export default function Edit({ user }: EditProps) {
                             <Input
                                 id="fecha-convocatoria"
                                 type="date"
-                                defaultValue={user.fecha_convocatoria}
-                                value={data.fecha_convocatoria}
+                                value={data.fecha_convocatoria ?? ''}
                                 onChange={(e) => {
                                     setData('fecha_convocatoria', e.target.value)
                                     clearErrors('fecha_convocatoria');
@@ -142,19 +141,17 @@ export default function Edit({ user }: EditProps) {
 
 
                         <div className="flex flex-col-reverse gap-3 border-t border-border pt-6 sm:flex-row sm:justify-end">
-                            <Link
-                                href={route('perfil.show')}
-                                className="rounded-xl px-5 py-3 text-center text-sm font-semibold text-neutral-foreground 
-                                transition hover:bg-tertiary"
-                            >
+                            <Button asChild variant='ghost' size="default" className="font-semibold">
+                                <Link href={route('perfil.show')}>
                                 Cancelar
-                            </Link>
+                                </Link>
+                            </Button>
 
                             <Button
                                 type="submit"
+                                variant="default"
                                 disabled={processing || !isDirty}
-                                className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary 
-                                px-5 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+                                className="font-semibold"
                             >
                                 <Save className="size-4" />
                                 Guardar cambios
