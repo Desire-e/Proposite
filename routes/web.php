@@ -5,24 +5,24 @@ use Inertia\Inertia;
 use App\Models\Usuario;
 use App\Enums\Rol;
 
-use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\TemariosController;
+use App\Http\Controllers\PerfilController;
+use App\Http\Controllers\OpositoresController;
 use App\Http\Controllers\ForosController;
+use App\Http\Controllers\PublicacionesController;
+use App\Http\Controllers\ComentariosController;
+use App\Http\Controllers\ReportesController;
 
 use App\Http\Controllers\Admin\PanelController as AdminPanelController;
 
-// use App\Http\Controllers\PublicacionesController;
-// use App\Http\Controllers\ComentariosController;
 // use App\Http\Controllers\RecursosController;
 // use App\Http\Controllers\TestsController;
 // use App\Http\Controllers\IntentosTestController;
-// use App\Http\Controllers\EstadisticasController;
-// use App\Http\Controllers\ReportesController;
 
 // use App\Http\Controllers\Admin\RecursosController as AdminRecursosController;
 // use App\Http\Controllers\Admin\ReportesController as AdminReportesController;
 // use App\Http\Controllers\Admin\TestsController as AdminTestsController;
-// use App\Http\Controllers\Admin\UsuariosController as AdminUsuariosController;
+// use App\Http\Controllers\Admin\OpositoresController as AdminUsuariosController;
 
 
 /*****************************
@@ -47,7 +47,7 @@ Route::get('/', function () {
 
 
 // Router por rol: solo redirige
-Route::middleware('auth')->get('/dashboard', function () {
+Route::middleware('auth', 'nosuspendido')->get('/dashboard', function () {
     
     /**
      * Comprobaciones de rol
@@ -71,7 +71,7 @@ Route::middleware('auth')->get('/dashboard', function () {
 // ==================
 
 
-Route::middleware(['auth', 'opositor'])->group(function () {
+Route::middleware(['auth', 'opositor', 'nosuspendido'])->group(function () {
 
     // ====== Perfil propio ======
 
@@ -87,10 +87,10 @@ Route::middleware(['auth', 'opositor'])->group(function () {
 
     // ====== Perfil ajeno ======
     
-    Route::get('/opositores/{usuario}', [PerfilController::class, 'show'])
+    Route::get('/opositores/{usuario}', [OpositoresController::class, 'show'])
         ->name('opositores.show');
 
-    Route::post('/opositores/{usuario}/reportes', [PerfilController::class, 'insertReporte'])
+    Route::post('/opositores/{usuario}/reportes', [ReportesController::class, 'insertUsuario'])
         ->name('opositores.reportes.insert');
 
 
@@ -111,30 +111,33 @@ Route::middleware(['auth', 'opositor'])->group(function () {
             ->name('index');
 
         Route::prefix('publicaciones')->name('publicaciones.')->group(function () {
-
-            Route::post('/', [ForosController::class, 'insertPublicacion'])
+            
+            Route::get('/{publicacion}', [PublicacionesController::class, 'show'])
+                ->name('show'); // foro.publicaciones.show
+            
+            Route::post('/', [PublicacionesController::class, 'insert'])
                 ->name('insert'); // foro.publicaciones.insert
 
-            Route::get('/{publicacion}', [ForosController::class, 'showPublicacion'])
-                ->name('show'); // foro.publicaciones.show
+            Route::post('/{publicacion}/me-sirvio', [PublicacionesController::class, 'toggleMeSirvio'])
+                ->name('me-sirvio.toggle'); // foro.publicaciones.me-sirvio.toggle
 
-            Route::delete('/{publicacion}', [ForosController::class, 'deletePublicacion'])
+            Route::delete('/{publicacion}', [PublicacionesController::class, 'delete'])
                 ->name('delete'); // foro.publicaciones.delete
 
-            Route::post('/{publicacion}/reportes', [ForosController::class, 'reportPublicacion'])
+            Route::post('/{publicacion}/reportes', [ReportesController::class, 'insertPublicacion'])
                 ->name('reportes.insert'); // foro.publicaciones.reportes.insert
 
-            Route::post('/{publicacion}/me-sirvio', [ForosController::class, 'toggleMeSirvio'])
-                ->name('me-sirvio.toggle'); // foro.publicaciones.me-sirvio.toggle
-            
-            Route::post('/{publicacion}/comentarios', [ForosController::class, 'insertComentario'])
+            Route::post('/{publicacion}/comentarios', [ComentariosController::class, 'insert'])
                 ->name('comentarios.insert'); // foro.publicaciones.comentarios.insert
+
+            // TODO. ELIMINAR Y REPORTAR COMENTARIO
+
         });
     });
 
 
     // ====== Tests ======
-
+/*
     Route::prefix('tests')->name('tests.')->group(function () {
         
         // Listado de tests
@@ -156,7 +159,7 @@ Route::middleware(['auth', 'opositor'])->group(function () {
         Route::get('/{test}/resultados', [TestsController::class, 'showResultados'])
             ->name('resultados.show'); // tests.resultados.show
     });
-
+*/
 });
 
 
@@ -173,7 +176,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 });
 
 
-// TODO. Revisar
+// TODO.
 
 Route::middleware(['auth', 'admin'])->group(function () {
 

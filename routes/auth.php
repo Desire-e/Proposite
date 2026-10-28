@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\AutenticacionController;
+use App\Http\Controllers\Auth\RegistroController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -11,29 +11,27 @@ use Illuminate\Support\Facades\Route;
 
 /**
  * Middleware guest:
- * 
  * Solo pueden acceder usuarios no autenticados.
  * Usuarios ya autenticados los redirige (configurable en bootstrap/app.php, redirectUsersTo)
  * 
  * Middleware auth:
- * 
  * Solo pueden acceder usuarios autenticados.
  * Usuarios no autenticados los redirige (configurable en bootstrap/app.php, redirectGuestsTo),
  */
 
 Route::middleware('guest')->group(function () {
-    Route::get('register', [RegisteredUserController::class, 'create'])
+    Route::get('register', [RegistroController::class, 'create'])
         ->name('register');
 
-    Route::post('register', [RegisteredUserController::class, 'store']);
+    Route::post('register', [RegistroController::class, 'store']);
 
-    Route::get('login', [AuthenticatedSessionController::class, 'login'])
+    Route::get('login', [AutenticacionController::class, 'login'])
         ->name('login');
 
-    Route::post('login', [AuthenticatedSessionController::class, 'authenticate']);
+    Route::post('login', [AutenticacionController::class, 'authenticate']);
 });
 
 Route::middleware('auth')->group(function () {
-    Route::post('logout', [AuthenticatedSessionController::class, 'logout'])
+    Route::post('logout', [AutenticacionController::class, 'logout'])
         ->name('logout');
 });
