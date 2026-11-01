@@ -1,25 +1,23 @@
-import {  
-    ArrowRight, Bell, Heart, MessageCircle, MoreHorizontal, Send,  Sparkles, UserRound,
-} from 'lucide-react';
-import { Link, router, useForm, usePage } from '@inertiajs/react';
+import { ArrowRight, Bell, MessageCircle, Send,  Sparkles, UserRound, } from 'lucide-react';
+import { Link, useForm, usePage } from '@inertiajs/react';
 import { type SharedData } from '@/types';
+import { FormEventHandler } from 'react';
+import { Label } from '@/components/ui/label';
+import Textarea from '@/components/ui/Textarea';
+import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
 
 import UserAvatar from '@/components/ui/UserAvatar';
 import AppLayout from '@/layouts/AppLayout';
-import { FeedbackModal } from '@/components/ui/FeedbackModal';
-import {
-    DropdownMenu,
-    DropdownMenuTrigger,
-    DropdownMenuContent,
-    DropdownMenuItem,
-} from '@/components/ui/dropdown-menu';
+import { OptionsMenu } from '@/components/OptionsMenu';
+import { MeSirvioButton } from '@/components/MeSirvioButton';
 
-import { FormEventHandler, useState } from 'react';
-import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import Textarea from '@/components/ui/Textarea';
+import { ReportModal } from "@/components/ReportModal";
+import { useReport } from "@/hooks/use-report";
+import { DeleteModal } from '@/components/DeleteModal';
+import { useDelete } from '@/hooks/use-delete';
 
+import { publishedSince } from '@/lib/dates';
 
 
 type Oposicion = {
@@ -58,7 +56,6 @@ export default function Feed(
     /**
      * Buscador y filtros
      */
-
     // const [query, setQuery] = useState('')
     // const [activeFilter, setActiveFilter] = useState('Más recientes')
 
@@ -74,32 +71,8 @@ export default function Feed(
 
 
     /**
-     * Calcular tiempo desde que fue publicada una publicación
-     */
-
-    function publishedSince(postDateStr: string) {
-        const currentDate = new Date();
-        const postDate = new Date(postDateStr);
-
-        const diffMs = currentDate.getTime() - postDate.getTime();
-
-        const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diffMs / (1000 * 60 * 60)) % 24);
-        const mins = Math.floor((diffMs / (1000 * 60)) % 60);
-        const secs = Math.floor((diffMs / 1000) % 60);
-        
-        const since = days >= 1 ? `Hace ${days} días` : 
-            hours >= 1 ? `Hace ${hours} horas` : 
-                mins >= 1 ?  `Hace ${mins} minutos` : 
-                    secs >= 1 ? `Hace ${secs} segundos` : 'Recién publicado';
-
-        return since;
-    }
-
-    /**
      * Crear publicación
      */
-
     const { data, setData, post, processing, errors, clearErrors, reset, isDirty} = 
         useForm<{contenido: string}>({contenido: '', });
 
@@ -115,115 +88,24 @@ export default function Feed(
     /**
      * Eliminar publicación propia
      */
-
-    // Si hay id, el modal está abierto
-    const [postToDelete, setPostToDelete] = useState<string | null>(null);
-    const deleteForm = useForm({});
-
-    const deletePublicacion = () => {
-        if (!postToDelete) return;
-
-        deleteForm.delete(
-            route('foro.publicaciones.delete', postToDelete), 
-            {
-                preserveScroll: true,
-                only: ['publicaciones'],
-                onFinish: () => setPostToDelete(null),
-            }
-        );
-    };
-
-    const { auth } = usePage<SharedData>().props;
-
+    const deletePublicacion = useDelete('foro.publicaciones.delete');
 
     /**
      * Reportar publicación ajena
      */
+    const reportPublicacion = useReport('foro.publicaciones.reportes.store');
 
-    const [postToReport, setPostToReport] = useState<string | null>(null);
-    const reportForm = useForm({ motivo: '' });
+    const { auth } = usePage<SharedData>().props;
 
-    const closeReport = () => { 
-        setPostToReport(null);
-        reportForm.reset();
-        reportForm.clearErrors();
-    };
-
-    const reportPublicacion = () => {
-        if (!postToReport) return;
-
-        reportForm.post(
-            route('foro.publicaciones.reportes.store', postToReport), 
-            {
-                preserveScroll: true,
-                onSuccess: closeReport,
-            }
-        );
-    };
-
-
-    /**
-     * Toggle me sirvió optimista (automático)
-     */
-
-    const toggleMeSirvio = (publicacion: Publicacion) => {
-        router.post(
-            route('foro.publicaciones.me-sirvio.toggle', publicacion.id), 
-            {}, 
-            { 
-                preserveScroll: true, 
-                // Partial reload: Opción de visita de Inertia, que pide 
-                // al servidor solo algunas props de la página.   
-                only: ['publicaciones'] 
-            }
-        );
-    }
-    
 
     return (
         <AppLayout headTitle={`Foro de ${oposicion.nombre} | Proposite`}>
             
             {/* Modal eliminar publicación */}
-            <FeedbackModal
-                // abierto si hay id publicación en el estado
-                open={postToDelete !== null}
-                tone="danger"
-                title="¿Eliminar esta publicación?"
-                description="La publicación y sus comentarios se eliminarán de forma permanente."
-                confirmLabel="Eliminar"                
-                processing={deleteForm.processing}
-                onConfirm={deletePublicacion}
-                onClose={() => setPostToDelete(null)}
-            />
+            <DeleteModal deletion={deletePublicacion} title="¿Eliminar esta publicación?" />
 
             {/* Modal reportar publicación */}
-            <FeedbackModal
-                open={postToReport !== null}
-                tone="warning"
-                title="Reportar publicación"
-                description="Cuéntanos qué ocurre. Un moderador lo revisará."
-                confirmLabel="Enviar reporte"
-                processing={reportForm.processing}
-                onConfirm={reportPublicacion}
-                onClose={closeReport}
-            >
-                <div className="mt-4">
-                    <Label htmlFor="motivo" className="sr-only">Motivo del reporte</Label>
-                    <Textarea
-                        id="motivo"
-                        rows={4}
-                        value={reportForm.data.motivo}
-                        onChange={(e) => {
-                            reportForm.setData('motivo', e.target.value);
-                            reportForm.clearErrors('motivo');
-                        }}
-                        errors={!!reportForm.errors.motivo}
-                        placeholder="Describe el motivo del reporte"
-                        disabled={reportForm.processing}
-                    />
-                    <InputError message={reportForm.errors.motivo} />
-                </div>                    
-            </FeedbackModal>
+            <ReportModal report={reportPublicacion} title="Reportar publicación" />
             
             <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8 lg:py-10">
             
@@ -377,43 +259,17 @@ export default function Feed(
 
                                                 {/* Eliminar / Reportar publicación */}
                                                 <div className='relative z-10'>
-                                                    <DropdownMenu>
-                                                        <DropdownMenuTrigger asChild>
-                                                            <button 
-                                                            type="button" 
-                                                            aria-label="Más opciones" 
-                                                            className="text-neutral-foreground hover:text-primary">
-                                                                <MoreHorizontal className="size-5" />
-                                                            </button>
-                                                        </DropdownMenuTrigger>
-
-                                                        <DropdownMenuContent 
-                                                            className="bg-white border-1 rounded-sm border-muted-foreground/30"
-                                                            align="end"
-                                                        >
-                                                            {esAutor ? (
-
-                                                            <DropdownMenuItem
-                                                                onSelect={() => setPostToDelete(publicacion.id)}
-                                                                className="cursor-pointer px-3 py-2 text-neutral-foreground 
-                                                                focus:bg-neutral focus:text-primary"
-                                                            >
-                                                                Eliminar
-                                                            </DropdownMenuItem>
-
-                                                            ) : (
-
-                                                            <DropdownMenuItem
-                                                                onSelect={() => setPostToReport(publicacion.id)}
-                                                                className="cursor-pointer px-3 py-2 text-neutral-foreground 
-                                                                focus:bg-neutral focus:text-primary"
-                                                            >
-                                                                Reportar
-                                                            </DropdownMenuItem>
-
-                                                            )}
-                                                        </DropdownMenuContent>
-                                                    </DropdownMenu>
+                                                    <OptionsMenu items={esAutor ? 
+                                                        [{ 
+                                                            label: 'Eliminar', 
+                                                            onSelect: () => deletePublicacion.open(publicacion.id) 
+                                                        }]
+                                                        : 
+                                                        [{ 
+                                                            label: 'Reportar', 
+                                                            onSelect: () => reportPublicacion.open(publicacion.id) 
+                                                        }]
+                                                    } />
                                                 </div>
                                             </div>
                                             
@@ -433,24 +289,19 @@ export default function Feed(
                                             {/* Acciones de la publicación */} 
                                             <div className="relative z-10 mt-5 flex items-center gap-5 
                                             border-t border-border pt-4 text-xs text-neutral-foreground">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => toggleMeSirvio(publicacion)}
-                                                    aria-pressed={publicacion.me_sirvio_activo}
-                                                    className={`inline-flex items-center gap-1.5 transition ${
-                                                        publicacion.me_sirvio_activo ? 'font-bold text-primary' : 'hover:text-primary'
-                                                    }`}
-                                                >
-                                                    <span>{publicacion.me_sirvio_count}</span>
-                                                    <Heart className="size-4" fill={publicacion.me_sirvio_activo ? 'currentColor' : 'none'} />
-                                                </button>
+                                                <MeSirvioButton
+                                                    publicacionId={publicacion.id}
+                                                    activo={publicacion.me_sirvio_activo}
+                                                    total={publicacion.me_sirvio_count}
+                                                />
                                                 
                                                 <Link
                                                     href={`${route('foro.publicaciones.show', publicacion.id)}#comentarios`} 
-                                                    className="inline-flex items-center gap-1.5 hover:text-primary"
+                                                    className="inline-flex items-center rounded-xl transition gap-1.5 
+                                                    text-xs text-neutral-foreground hover:text-primary"
                                                 >
-                                                    {publicacion.comentarios_count} 
                                                     <MessageCircle className="size-4" />
+                                                    {publicacion.comentarios_count} 
                                                 </Link>
                                             </div>
                                         </div>
