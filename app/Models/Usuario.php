@@ -37,8 +37,7 @@ class Usuario extends Authenticatable {
         'rol',
         'fecha_convocatoria',
         'biografia',
-        'suspendido',
-        'suspendido_por',
+        'deleted_by',
     ];
     
     public $timestamps = true;
@@ -51,15 +50,42 @@ class Usuario extends Authenticatable {
         return [
             'rol'=> Rol::class, // enum de roles
             'fecha_convocatoria' => 'date',
-            'suspendido' => 'boolean',
         ];
     }
 
+    // Obtener si es admin 
+    public function esAdmin(): bool { return $this->rol === Rol::ADMIN; }
 
     // Relaciones
     
     public function intentosTests(): HasMany {
         return $this->hasMany(IntentoTest::class, 'usuario_id');
+    }
+
+
+    // Método especial de los modelos Eloquent de Laravel que se ejecuta una sola vez, 
+    // cuando la clase del modelo se usa por primera vez (al arrancar la petición). 
+    // Es el sitio oficial para registrar cosas que deben estar activas durante toda la vida del modelo
+    
+    protected static function booted(): void 
+    {
+        // evento de Eloquent disparado antes de que un modelo sea eliminado de la BD
+        static::deleting(function (Usuario $usuario) {
+
+            // Publicaciones: cada delete arrastra sus comentarios
+            $usuario->publicaciones()->get()->each->delete();
+
+            // Comentarios del usuario en publicaciones ajenas
+            $usuario->comentarios()->get()->each->delete();
+
+            // Recursos subidos
+            // $usuario->recursos()->get()->each->delete();
+
+            // Tests creados: NO se tocan preguntas ni intentos
+            $usuario->testsCreados()->get()->each->delete();
+
+            // Los reportes (enviados y recibidos) se conservan
+        });
     }
 
     // ================
@@ -88,8 +114,8 @@ class Usuario extends Authenticatable {
         );
     }
     
-    public function suspendidoPor(): BelongsTo{
-        return $this->belongsTo(Usuario::class, 'suspendido_por');
+    public function baneadoPor(): BelongsTo{
+        return $this->belongsTo(Usuario::class, 'deleted_by');
     }
 
     public function publicaciones(): HasMany {
@@ -116,8 +142,8 @@ class Usuario extends Authenticatable {
     // ADMIN
     // ================
 
-    public function usuariosSuspendidos(): HasMany {
-        return $this->hasMany(Usuario::class, 'suspendido_por');
+    public function usuariosBaneados(): HasMany {
+        return $this->hasMany(Usuario::class, 'deleted_by');
     }
 
     public function testsCreados(): HasMany {

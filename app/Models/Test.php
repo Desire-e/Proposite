@@ -33,6 +33,9 @@ class Test extends Model {
     public const UPDATED_AT = null;
 
 
+    // Sin evento deleting: sus IntentoTest y Preguntas se mantienen en la BD 
+
+
     // Relaciones
 
     public function preguntas(): HasMany{

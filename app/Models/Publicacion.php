@@ -18,19 +18,7 @@ use App\Models\Reporte;
 
 class Publicacion extends Model {
 
-    /**
-     * SoftDeletes. Gestión de deleted_at
-     * 
-     * $publicacion->delete(); No elimina físicamente, establece deleted_at=fecha/hora actual.
-     * Publicacion::withTrashed()->get(); Para consultas incluyendo eliminadas.
-     * Publicacion::onlyTrashed()->get(); Para consultas eliminadas.
-     * $publicacion->restore(); Restaurar.
-     * $publicacion->forceDelete(); Eliminarla físicamente.
-     */
-
     use HasUuids, SoftDeletes;
-    // NOTA. No necesitas declarar manualmente deleted_at en $fillable, 
-    // ni añadir un cast específico para que SoftDeletes funcione.
     
     protected $table = "publicaciones";
 
@@ -54,6 +42,16 @@ class Publicacion extends Model {
     public $timestamps = true;
     public const UPDATED_AT = null;
 
+    protected static function booted(): void
+    {
+        static::deleting(function (Publicacion $publicacion) {
+            // Comentarios: cada delete es un soft delete individual
+            // (los reportes de esos comentarios se conservan)
+            $publicacion->comentarios()->get()->each->delete();
+
+            // Los reportes directos sobre la publicación se conservan
+        });
+    }
     
     // Relaciones
 
@@ -75,8 +73,12 @@ class Publicacion extends Model {
         return $this->belongsTo(Oposicion::class, 'oposicion_id');
     }
 
+    // TODO. El admin, si quiere ver los comentarios de una publicación eliminada, 
+    // que los vea por una ruta de admin específica con su propia consulta withTrashed(), 
+    // no por la página pública del foro.
     public function comentarios(): HasMany {
         return $this->hasMany(Comentario::class, 'publicacion_id');
+        // ->withTrashed();
     }
 
     public function meSirvio(): BelongsToMany
