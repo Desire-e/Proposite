@@ -20,7 +20,7 @@ class ComentariosController extends Controller
      */
     public function store(StoreComentarioRequest $request, Publicacion $publicacion): RedirectResponse
     {
-        Gate::authorize('comment', $publicacion);
+        Gate::authorize('create', $publicacion);
         
         Comentario::create([
             'usuario_id' => $request->user()->id,
@@ -31,8 +31,13 @@ class ComentariosController extends Controller
         return back();
     }
 
-    /**
-     * TODO. Eliminar comentario
-     */
 
+    public function delete(Comentario $comentario): RedirectResponse
+    {
+        Gate::authorize('delete', $comentario);
+
+        $comentario->delete(); // soft delete: rellena deleted_at
+
+        return back();
+    }
 }

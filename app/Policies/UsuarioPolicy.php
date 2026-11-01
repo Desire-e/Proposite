@@ -4,59 +4,75 @@ namespace App\Policies;
 
 use App\Models\Usuario;
 use Illuminate\Auth\Access\Response;
-use App\Enums\Rol;
 
 class UsuarioPolicy
 {
     public function before(Usuario $usuario, string $ability): Response|bool|null
     {
-        // Si no es admin, reglas normales
-        if ($usuario->rol !== Rol::ADMIN){
-            return null;
-        } 
-
-        // Admin: no puede reportar
-        if ($ability === 'report') {
-            return Response::deny('Los administradores no pueden realizar esta acción.');
+        if (!$usuario->esAdmin()) { 
+            return match ($ability) { 
+                'view' => null, 
+                'delete' => Response::deny('Solo los administradores pueden realizar esta operación.'), 
+                'recover' => Response::deny('Solo los administradores pueden realizar esta operación.'), 
+                default  => null,
+            };            
         }
 
-        return null;
+        return match ($ability) { 
+            'view' => Response::allow(), 
+            default  => null,
+        };
     }
 
     public function view(Usuario $usuario, Usuario $perfil): Response
     {
         // Los administradores no tienen perfil público
-        if ($perfil->rol === Rol::ADMIN) {
-            return Response::denyAsNotFound(); // responde 404 not found
-        }
-        
-        // El admin ve cualquier opositor
-        if ($usuario->rol === Rol::ADMIN) {
-            return Response::allow();
+        if ($perfil->esAdmin()) {
+            return $usuario->esAdmin()
+                ? Response::allow()
+                : Response::denyAsNotFound(); // responde 404 not found
         }
 
         // Un opositor solo ve perfiles activos de su misma oposición
-        return  (!$perfil->suspendido) && ($usuario->oposicion_id === $perfil->oposicion_id)
+        return ($this->visibleParaOpositor($usuario, $perfil))
             ? Response::allow()
-            : Response::denyAsNotFound(); // 404
+            : Response::denyAsNotFound();
     }
 
-    public function report(Usuario $usuario, Usuario $reportado): Response
+    /**
+     * Banear = soft delete
+     */
+    public function delete(Usuario $usuario, Usuario $perfil): Response
     {
-        $acceso = $this->view($usuario, $reportado);
-
-        if ($acceso->denied()) return $acceso;
-
-        if ($usuario->id === $reportado->id) {
-            return Response::deny('No puedes reportarte a ti mismo.');
+        if ($perfil->esAdmin()) {
+            return Response::deny('No puedes banear a otro administrador.');
         }
 
-        $yaReportado = $reportado->reportesRecibidos()
-            ->where('usuario_reporta_id', $usuario->id)
-            ->exists();
-
-        return $yaReportado
-            ? Response::deny('Ya habías reportado a este usuario.')
+        return $perfil->trashed()
+            ? Response::deny('Este usuario ya está baneado.')
             : Response::allow();
+    }
+
+    public function update(Usuario $usuario, Usuario $perfil): Response {
+        return $perfil->id === $usuario->id 
+            ? Response::allow()
+            : Response::deny('No puedes modificar un perfil ajeno.');
+    }
+
+    /**
+     * Suprimir baneo
+     */
+    public function recover(Usuario $usuario, Usuario $perfil): Response {
+        return !$perfil->trashed()
+            ? Response::deny('Este usuario no estaba baneado.')
+            : Response::allow();
+    }
+
+
+
+    private function visibleParaOpositor(Usuario $usuario, Usuario $perfil): bool
+    {
+        return !$perfil->trashed() 
+            && $usuario->oposicion_id === $perfil->oposicion_id;
     }
 }

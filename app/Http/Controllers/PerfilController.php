@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 
 class PerfilController extends Controller
@@ -54,6 +55,8 @@ class PerfilController extends Controller
     public function update(UpdatePerfilRequest $request): RedirectResponse
     {
         $user = $request->user(); // usuario autenticado que hizo la request
+
+        Gate::authorize('update', $user);
 
         $user->update($request->validated());
 

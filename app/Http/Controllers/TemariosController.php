@@ -62,15 +62,18 @@ class TemariosController extends Controller
         $temaId = $request->validated()['tema'];
         $checked =  $request->boolean('checked');
 
-        $existeFila = $user->checkedTemario()->where('temarios.id', $temaId)->exists();
+        // $existeFila = $user->checkedTemario()->where('temarios.id', $temaId)->exists();
+        // Comprueba sobre TODAS las filas del pivote, no solo las marcadas
+        $existeFila = $user->checkTemario()->where('temario_id', $temaId)->exists();
 
         // actualiza registro anterior
         if($existeFila){
-            $user->checkedTemario()->updateExistingPivot($temaId, ['checked'=>$checked]);
+            $user->checkTemario()->updateExistingPivot($temaId, ['checked' => $checked]);
         }
         // inserta nuevo registro
         else {
-            $user->checkedTemario()->attach($temaId, ['checked'=>$checked]);
+            $user->checkTemario()->attach($temaId, ['checked' => $checked]);
+            // $user->checkedTemario()->attach($temaId, ['checked'=>$checked]);
         }
 
         // vuelve a la misma página y React recibe el temario actualizado.

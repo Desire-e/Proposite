@@ -23,7 +23,6 @@ class PublicacionesController extends Controller
     {
         // Gate::authorize consulta la policy y lanza el 403 si deniega
         Gate::authorize('view', $publicacion);
-        // abort_if($publicacion->oposicion_id !== $request->user()->oposicion_id, 403);
 
 
         return Inertia::render('foro/publicaciones/show', [
@@ -55,6 +54,9 @@ class PublicacionesController extends Controller
      */
     public function store(StorePublicacionRequest $request): RedirectResponse
     {
+        // Para habilidades sin modelo, se le da la clase
+        Gate::authorize('create', Publicacion::class);
+
         $user = $request->user();
 
         Publicacion::create([
@@ -74,7 +76,7 @@ class PublicacionesController extends Controller
     {
         $user = $request->user();
 
-        Gate::authorize('view', $publicacion);
+        Gate::authorize('react', $publicacion);
 
         // toggle() es un método de relaciones belongsToMany que invierte el 
         // estado de la relación entre dos modelos en la tabla pivote. 

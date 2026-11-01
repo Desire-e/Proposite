@@ -12,11 +12,11 @@ use App\Http\Controllers\ForosController;
 use App\Http\Controllers\PublicacionesController;
 use App\Http\Controllers\ComentariosController;
 use App\Http\Controllers\ReportesController;
+use App\Http\Controllers\TestsController;
 
 use App\Http\Controllers\Admin\PanelController as AdminPanelController;
 
 // use App\Http\Controllers\RecursosController;
-// use App\Http\Controllers\TestsController;
 // use App\Http\Controllers\IntentosTestController;
 
 // use App\Http\Controllers\Admin\RecursosController as AdminRecursosController;
@@ -47,7 +47,7 @@ Route::get('/', function () {
 
 
 // Router por rol: solo redirige
-Route::middleware('auth', 'nosuspendido')->get('/dashboard', function () {
+Route::middleware('auth')->get('/dashboard', function () {
     
     /**
      * Comprobaciones de rol
@@ -71,7 +71,7 @@ Route::middleware('auth', 'nosuspendido')->get('/dashboard', function () {
 // ==================
 
 
-Route::middleware(['auth', 'opositor', 'nosuspendido'])->group(function () {
+Route::middleware(['auth', 'opositor'])->group(function () {
 
     // ====== Perfil propio ======
 
@@ -90,8 +90,8 @@ Route::middleware(['auth', 'opositor', 'nosuspendido'])->group(function () {
     Route::get('/opositores/{usuario}', [OpositoresController::class, 'show'])
         ->name('opositores.show');
 
-    Route::post('/opositores/{usuario}/reportes', [ReportesController::class, 'insertUsuario'])
-        ->name('opositores.reportes.insert');
+    Route::post('/opositores/{usuario}/reportes', [ReportesController::class, 'storeUsuario'])
+        ->name('opositores.reportes.store');
 
 
     // ====== Temario ======
@@ -110,13 +110,15 @@ Route::middleware(['auth', 'opositor', 'nosuspendido'])->group(function () {
         Route::get('/', [ForosController::class, 'index'])
             ->name('index');
 
+        // Acciones para publicaciones y sus comentarios
+
         Route::prefix('publicaciones')->name('publicaciones.')->group(function () {
             
             Route::get('/{publicacion}', [PublicacionesController::class, 'show'])
                 ->name('show'); // foro.publicaciones.show
             
-            Route::post('/', [PublicacionesController::class, 'insert'])
-                ->name('insert'); // foro.publicaciones.insert
+            Route::post('/', [PublicacionesController::class, 'store'])
+                ->name('store'); // foro.publicaciones.store
 
             Route::post('/{publicacion}/me-sirvio', [PublicacionesController::class, 'toggleMeSirvio'])
                 ->name('me-sirvio.toggle'); // foro.publicaciones.me-sirvio.toggle
@@ -124,20 +126,28 @@ Route::middleware(['auth', 'opositor', 'nosuspendido'])->group(function () {
             Route::delete('/{publicacion}', [PublicacionesController::class, 'delete'])
                 ->name('delete'); // foro.publicaciones.delete
 
-            Route::post('/{publicacion}/reportes', [ReportesController::class, 'insertPublicacion'])
-                ->name('reportes.insert'); // foro.publicaciones.reportes.insert
+            Route::post('/{publicacion}/reportes', [ReportesController::class, 'storePublicacion'])
+                ->name('reportes.store'); // foro.publicaciones.reportes.store
 
-            Route::post('/{publicacion}/comentarios', [ComentariosController::class, 'insert'])
-                ->name('comentarios.insert'); // foro.publicaciones.comentarios.insert
+            Route::post('/{publicacion}/comentarios', [ComentariosController::class, 'store'])
+                ->name('comentarios.store'); // foro.publicaciones.comentarios.store
+        });
 
-            // TODO. ELIMINAR Y REPORTAR COMENTARIO
+        // Acciones concretas para comentarios
 
+        Route::prefix('comentarios')->name('comentarios.')->group(function () {
+            Route::delete('/{comentario}', [ComentariosController::class, 'delete'])
+                ->name('delete'); // foro.comentarios.delete
+
+            Route::post('/{comentario}/reportes', [ReportesController::class, 'storeComentario'])
+                ->name('reportes.store'); // foro.comentarios.reportes.store
         });
     });
+    
 
 
     // ====== Tests ======
-/*
+
     Route::prefix('tests')->name('tests.')->group(function () {
         
         // Listado de tests
@@ -152,14 +162,14 @@ Route::middleware(['auth', 'opositor', 'nosuspendido'])->group(function () {
         Route::get('/{test}', [TestsController::class, 'createResultados'])
             ->name('resultados.create'); // tests.resultados.create
 
-        Route::post('/{test}', [TestsController::class, 'insertResultados'])
-            ->name('resultados.insert'); // tests.resultados.insert
+        Route::post('/{test}', [TestsController::class, 'storeResultados'])
+            ->name('resultados.store'); // tests.resultados.store
 
         // Fin test
         Route::get('/{test}/resultados', [TestsController::class, 'showResultados'])
             ->name('resultados.show'); // tests.resultados.show
     });
-*/
+
 });
 
 
@@ -184,7 +194,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     // Route::get('/usuarios', [AdminUsuariosController::class, 'index'])
     //     ->name('usuarios.index');
 
-    // Route::patch('/usuarios/{usuario}/suspension', [AdminUsuariosController::class, 'toggleSuspendido'])
+    // Route::patch('/usuarios/{usuario}/suspension', [AdminUsuariosController::class, 'toggleBaneado'])
     //     ->name('usuarios.suspension');
 
 

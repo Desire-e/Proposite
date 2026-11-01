@@ -29,7 +29,6 @@ class OpositoresController extends Controller
         }
 
         Gate::authorize('view', $usuario);
-        // abort_if($usuario->rol === Rol::ADMIN || $usuario->suspendido, 404);
 
         return Inertia::render('perfil/show', [
             'user' => $this->perfil->datosPerfil($usuario),

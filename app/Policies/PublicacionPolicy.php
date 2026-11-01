@@ -4,93 +4,102 @@ namespace App\Policies;
 
 use App\Models\Publicacion;
 use App\Models\Usuario;
-use App\Enums\Rol;
 use Illuminate\Auth\Access\Response;
 
 /**
  * Agrupación de reglas de permiso de un recurso.
- * Laravel elige la policy según el modelo que se 
- * le pasa a Gate::authorize().
+ * Laravel elige la policy según el modelo que se le pasa a Gate::authorize().
  */
+
 
 class PublicacionPolicy
 {
-
     /**
-     * Primer método ejecutado en la policy.
-     * 
-     * Recibe @param usuario y @param ability (nombre de la acción 
-     * que se está comprobando).
-     * 
-     * @return true Si es admin y la acción es view o delete, Laravel 
-     * autoriza sin llamar al método correspondiente.
+     * Acciones prohibidas para admin
+     * (se evalúa antes que ningún ability)
      */
     public function before(Usuario $usuario, string $ability): Response|bool|null
     {
-        // Si no es admin, reglas normales
-        if ($usuario->rol !== Rol::ADMIN) {
-            return null;
-        }
+        // No admin - reglas normales
+        if (!$usuario->esAdmin()) { return null; }
 
-        // Admin: puede ver y eliminar cualquier publicación
-        if ($ability === 'view' || $ability === 'delete') {
-            return true;
-        }
+        // Admin
+        return match ($ability) { 
+            // Admin ve todo, incluidas las eliminadas
+            'view' => Response::allow(), 
+            
+            // No puede
+            'create' => Response::deny('Los administradores no pueden realizar esta acción.'),
+            'react' => Response::deny('Los administradores no pueden realizar esta acción.'),
 
-        // Admin: no puede comentar ni reportar
-        if ($ability === 'comment' || $ability === 'report') {
-            return Response::deny('Los administradores no pueden realizar esta acción.');
-        }
-
-        // Cualquier otra acción: regla normal
-        return null;
+            // Cualquier otra acción, reglas concretas de la ability
+            default  => null,
+        };
     }
 
+
     /**
-     * No puede ver/interactuar con publicaciones de distinta oposición
+     * Visualizar @param Publicacion
      */
     public function view(Usuario $usuario, Publicacion $publicacion): Response
     {
-        return $usuario->oposicion_id === $publicacion->oposicion_id
-            ? Response::allow() // continúa
-            : Response::denyAsNotFound(); // 404
+        return $this->visibleParaOpositor($usuario, $publicacion)
+            ? Response::allow()
+            : Response::denyAsNotFound();
     }
 
-    public function comment(Usuario $usuario, Publicacion $publicacion): Response 
-    { 
-        return $this->view($usuario, $publicacion); 
-    }
-    
     /**
-     * No puede reportar publicaciones propias, 
-     * publicaciones de otra oposición, 
-     * ni dos veces a la misma
+     * Crear @param Publicacion
      */
-    public function report(Usuario $usuario, Publicacion $publicacion): Response
+    public function create(Usuario $usuario): Response
     {
-        $acceso = $this->view($usuario, $publicacion);
-        if ($acceso->denied()) return $acceso;
-
-        if($publicacion->usuario_id === $usuario->id){
-            return Response::deny('Solo puedes reportar publicaciones que no sean las tuyas.'); // 403
-        } 
-
-        $yaReportada = $publicacion->reportesRecibidos()
-            ->where('usuario_reporta_id', $usuario->id)
-            ->exists();
-
-        return $yaReportada
-            ? Response::deny('Ya habías reportado esta publicación.')
-            : Response::allow();
+        return Response::allow();
     }
 
     /**
-     * No puede eliminar publicaciones de otro usuario
+     * Reaccionar @param Publicacion
+     */
+    public function react(Usuario $usuario, Publicacion $publicacion): Response
+    {
+        return $this->visibleParaOpositor($usuario, $publicacion)
+            ? Response::allow()
+            : Response::denyAsNotFound();
+    }
+
+    /**
+     * Eliminar @param Publicacion
      */
     public function delete(Usuario $usuario, Publicacion $publicacion): Response
     {
-        return $usuario->id === $publicacion->usuario_id
+        // Admin: puede eliminar cualquiera, salvo las ya eliminadas
+        if ($usuario->esAdmin()) {
+            return $publicacion->trashed()
+                ? Response::deny('Esta publicación ya está eliminada.')
+                : Response::allow();
+        }
+
+        if (!$this->visibleParaOpositor($usuario, $publicacion)) {
+            return Response::denyAsNotFound();
+        }
+
+        return $this->esAutor($usuario, $publicacion)
             ? Response::allow()
             : Response::deny('Solo puedes eliminar tus propias publicaciones.');
+    }
+
+
+
+    /**
+     * Visible para un opositor: no eliminada y de su oposición.
+     */
+    private function visibleParaOpositor(Usuario $usuario, Publicacion $publicacion): bool
+    {
+        return ! $publicacion->trashed()
+            && $usuario->oposicion_id === $publicacion->oposicion_id;
+    }
+
+    private function esAutor(Usuario $usuario, Publicacion $publicacion): bool
+    {
+        return $usuario->id === $publicacion->usuario_id;
     }
 }

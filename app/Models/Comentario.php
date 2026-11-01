@@ -31,6 +31,9 @@ class Comentario extends Model {
     public $timestamps = true;
     public const UPDATED_AT = null;
 
+    
+    // Sin evento deleting: sus reportes se conservan siempre
+
 
     // Relaciones
 
@@ -48,6 +51,7 @@ class Comentario extends Model {
         return $this->belongsTo(Usuario::class, 'usuario_id');
     }
 
+    // Comentarios de publicaciones eliminadas (solo admin podrá verlas)
     public function publicacion(): BelongsTo {
         return $this->belongsTo(Publicacion::class, 'publicacion_id');
     }
