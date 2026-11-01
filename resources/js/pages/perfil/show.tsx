@@ -1,19 +1,16 @@
-import { ArrowRight, CalendarDays, Edit3, GraduationCap, Target, Trophy, Users, MoreHorizontal } from "lucide-react";
+import { ArrowRight, CalendarDays, Edit3, GraduationCap, Target, Trophy, Users } from "lucide-react";
 import AppLayout from '@/layouts/AppLayout';
 import UserAvatar from "@/components/ui/UserAvatar";
 import ProfileCard from "@/components/perfil/ProfileCard";
-import {
-    DropdownMenu,
-    DropdownMenuTrigger,
-    DropdownMenuContent,
-    DropdownMenuItem,
-} from '@/components/ui/dropdown-menu';
-import { Link, useForm } from '@inertiajs/react';
-import { useState } from "react";
-import { FeedbackModal } from "@/components/ui/FeedbackModal";
-import { Label } from "@/components/ui/label";
-import Textarea from "@/components/ui/Textarea";
-import InputError from "@/components/input-error";
+import { OptionsMenu } from '@/components/OptionsMenu';
+import { Link } from '@inertiajs/react';
+
+import { publishedSince } from '@/lib/dates';
+import { formatMY } from "@/lib/dates";
+
+import { ReportModal } from "@/components/ReportModal";
+import { useReport } from "@/hooks/use-report";
+
 
 type Oposicion = {
     nombre: string;
@@ -63,75 +60,15 @@ type PerfilProps = { user: UserProfile; es_propio: boolean };
 
 export default function Perfil({ user, es_propio }: PerfilProps) {
 
-
-    function publishedSince(postDateStr: string) {
-        const currentDate = new Date();
-        const postDate = new Date(postDateStr);
-
-        const diffMs = currentDate.getTime() - postDate.getTime();
-
-        const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diffMs / (1000 * 60 * 60)) % 24);
-        const mins = Math.floor((diffMs / (1000 * 60)) % 60);
-        const secs = Math.floor((diffMs / 1000) % 60);
-        
-        const since = days >= 1 ? `Hace ${days} días` : 
-            hours >= 1 ? `Hace ${hours} horas` : 
-                mins >= 1 ?  `Hace ${mins} minutos` : 
-                    secs >= 1 ? `Hace ${secs} segundos` : 'Recién publicado';
-
-        return since;
-    }
-
-    /**
-     * Formatea @dateStr completa, a mes y año en string 
-     * 
-     * TODO. HACER EN SERVIDOR
-     */
-    function formatMY(dateStr: string): string {
-
-        const date = new Date(dateStr)
-        
-        // comprueba si es fecha válida, convirtiendo a ms desde 1970 y comprobando isNaN 
-        if (Number.isNaN(date.getTime())) return '' 
-
-        return new Intl.DateTimeFormat('es-ES', {
-            month: 'long',
-            year: 'numeric',
-            timeZone: 'UTC',
-        }).format(date) // Aplica las opciones de formato a la fecha y devuelve resultado en texto
-    }
-
-
     /**
      * Reportar usuario
+     * Inicializa con ruta de reportes
      */
-
-    const [userToReport, setUserToReport] = useState<string | null>(null);
-    const reportForm = useForm({ motivo: '' });
-
-    const closeReport = () => { 
-        setUserToReport(null);
-        reportForm.reset();
-        reportForm.clearErrors();
-    };
-
-    const reportUsuario = () => {
-        if (!userToReport) return;
-
-        reportForm.post(
-            route('opositores.reportes.store', userToReport), 
-            {
-                preserveScroll: true,
-                onSuccess: ()=> closeReport(),
-            }
-        );
-    };
+    const reportUsuario = useReport('opositores.reportes.store');
 
     /**
-     * Porcentaje de progreso de temario
+     * Mensaje de porcentaje de progreso de temario
      */
-
     const { porcentaje } = user.progreso;
 
     const mensajeProgreso = porcentaje < 30
@@ -147,34 +84,7 @@ export default function Perfil({ user, es_propio }: PerfilProps) {
         <AppLayout headTitle={es_propio ? "Perfil | Proposite" : `${user.name} | Proposite`}>
 
             {/* Modal reportar usuario */}
-            <FeedbackModal
-                open={userToReport !== null}
-                tone="warning"
-                title="Reportar usuario"
-                description="Cuéntanos qué ocurre. Un moderador lo revisará."
-                confirmLabel="Enviar reporte"
-                processing={reportForm.processing}
-                onConfirm={reportUsuario}
-                onClose={closeReport}
-            >
-                <div className="mt-4">
-                    <Label htmlFor="motivo" className="sr-only">Motivo del reporte</Label>
-                    <Textarea
-                        id="motivo"
-                        rows={4}
-                        value={reportForm.data.motivo}
-                        onChange={(e) => {
-                            reportForm.setData('motivo', e.target.value);
-                            reportForm.clearErrors('motivo');
-                        }}
-                        errors={!!reportForm.errors.motivo}
-                        placeholder="Describe el motivo del reporte"
-                        disabled={reportForm.processing}
-                    />
-                    <InputError message={reportForm.errors.motivo} />
-                </div>                    
-            </FeedbackModal>
-
+            <ReportModal report={reportUsuario} title="Reportar usuario" />
 
             <div className="mx-auto w-full max-w-6xl px-4 py-6">
 
@@ -229,39 +139,22 @@ export default function Perfil({ user, es_propio }: PerfilProps) {
 
                         {/* Solo puede verlo el usuario si no es su propio perfil */}
                         {!es_propio ? (
-                        <div className="absolute right-5 md:right-10 top-3 md:top-6">
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <button 
-                                    type="button" 
-                                    aria-label="Más opciones" 
-                                    className="text-neutral-foreground hover:text-primary">
-                                        <MoreHorizontal className="size-5" />
-                                    </button>
-                                </DropdownMenuTrigger>
-
-                                <DropdownMenuContent 
-                                    className="bg-white border-1 rounded-sm border-muted-foreground/30"
-                                    align="end"
-                                >
-                                    <DropdownMenuItem
-                                        onSelect={() => setUserToReport(user.id)}
-                                        className="cursor-pointer px-3 py-2 text-neutral-foreground 
-                                        focus:bg-neutral focus:text-primary"
-                                    >
-                                        Reportar
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
+                            <div className="absolute right-5 md:right-10 top-3 md:top-6">
+                                <OptionsMenu items={
+                                    [{ 
+                                        label: 'Reportar', 
+                                        onSelect: () => reportUsuario.open(user.id) 
+                                    }]
+                                }/>
+                            </div>
                         ) : (
-                        <Link
-                            href={route('perfil.edit')}
-                            className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-border 
-                            px-4 py-3 text-xs font-semibold text-primary transition-colors hover:bg-tertiary"
-                        >
-                            <Edit3 size={15} /> Editar perfil
-                        </Link>
+                            <Link
+                                href={route('perfil.edit')}
+                                className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-border 
+                                px-4 py-3 text-xs font-semibold text-primary transition-colors hover:bg-tertiary"
+                            >
+                                <Edit3 size={15} /> Editar perfil
+                            </Link>
                         )}
 
                     </div>

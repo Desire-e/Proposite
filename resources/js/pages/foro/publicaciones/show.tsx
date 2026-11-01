@@ -1,17 +1,24 @@
 
-import { ArrowLeft, Heart, MessageCircle, MoreHorizontal, Send,} from 'lucide-react'
+import { ArrowLeft, MessageCircle, Send,} from 'lucide-react'
 import AppLayout from '@/layouts/AppLayout'
 import UserAvatar from '@/components/ui/UserAvatar'
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, } from '@/components/ui/dropdown-menu';
-import { Link, router, useForm, usePage } from '@inertiajs/react';
+import { OptionsMenu } from '@/components/OptionsMenu';
+import { Link, useForm, usePage } from '@inertiajs/react';
 import { type SharedData } from '@/types';
-import { FeedbackModal } from '@/components/ui/FeedbackModal';
-import { FormEventHandler, useState } from 'react';
+import { FormEventHandler } from 'react';
+import { MeSirvioButton } from '@/components/MeSirvioButton';
+
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import Textarea from '@/components/ui/Textarea';
 
+import { publishedSince } from '@/lib/dates';
+
+import { useReport } from '@/hooks/use-report';
+import { ReportModal } from '@/components/ReportModal';
+import { DeleteModal } from '@/components/DeleteModal';
+import { useDelete } from '@/hooks/use-delete';
 
 type Usuario = {
     id: string;
@@ -47,80 +54,28 @@ export default function Publicacion({
     usuario_autor, publicacion, me_sirvio, me_sirvio_activo, comentarios
 }: PublicacionProps) {
 
+    /** Eliminar publicación propia */
+    const deletePublicacion = useDelete('foro.publicaciones.delete');
 
-    function publishedSince(postDateStr: string) {
-        const currentDate = new Date();
-        const postDate = new Date(postDateStr);
+    /** Reportar publicación ajena */
+    const reportPublicacion = useReport('foro.publicaciones.reportes.store');
 
-        const diffMs = currentDate.getTime() - postDate.getTime();
+    /** Eliminar comentario propio */
+    const deleteComentario = useDelete('foro.comentarios.delete')
 
-        const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diffMs / (1000 * 60 * 60)) % 24);
-        const mins = Math.floor((diffMs / (1000 * 60)) % 60);
-        const secs = Math.floor((diffMs / 1000) % 60);
-        
-        const since = days >= 1 ? `Hace ${days} días` : 
-            hours >= 1 ? `Hace ${hours} horas` : 
-                mins >= 1 ?  `Hace ${mins} minutos` : 
-                    secs >= 1 ? `Hace ${secs} segundos` : 'Recién publicado';
+    /** Reportar comentario ajeno */
+    const reportComentario = useReport('foro.comentarios.reportes.store');
 
-        return since;
-    }
-
-
-    /**
-     * Eliminar publicación propia
-     */
-
+    /** Saber si reportable/eliminable es propio o ajeno */
+    // TODO copiar en index
     const { auth } = usePage<SharedData>().props;
     const esAutor = usuario_autor.id === auth.user.id;
 
-    // Si hay id, el modal está abierto
-    const [postToDelete, setPostToDelete] = useState<string | null>(null);
-    const deleteForm = useForm({});
 
-    const deletePublicacion = () => {
-        if (!postToDelete) return;
-
-        deleteForm.delete(
-            route('foro.publicaciones.delete', postToDelete), 
-            {
-                preserveScroll: true,
-                only: ['publicaciones'],
-                onFinish: () => setPostToDelete(null),
-            }
-        );
-    };
-
-    /**
-     * Reportar publicación ajena
-     */
-
-    const [postToReport, setPostToReport] = useState<string | null>(null);
-    const reportForm = useForm({ motivo: '' });
-
-    const closeReport = () => { 
-        setPostToReport(null);
-        reportForm.reset();
-        reportForm.clearErrors();
-    };
-
-    const reportPublicacion = () => {
-        if (!postToReport) return;
-
-        reportForm.post(
-            route('foro.publicaciones.reportes.store', postToReport), 
-            {
-                preserveScroll: true,
-                onSuccess: () => closeReport(), 
-            }
-        );
-    };
 
     /**
      * Crear comentario
      */
-
     const { data, setData, post, processing, errors, clearErrors, reset} = 
         useForm<{contenido: string}>({contenido: ''});
 
@@ -143,69 +98,21 @@ export default function Publicacion({
         );
     };
 
-    /**
-     * Toggle me sirvió optimista (automático)
-     */
-
-    const toggleMeSirvio = (publicacion: Publicacion) => {
-        router.post(
-            route('foro.publicaciones.me-sirvio.toggle', publicacion.id), 
-            {}, 
-            { 
-                preserveScroll: true, 
-                // Partial reload: Opción de visita de Inertia, que pide 
-                // al servidor solo algunas props de la página.   
-                // only: ['comentarios'] 
-            }
-        );
-    }
-
-
 
   return (
         <AppLayout headTitle="Publicación | Proposite">
-            
             {/* Modal eliminar publicación */}
-            <FeedbackModal
-                // abierto si hay id publicación en el estado
-                open={postToDelete !== null}
-                tone="danger"
-                title="¿Eliminar esta publicación?"
-                description="La publicación y sus comentarios se eliminarán de forma permanente."
-                confirmLabel="Eliminar"                
-                processing={deleteForm.processing}
-                onConfirm={deletePublicacion}
-                onClose={() => setPostToDelete(null)}
-            />
+            <DeleteModal deletion={deletePublicacion} title="¿Eliminar esta publicación?" />
 
             {/* Modal reportar publicación */}
-            <FeedbackModal
-                open={postToReport !== null}
-                tone="warning"
-                title="Reportar publicación"
-                description="Cuéntanos qué ocurre. Un moderador lo revisará."
-                confirmLabel="Enviar reporte"
-                processing={reportForm.processing}
-                onConfirm={reportPublicacion}
-                onClose={closeReport}
-            >
-                <div className="mt-4">
-                    <Label htmlFor="motivo" className="sr-only">Motivo del reporte</Label>
-                    <Textarea
-                        id="motivo"
-                        rows={4}
-                        value={reportForm.data.motivo}
-                        onChange={(e) => {
-                            reportForm.setData('motivo', e.target.value);
-                            reportForm.clearErrors('motivo');
-                        }}
-                        errors={!!reportForm.errors.motivo}
-                        placeholder="Describe el motivo del reporte"
-                        disabled={reportForm.processing}
-                    />
-                    <InputError message={reportForm.errors.motivo} />
-                </div>                    
-            </FeedbackModal>
+            <ReportModal report={reportPublicacion} title="Reportar publicación" />
+
+            {/* Modal eliminar comentario */}
+            <DeleteModal deletion={deleteComentario} title="¿Eliminar este comentario?" />
+
+            {/* Modal reportar comentario */}
+            <ReportModal report={reportComentario} title="Reportar comentario" />
+
 
             <div className="mx-auto max-w-4xl px-6 py-8 lg:px-8 lg:py-10">
                 <Link
@@ -238,43 +145,17 @@ export default function Publicacion({
 
                         {/* Eliminar / Reportar publicación */}
                         <div className='relative z-10'>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <button 
-                                    type="button" 
-                                    aria-label="Más opciones" 
-                                    className="text-neutral-foreground hover:text-primary">
-                                        <MoreHorizontal className="size-5" />
-                                    </button>
-                                </DropdownMenuTrigger>
-
-                                <DropdownMenuContent 
-                                    className="bg-white border-1 rounded-sm border-muted-foreground/30"
-                                    align="end"
-                                >
-                                    {esAutor ? (
-
-                                    <DropdownMenuItem
-                                        onSelect={() => setPostToDelete(publicacion.id)}
-                                        className="cursor-pointer px-3 py-2 text-neutral-foreground 
-                                        focus:bg-neutral focus:text-primary"
-                                    >
-                                        Eliminar
-                                    </DropdownMenuItem>
-
-                                    ) : (
-
-                                    <DropdownMenuItem
-                                        onSelect={() => setPostToReport(publicacion.id)}
-                                        className="cursor-pointer px-3 py-2 text-neutral-foreground 
-                                        focus:bg-neutral focus:text-primary"
-                                    >
-                                        Reportar
-                                    </DropdownMenuItem>
-
-                                    )}
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+                            <OptionsMenu items={esAutor ? 
+                                [{ 
+                                    label: 'Eliminar', 
+                                    onSelect: () => deletePublicacion.open(publicacion.id) 
+                                }]
+                                : 
+                                [{ 
+                                    label: 'Reportar', 
+                                    onSelect: () => reportPublicacion.open(publicacion.id) 
+                                }]
+                            } />
                         </div>
                     </div>
                     
@@ -282,27 +163,20 @@ export default function Publicacion({
                         {publicacion.contenido}
                     </p>
 
-                    <div style={{display:'hidden'}} id="comentarios"></div>
+                    <div style={{visibility: 'hidden'}} id="comentarios"></div>
 
                     <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-border pt-5">
-                        {/* TODO. Toggle mesirvio */}                    
-                        <button
-                            type="button"
-                            onClick={() => toggleMeSirvio(publicacion)}
-                            aria-pressed={me_sirvio_activo}
-                            className={`inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition ${
-                                me_sirvio_activo ? 'bg-tertiary text-primary' : 
-                                'text-neutral-foreground hover:bg-neutral hover:text-primary'
-                            }`}
-                        >
-                            <Heart className={`size-4 ${me_sirvio_activo ? 'fill-current' : ''}`} />
-                            {me_sirvio} Me sirvió
-                        </button>
+                        <MeSirvioButton
+                            publicacionId={publicacion.id}
+                            activo={me_sirvio_activo}
+                            total={me_sirvio}
+                            variant='full'
+                        />
 
                         <Link
                             href={`${route('foro.publicaciones.show', publicacion.id)}#comentarios`} 
-                            className="inline-flex items-center gap-2 px-3 py-2 text-sm text-neutral-foreground font-semibold
-                            transition text-neutral-foreground hover:bg-neutral hover:text-primary"
+                            className="inline-flex items-center gap-2 rounded-xl transition px-3 py-2 
+                            text-sm font-semibold text-neutral-foreground hover:bg-neutral hover:text-primary"
                         >
                             <MessageCircle className="size-4" />
                             {comentarios?.length} Comentarios
@@ -329,7 +203,6 @@ export default function Publicacion({
                                 userId={auth.user.id} 
                                 username={auth.user.name} 
                             />
-                            {/* TODO. form insertar comentario */}
                             <form className="min-w-0 flex-1" noValidate onSubmit={storeComentario}>
                                 <Label htmlFor="contenido" className="sr-only">
                                     Escribe un comentario
@@ -343,9 +216,6 @@ export default function Publicacion({
                                     }}
 
                                     className="resize-none"
-                                    // className="min-h-20 w-full resize-none rounded-xl border border-border 
-                                    // bg-background px-4 py-3 text-sm outline-none placeholder:text-neutral-foreground 
-                                    // focus:border-primary focus:ring-2 focus:ring-ring/30"
                                     placeholder="Responde a la comunidad..."
                                     disabled={processing}
                                     errors={errors.contenido ? true : false}
@@ -377,31 +247,53 @@ export default function Publicacion({
                     )} */}
 
                     <div className="mt-6 space-y-4">
-                        {comentarios?.map((comentario) => (
-                        <article 
-                            key={comentario.id} 
-                            className="rounded-2xl border border-border bg-background p-5">
-                            <div className="flex gap-3">
-                                <UserAvatar userId={comentario.usuario_id} username={comentario.usuario.name} />
+                        {comentarios?.map((comentario) => {
+                            const esAutorComentario = comentario.usuario_id === auth.user.id;
 
-                                <div>
-                                    <div className="flex flex-wrap items-baseline gap-x-2">
-                                        <h3 className="text-sm font-bold">
-                                            {comentario.usuario.name}
-                                        </h3>
+                            return (
+                                <article key={comentario.id} className="relative rounded-2xl border border-border bg-background p-5">
+                                    <div className="flex items-start justify-between gap-4">
+                                        
+                                        <div className="flex gap-4">
+                                            <UserAvatar userId={comentario.usuario_id} username={comentario.usuario.name} />
 
-                                        <span className="text-xs text-neutral-foreground">
-                                            {publishedSince(comentario.created_at)}
-                                        </span>
+                                            <div className="min-w-0">
+                                                <div className="flex flex-wrap items-baseline gap-x-2">
+                                                    <h3 className="text-sm font-bold">
+                                                        {comentario.usuario.name}
+                                                    </h3>
+
+                                                    <span className="text-xs text-neutral-foreground">
+                                                        {publishedSince(comentario.created_at)}
+                                                    </span>
+                                                </div>
+
+                                                <p className="mt-3 text-sm leading-7 text-neutral-foreground">
+                                                    {comentario.contenido}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* Eliminar / Reportar comentario */}
+                                        <div className="relative z-10 shrink-0">
+                                            <OptionsMenu
+                                                items={ esAutorComentario ? 
+                                                    [{
+                                                        label: 'Eliminar',
+                                                        onSelect: () => deleteComentario.open(comentario.id),
+                                                    }]
+                                                    : 
+                                                    [{
+                                                        label: 'Reportar',
+                                                        onSelect: () => reportComentario.open(comentario.id),
+                                                    }]
+                                                }
+                                            />
+                                        </div>
                                     </div>
-
-                                    <p className="mt-3 text-sm leading-7 text-neutral-foreground">
-                                        {comentario.contenido}
-                                    </p>
-                                </div>
-                            </div>
-                        </article>
-                        ))}
+                                </article>
+                            );
+                        })}
                     </div>
                 </section>
             </div>
