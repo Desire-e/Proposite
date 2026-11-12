@@ -146,6 +146,8 @@ Route::middleware(['auth', 'opositor'])->group(function () {
     
 
 
+    // TODO. PONER PARA ADMIN PERO SIN REGISTRAR RESULTADOS
+    
     // ====== Tests ======
 
     Route::prefix('tests')->name('tests.')->group(function () {
@@ -159,15 +161,15 @@ Route::middleware(['auth', 'opositor'])->group(function () {
             ->name('show'); // tests.show
 
         // Realizando test
-        Route::get('/{test}', [TestsController::class, 'createResultados'])
-            ->name('resultados.create'); // tests.resultados.create
+        Route::get('/{test}/intento', [TestsController::class, 'createIntento'])
+            ->name('intento.create'); // tests.intento.create
 
-        Route::post('/{test}', [TestsController::class, 'storeResultados'])
-            ->name('resultados.store'); // tests.resultados.store
+        Route::post('/{test}/intento', [TestsController::class, 'storeIntento'])
+            ->name('intento.store'); // tests.intento.store
 
-        // Fin test
-        Route::get('/{test}/resultados', [TestsController::class, 'showResultados'])
-            ->name('resultados.show'); // tests.resultados.show
+        // Ver resultado de un intento concreto
+        Route::get('intento/{intentoTest}', [TestsController::class, 'showIntento'])
+            ->name('intento.show'); // tests.intento.show
     });
 
 });

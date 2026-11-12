@@ -18,6 +18,7 @@ use App\Models\Comentario;
 use App\Models\Test;
 use App\Models\IntentoTest;
 use App\Models\Recurso;
+use Carbon\CarbonInterface;
 
 
 class Usuario extends Authenticatable {
@@ -63,30 +64,51 @@ class Usuario extends Authenticatable {
     }
 
 
+    private ?CarbonInterface $borradoEn = null;
+
     // Método especial de los modelos Eloquent de Laravel que se ejecuta una sola vez, 
     // cuando la clase del modelo se usa por primera vez (al arrancar la petición). 
     // Es el sitio oficial para registrar cosas que deben estar activas durante toda la vida del modelo
     
     protected static function booted(): void 
     {
-        // evento de Eloquent disparado antes de que un modelo sea eliminado de la BD
-        static::deleting(function (Usuario $usuario) {
+        static::deleted(function (Usuario $usuario) {
+            // En force delete se propaga soft deletes: las FK con cascadeOnDelete se encargan del borrado físico.
+            if ($usuario->isForceDeleting()) { return; }
 
             // Publicaciones: cada delete arrastra sus comentarios
             $usuario->publicaciones()->get()->each->delete();
-
             // Comentarios del usuario en publicaciones ajenas
             $usuario->comentarios()->get()->each->delete();
-
-            // Recursos subidos
-            // $usuario->recursos()->get()->each->delete();
-
-            // Tests creados: NO se tocan preguntas ni intentos
-            $usuario->testsCreados()->get()->each->delete();
+            $usuario->intentosTests()->delete();
 
             // Los reportes (enviados y recibidos) se conservan
         });
+
+        static::restoring(function (Usuario $usuario) {
+            $usuario->borradoEn = $usuario->deleted_at;
+        });
+
+        // Al restaurar el usuario (revocar baneo), restaurar también hijos
+        static::restored(function (Usuario $usuario) {
+            $usuario->publicaciones()->onlyTrashed()
+                ->where('deleted_at', '>=', $usuario->borradoEn)
+                ->get()->each->restore();
+
+            $usuario->intentosTests()->onlyTrashed()
+                ->where('deleted_at', '>=', $usuario->borradoEn)
+                ->whereHas('test')          // el test sigue activo
+                ->restore();
+
+            $usuario->comentarios()->onlyTrashed()
+                ->where('deleted_at', '>=', $usuario->borradoEn)
+                ->whereHas('publicacion')   // la publicación sigue activa
+                ->restore();
+        });
     }
+
+
+    // Relaciones
 
     // ================
     // OPOSITOR

@@ -21,7 +21,8 @@ class ToggleTemaRequest extends FormRequest
                 'required',
                 // el tema debe existir y ser de la oposición del usuario
                 Rule::exists('temarios', 'id')
-                    ->where('oposicion_id', $this->user()->oposicion_id),
+                    ->where('oposicion_id', $this->user()->oposicion_id)
+                    ->withoutTrashed()
             ],
         ];
     }

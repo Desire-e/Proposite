@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Carbon\CarbonInterface;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -42,16 +43,29 @@ class Publicacion extends Model {
     public $timestamps = true;
     public const UPDATED_AT = null;
 
+
+    private ?CarbonInterface $borradoEn = null;
+
     protected static function booted(): void
     {
-        static::deleting(function (Publicacion $publicacion) {
-            // Comentarios: cada delete es un soft delete individual
-            // (los reportes de esos comentarios se conservan)
-            $publicacion->comentarios()->get()->each->delete();
+        static::deleted(function (Publicacion $publicacion) {
+            if ($publicacion->isForceDeleting()) { return; }
 
-            // Los reportes directos sobre la publicación se conservan
+            $publicacion->comentarios()->delete();
+        });
+
+        static::restoring(function (Publicacion $publicacion) {
+            $publicacion->borradoEn = $publicacion->deleted_at;
+        });
+
+        static::restored(function (Publicacion $publicacion) {
+            $publicacion->comentarios()->onlyTrashed()
+                ->where('deleted_at', '>=', $publicacion->borradoEn)
+                ->whereHas('usuario')
+                ->restore();
         });
     }
+    
     
     // Relaciones
 

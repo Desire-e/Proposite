@@ -45,7 +45,7 @@ class ComentarioSeeder extends Seeder
         ];
 
         foreach ($comentariosPorPublicacion as $inicio => $comentarios) {
-            $publicacion = Publicacion::where('usuario_id', $alba->id)
+            $publicacion = Publicacion::where('usuario_id', $user->id)
                 ->where('contenido', 'like', $inicio . '%')
                 ->first();
 

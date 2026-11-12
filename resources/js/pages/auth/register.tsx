@@ -1,6 +1,6 @@
 import { FormEventHandler, useState } from 'react';
 import { Link, useForm } from '@inertiajs/react';
-import { ArrowLeft, ChevronDown, Eye, EyeOff, GraduationCap, ChevronRight
+import { ChevronDown, Eye, EyeOff, GraduationCap, ChevronRight
 } from 'lucide-react';
 
 // import AppLayout from '@/layouts/AppLayout';
@@ -18,6 +18,7 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
+import { BackLink } from '@/components/ui/BackLink';
 
 
 const aside: asideContentData = {
@@ -103,29 +104,19 @@ export default function Register({
             <section className="flex items-center justify-center px-6 py-10 sm:px-10">
                 <div className="w-full max-w-md">
                     <div className="mb-8 flex items-center justify-between lg:hidden">
-                        <Link
-                            href={route('welcome')}
-                            className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-foreground"
-                        >
-                            <ArrowLeft className="size-4" />
-                            Volver
-                        </Link>
-
-                        <span className="font-heading text-xl font-bold text-primary">
-                            proposite
-                        </span>
+                        <BackLink routeName="welcome">Volver al inicio</BackLink>
                     </div>
 
-                    <div className="mb-7">
-                        <span className="text-xs font-bold uppercase tracking-[0.18em] text-secondary">
+                    <div className="mb-8">
+                        <span className="text-sm font-bold uppercase tracking-[0.18em] text-secondary">
                             Da el primer paso
                         </span>
 
-                        <h2 className="mt-3 font-heading text-4xl font-bold tracking-tight text-foreground">
+                        <h2 className="mt-1 font-heading text-4xl font-bold text-foreground">
                             Crear cuenta
                         </h2>
 
-                        <p className="mt-2 text-sm leading-6 text-neutral-foreground">
+                        <p className="mt-4 leading-6 text-neutral-foreground">
                             Únete a una comunidad que entiende tu objetivo.
                         </p>
                     </div>
@@ -133,7 +124,7 @@ export default function Register({
                     <form
                         onSubmit={submit}
                         noValidate
-                        className="flex flex-col gap-4"
+                        className="flex flex-col gap-5"
                     >
                         <div className="flex flex-col gap-2 text-sm font-medium text-foreground">
                             <Input
@@ -190,7 +181,7 @@ export default function Register({
                                     variant="ghost"
                                     aria-label={ showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña' }
                                     onClick={() => setShowPassword((value) => !value,)}
-                                    className={`${errors.password ? 'text-error!' : ''}
+                                    className={`${errors.password ? 'text-error-foreground!' : ''}
                                     absolute right-0 top-1/2 -translate-y-1/2 
                                     text-neutral-foreground hover:text-primary`}
                                 >
@@ -213,7 +204,7 @@ export default function Register({
                                         appearance-none rounded-sm text-sm border border-border outline-none 
                                         transition focus:border-primary focus:ring-2 focus:ring-ring/30
                                         disabled:cursor-not-allowed disabled:opacity-50
-                                        ${errors.oposicion_id ? 'border-error! placeholder:text-error! focus:border-2!' : ''}`}
+                                        ${errors.oposicion_id ? 'border-error-foreground! placeholder:text-error-foreground! focus:border-2!' : ''}`}
                                     >
                                         <div className='flex gap-2 items-center text-left'>
                                             <GraduationCap 
@@ -255,13 +246,12 @@ export default function Register({
                         </div>
 
 
-                        <p className="-mt-2 text-xs font-normal text-neutral-foreground">
-                            Selecciona la oposición a la que te estás
-                            presentando.
+                        <p className="-mt-2 text-sm font-normal text-neutral-foreground">
+                            Selecciona la oposición a la que te estás presentando.
                         </p>
 
                         <div className="flex flex-col items-start gap-2 mt-2 text-sm font-normal 
-                        leading-5 text-neutral-foreground">
+                        leading-5 text-foreground">
                             <label htmlFor="terminos" className='text-sm flex gap-3 items-center'> 
                                 <Checkbox
                                     id="terminos"
@@ -289,20 +279,19 @@ export default function Register({
                             type="submit"
                             disabled={processing}
                             className="mt-2 h-12 w-full rounded-xl bg-primary font-semibold 
-                            text-primary-foreground shadow-lg shadow-primary/20 transition hover:bg-tertiary-foreground"
+                            text-primary-foreground shadow-lg  text-base shadow-primary/20 
+                            transition hover:bg-tertiary-foreground"
                         >
                             {processing ? 'Creando cuenta…' : 'Crear mi cuenta'}
                         </Button>
                     </form>
 
-                    <div className="my-6 h-px bg-border" />
+                    <div className="my-7 h-px bg-border" />
 
                     <p className="text-sm text-neutral-foreground text-center">
                         ¿Ya tienes una cuenta?{' '}
                         <AccentText underline={true}>
-                            <Link href={route('login')}>
-                                Inicia sesión
-                            </Link>
+                            <Link href={route('login')}>Inicia sesión</Link>
                         </AccentText>
                     </p>
                 </div>

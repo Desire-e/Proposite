@@ -6,6 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Tema;
 use App\Models\Oposicion;
+use RuntimeException;
 
 class TemarioMaestroPrimariaSeeder extends Seeder
 {
