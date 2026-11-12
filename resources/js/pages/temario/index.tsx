@@ -1,34 +1,14 @@
-// import { useMemo, useState } from 'react'
 import { useState, useEffect, useMemo } from 'react'
-import { Check, ExternalLink, FileText, 
-    // BookOpen, Filter, GraduationCap, ChevronRight, Search, Target, 
-} from 'lucide-react'
 import { router } from '@inertiajs/react'
+import { type Oposicion, type Tema } from '@/types/models';
+
 import AppLayout from '@/layouts/AppLayout';
+import { PageHero } from '@/components/PageHero';
+import { TemaItem } from '@/components/temario/TemaItem';
+import { SectionHeading } from '@/components/ui/SectionHeading';
+import { ProgressBar } from '@/components/ui/ProgressBar';
 
-type Recurso = {
-    subido_por: string;  
-    temario_id: string; 
-    titulo: string;
-    recurso_url: string;
-}
-
-type Oposicion = {
-    id: string;
-    nombre: string;
-    descripcion: string;
-};
-
-type Tema = {
-    id: string;
-    bloque: string | null;
-    numero_tema: string;
-    titulo: string;
-    recursos?: Recurso[] | null;
-    checked: boolean;
-}
-
-type Bloque = { 
+type Bloque ={ 
     nombre: string | null; 
     temas: Tema[] 
 };
@@ -37,8 +17,6 @@ type Bloque = {
 
 export default function Temario(
     {temario, oposicion}: {temario: Tema[], oposicion: Oposicion}
-    // { _opposition, callLabel = 'Convocatoria 2026', _topics, studiedTopicIds = [], urls = {}, }:  
-    // SyllabusIndexProps
 ){
 
     // Copia local del temario
@@ -145,27 +123,12 @@ export default function Temario(
         <AppLayout headTitle="Temario oficial | Proposite">
 
             <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8 lg:py-10">
-                {/* Hero */}
-                <section className="rounded-3xl border border-border bg-tertiary px-6 py-7 lg:px-10 lg:py-9">
-                    <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
-                        <div className="max-w-2xl">
-                            <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-secondary">
-                                Tu preparación
-                            </div>
-
-                            <h1 className="font-serif text-3xl font-bold tracking-tight text-primary lg:text-5xl">
-                                Temario de {oposicion.nombre}
-                            </h1>
-
-                            <p className="mt-3 max-w-xl text-sm leading-6 text-neutral-foreground">
-                                Consulta el temario oficial, marca cada tema cuando lo hayas estudiado. Tu progreso se guardará 
-                                en tu perfil para que puedas volver cuando quieras.
-                            </p>
-
-                   
-                        </div>
-
-                        {/* Progreso */}
+                <PageHero
+                    eyebrow="Tu preparación"
+                    title={`Temario de ${oposicion.nombre}`}
+                    description="Consulta el temario oficial, marca cada tema cuando lo hayas estudiado. Tu progreso se guardará en tu perfil para que puedas volver cuando quieras."
+                    aside={
+                        // Progreso
                         <div className="w-full max-w-xs rounded-2xl bg-background p-5 shadow-sm">
                             <div className="mb-3 flex items-end justify-between">
                                 <span className="text-xs font-semibold text-neutral-foreground">
@@ -177,35 +140,24 @@ export default function Temario(
                                 </strong>
                             </div>
 
-                            <div className="h-2 overflow-hidden rounded-full bg-tertiary">
-                                <span
-                                    className="block h-full rounded-full bg-secondary transition-all"
-                                    style={{ width: `${porcentaje}%` }}
-                                />
-                            </div>
+                            <ProgressBar porcentaje={porcentaje} />
+
                             <p className="mt-3 text-xs text-neutral-foreground">
                                 {completados} de {temarioLocal.length} temas marcados
                                 como estudiados
                             </p>
                         </div>
-                    </div>
-                </section>
+                    }
+                />
 
                 {/* Temas */}
                 <section className='mt-8 gap-4'>
-                    <div className="mb-4 flex items-center justify-between">
-                        <div>
-                            <p className="text-xs font-bold uppercase tracking-[0.16em] text-secondary">
-                                Índice del BOE
-                            </p>
+                    <SectionHeading
+                        eyebrow="Índice del BOE"
+                        title="Todos los temas"
+                        className="mb-4 text-foreground"
+                    />
 
-                            <h2 className="mt-1 font-serif text-2xl font-bold text-foreground">
-                                Todos los temas
-                            </h2>
-                        </div>
-                    </div>
-
-                    {/* TODO. */}
                     {/* Listado de temas (temario oficial) */}
                     <div className="flex flex-col gap-3">
                         
@@ -213,7 +165,7 @@ export default function Temario(
                         <div key={bloque.nombre ?? 'sin-bloque'} className="flex flex-col gap-3">
                             {/* Mostrar el título solo si existe un bloque */}
                             {bloque.nombre && (
-                                <h3 className="font-serif text-xl font-bold text-foreground">
+                                <h3 className="font-heading text-xl font-bold text-foreground">
                                     {bloque.nombre}
                                 </h3>
                             )}
@@ -221,74 +173,12 @@ export default function Temario(
                             {/* Recorrer los temas de este bloque */}
                             <div className="flex flex-col gap-3">
                                 {bloque.temas.map((tema) => (
-                                <article
-                                    key={tema.id}
-                                    className={`rounded-2xl border bg-background p-5 transition-colors 
-                                        ${tema.checked ? 'border-secondary/50 bg-tertiary/40' : 'border-border'}
-                                    `}
-                                >
-                                    <div className="flex gap-4">
-                                        <button
-                                            type="button"
-                                            disabled={savingCheck}
-                                            onClick={() => toggleCheck(tema.id, tema.checked)}
-                                            aria-pressed={tema.checked}
-                                            aria-label={`${tema.checked ? 'Desmarcar' : 'Marcar'} tema 
-                                                ${tema.numero_tema} como estudiado
-                                            `}
-                                            className={`mt-0.5 flex size-6 shrink-0 items-center justify-center 
-                                                rounded-lg border-2 transition-colors ${tema.checked ? 
-                                                    'border-primary bg-primary text-primary-foreground' : 
-                                                    'border-secondary bg-background text-transparent hover:bg-tertiary'
-                                            }`}
-                                        >
-                                            <Check className="size-4" />
-                                        </button>
-
-                                        <div className="min-w-0 flex-1">
-                                            <div className="flex flex-col justify-between gap-2 sm:flex-row">
-                                                <div>
-                                                    <p className="text-xs font-bold uppercase tracking-[0.12em] text-secondary">
-                                                        Tema {tema.numero_tema}
-                                                    </p>
-
-                                                    <h3 className={`mt-1 text-base font-bold ${tema.checked ? 
-                                                    'text-primary' : 'text-foreground'}`}>
-                                                        {tema.titulo}
-                                                    </h3>
-                                                </div>
-
-                                                {tema.checked && (
-                                                    <span className="inline-flex h-fit items-center gap-1 rounded-full 
-                                                    bg-tertiary px-2.5 py-1 text-[11px] font-bold text-tertiary-foreground">
-                                                        <Check className="size-3" />
-                                                        Estudiado
-                                                    </span>
-                                                )}
-                                            </div>
-
-                                            {/* <p className="mt-2 text-sm leading-6 text-neutral-foreground">
-                                                ejemplo de resumen del tema 
-                                            </p> */}
-
-                                            <div className="mt-4 flex flex-wrap items-center gap-3">
-                                                {tema.recursos?.map((recurso) => (
-                                                    <a
-                                                        key={`${recurso.temario_id}-${recurso.titulo}`}
-                                                        href={recurso.recurso_url}
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                        className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:text-secondary"
-                                                    >
-                                                        <FileText className="size-3.5" />
-                                                        {recurso.titulo}
-                                                        <ExternalLink className="size-3" />
-                                                    </a>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </article>
+                                    <TemaItem
+                                        key={tema.id}
+                                        tema={tema}
+                                        disabled={savingCheck}
+                                        onToggle={() => toggleCheck(tema.id, tema.checked)}
+                                    />
                                 ))}
                             </div>
                         </div>
