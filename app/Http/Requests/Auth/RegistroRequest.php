@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class RegistroRequest extends FormRequest
 {
@@ -21,7 +22,7 @@ class RegistroRequest extends FormRequest
             'oposicion_id' => [
                 'required',
                 'uuid',
-                'exists:oposiciones,id',
+                Rule::exists('oposiciones', 'id')->withoutTrashed(),
             ],
             'name' => [
                 'required', 

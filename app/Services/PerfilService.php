@@ -21,9 +21,9 @@ class PerfilService
             'id' => $user->id,
             'name' => $user->name,
             'oposicion' => $user->oposicion->only(['nombre', 'descripcion']),
-            'biografia' => $user->biografia ?? null,
+            'biografia' => $user->biografia,
             'signed_up_at' => $user->created_at,
-            'anio_convocatoria' => $user->fecha_convocatoria?->format('Y') ?? null,
+            'anio_convocatoria' => $user->fecha_convocatoria?->format('Y'),
             'progreso' => $this->progresoTemario($user),
             'estadisticas' => $this->estadisticasTests($ultimosIntentos),
             'tema_mas_fuerte' => $this->temaMasFuerte($ultimosIntentos),
@@ -31,6 +31,9 @@ class PerfilService
         ];
     }
 
+    // ====================
+    // Consultas
+    // ====================
 
     /**
      * @return Collection del último intento de cada test que ha 
@@ -43,14 +46,11 @@ class PerfilService
             ->with('test.temario')
             // ordena intento de nuevo a viejo
             ->orderByDesc('created_at')->get() 
-            // quita intentos en tests eliminados
-            ->filter(fn ($intento) => $intento->test !== null)
             // se queda con el primero de cada test, el más nuevo
             ->unique('test_id');
 
         return $ultimosIntentosTest;  
     }
-
 
     /**
      * Obtiene @param Usuario y mide progreso de temas marcados estudiados
@@ -59,15 +59,15 @@ class PerfilService
      */
     private function progresoTemario(Usuario $user): array
     {
-        $totalTemas = Tema::where('oposicion_id', $user->oposicion_id)->count();
+        $totalTemas = $user->oposicion->temario()->count();
 
         // Temas de esa oposición marcados como estudiados.
         $temasEstudiados = $user->checkedTemario() // obtiene temarios estudiados
             ->where('temarios.oposicion_id', $user->oposicion_id) // solo temas de su oposición
             ->count();
             
-        $porcentaje = $totalTemas > 0 ? 
-            (int) round($temasEstudiados / $totalTemas * 100) : 
+        $porcentaje = $totalTemas > 0 
+            ? (int) round($temasEstudiados / $totalTemas * 100) : 
             0;
 
         return [
@@ -77,6 +77,39 @@ class PerfilService
         ];
     }
 
+    /**
+     * @return Collection de las 2 últimas publicaciones 
+     * o comentarios del @param Usuario
+     */
+    private function actividadReciente(Usuario $user): Collection
+    {
+        $publicaciones = $user->publicaciones()
+            ->latest()->take(2)->get()
+            ->map(fn ($p) => [
+                'id' => $p->id,
+                'tipo' => 'publicacion',
+                'texto' => $p->contenido,
+                'created_at' => $p->created_at,
+            ]);
+
+        $comentarios = $user->comentarios()
+            ->latest()->take(2)->get()
+            ->map(fn ($c) => [
+                'id' => $c->id,
+                'tipo' => 'comentario',
+                'texto' => $c->contenido,
+                'publicacion_id' => $c->publicacion_id,
+                'created_at' => $c->created_at,
+            ]);
+
+        return $publicaciones->concat($comentarios)
+            ->sortByDesc('created_at')->take(2)->values();
+    }
+
+
+    // ====================
+    // Cálculos
+    // ====================
 
     /**
      * @param Collection de ultimosIntentosTest()
@@ -105,7 +138,6 @@ class PerfilService
         ];
     }
 
-
     /**
      * @param Collection de ultimosIntentosTest() del usuario
      * @return array de tema con mejor nota media 
@@ -114,8 +146,6 @@ class PerfilService
     private function temaMasFuerte(Collection $ultimosIntentos): ?array
     {
         $mejorNotaTema = $ultimosIntentos
-            // quita intentos de tests asociados a temas eliminados 
-            ->filter(fn ($intento) => $intento->test->temario !== null)
             // agrupa los intentos por temario
             ->groupBy(fn ($intento) => $intento->test->temario_id)
             // transforma cada grupo de intentos por tema, en un 
@@ -131,34 +161,4 @@ class PerfilService
     
         return $mejorNotaTema;
     }
-
-
-    /**
-     * @return Collection de las 2 últimas publicaciones 
-     * o comentarios del @param Usuario
-     */
-    private function actividadReciente(Usuario $user): Collection
-    {
-        $publicaciones = $user->publicaciones()
-            ->latest()->take(2)->get()
-            ->map(fn ($p) => [
-                'id' => $p->id,
-                'tipo' => 'publicacion',
-                'texto' => $p->contenido,
-                'created_at' => $p->created_at,
-            ]);
-
-        $comentarios = $user->comentarios()
-            ->latest()->take(2)->get()
-            ->map(fn ($c) => [
-                'id' => $c->id,
-                'tipo' => 'comentario',
-                'texto' => $c->contenido,
-                'created_at' => $c->created_at,
-            ]);
-
-        return $publicaciones->concat($comentarios)
-            ->sortByDesc('created_at')->take(2)->values();
-    }
-
 }

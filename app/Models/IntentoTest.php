@@ -4,14 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\Test;
 use App\Models\Usuario;
 
 class IntentoTest extends Model {
     
-    use HasUuids;
+    use HasUuids, SoftDeletes;
 
     protected $table = "intentos_test";
 
@@ -27,6 +27,14 @@ class IntentoTest extends Model {
     
     public $timestamps = true;
     public const UPDATED_AT = null;
+
+    // Accesor
+    // public const NOTA_APROBADO = 5;
+
+    // public function getAprobado(): bool
+    // {
+    //     return $this->nota >= self::NOTA_APROBADO;
+    // }
 
 
     // Relaciones
