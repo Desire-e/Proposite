@@ -2,8 +2,11 @@
 /**
  * Saber desde hace cuanto fue publicado una publicacion/comentario
  */
-export function publishedSince(dateStr: string): string {
-    const mins = Math.floor((Date.now() - new Date(dateStr).getTime()) / 60_000);
+export function publishedSince(dateStr: string, untilNow: number = Date.now()): string {
+    const diffMs = untilNow - new Date(dateStr).getTime();
+
+    const secs = Math.floor(diffMs / 1000);
+    const mins = Math.floor(secs / 60);
     const hours = Math.floor(mins / 60);
     const days = Math.floor(hours / 24);
 

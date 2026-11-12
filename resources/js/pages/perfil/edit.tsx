@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/AppLayout';
-import { ArrowLeft, Save } from 'lucide-react'
+import { Save } from 'lucide-react'
 import { Link, useForm} from '@inertiajs/react';
 
 import { FormEventHandler } from 'react';
@@ -8,6 +8,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Textarea from '@/components/ui/Textarea';
+import { SectionCard } from '@/components/ui/SectionCard';
+import { SectionHeading } from '@/components/ui/SectionHeading';
+import { BackLink } from '@/components/ui/BackLink';
 
 type EditPerfilForm = {
     name: string;
@@ -50,25 +53,18 @@ export default function Edit({ user }: EditProps) {
 
     return (
         <AppLayout headTitle={'Editar perfil | Proposite'}>
-            <div className="mx-auto max-w-3xl my-5">
-                <Link
-                    href={route('perfil.show')}
-                    className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-foreground 
-                    transition hover:text-primary"
-                >
-                    <ArrowLeft className="size-4" />
-                    Volver a mi perfil
-                </Link>
+            <div className="mx-auto max-w-3xl my-5 m-10">
+                <BackLink routeName="perfil.show">Volver a mi perfil</BackLink>
 
-                <section className="mt-8 rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-10">
+                <SectionCard className="mt-8 p-6 shadow-sm sm:p-10 m-5">
                     <div className="max-w-xl">
-                        <p className="text-xs font-bold uppercase tracking-[0.16em] text-secondary">
-                            Tu identidad en la comunidad
-                        </p>
-
-                        <h1 className="mt-3 font-heading text-4xl font-bold tracking-tight text-primary">
-                            Editar perfil
-                        </h1>
+                        <SectionHeading
+                            as="h1"
+                            size="lg"
+                            eyebrow="Tu identidad en la comunidad"
+                            title="Editar perfil"
+                            className="text-primary"
+                        />
 
                         <p className="mt-3 leading-7 text-neutral-foreground">
                             Actualiza la información que compartes con otros opositores.
@@ -158,7 +154,7 @@ export default function Edit({ user }: EditProps) {
                             </Button>
                         </div>
                     </form>
-                </section>
+                </SectionCard>
 
             </div>
         </AppLayout>

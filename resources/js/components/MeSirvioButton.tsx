@@ -49,8 +49,8 @@ export function MeSirvioButton({ publicacionId, activo, total, variant = 'compac
     // Estilos
     const base = 'inline-flex items-center gap-2 rounded-xl transition';
     const styles = {
-        compact: `gap-1.5 text-xs ${activo ? 'font-bold text-primary' : 'text-neutral-foreground hover:text-primary'}`,
-        full: `px-3 py-2 text-sm font-semibold ${activo ? 'bg-tertiary text-primary' : 'text-neutral-foreground hover:bg-neutral hover:text-primary'}`,
+        compact: `gap-1.5 text-xs ${isActivo ? 'font-bold text-primary' : 'text-neutral-foreground hover:text-primary'}`,
+        full: `text-sm font-semibold ${isActivo ? 'text-primary' : 'text-neutral-foreground hover:text-primary'}`,
     };
 
     return (

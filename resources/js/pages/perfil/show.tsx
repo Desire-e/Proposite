@@ -1,11 +1,13 @@
 import { ArrowRight, CalendarDays, Edit3, GraduationCap, Target, Trophy, Users } from "lucide-react";
 import AppLayout from '@/layouts/AppLayout';
 import UserAvatar from "@/components/ui/UserAvatar";
-import ProfileCard from "@/components/perfil/ProfileCard";
-import { OptionsMenu } from '@/components/OptionsMenu';
+import { SectionCard } from "@/components/ui/SectionCard";
+import { StatCard } from "@/components/ui/StatCard";
+import { AccionesContenido } from '@/components/AccionesContenido';
 import { Link } from '@inertiajs/react';
 
 import { publishedSince } from '@/lib/dates';
+import { useUntilNow } from '@/hooks/use-until-now';
 import { formatMY } from "@/lib/dates";
 
 import { ReportModal } from "@/components/ReportModal";
@@ -38,6 +40,7 @@ type RecentActivity = {
     id: string;
     tipo: 'publicacion' | 'comentario';
     texto: string;
+    publicacion_id?: string; // comentario asociado a una publicacion
     created_at: string;
 }
 
@@ -78,6 +81,9 @@ export default function Perfil({ user, es_propio }: PerfilProps) {
             : (es_propio ? 'Tu aprobado está en camino' : 'Está cerca de la meta');
 
 
+    /** Hook propio para actualizar desde cuando se publicó comentario/publicacion */
+    const untilNow = useUntilNow();
+
 
     return (
 
@@ -89,15 +95,9 @@ export default function Perfil({ user, es_propio }: PerfilProps) {
             <div className="mx-auto w-full max-w-6xl px-4 py-6">
 
                 {/* Profile hero */}
-                <section className="relative flex flex-col p-6 md:flex-col md:px-9 md:py-8  
-                gap-6 rounded-2xl border border-border bg-white shadow-sm">
-                    
-                    <div className="text-xs font-extrabold uppercase tracking-[0.13em] text-secondary">
-                        <span className="mr-2 inline-block size-2 rounded-full bg-success-foreground" />
-                        Perfil de opositor
-                    </div>
+                <SectionCard className="relative flex flex-col gap-6 p-6 shadow-sm md:px-9 md:py-8">
 
-                    <div className="flex md:flex-row flex-col gap-6 items-center justify-between">
+                    <div className="flex md:flex-row flex-col gap-6 md:items-center justify-between">
                         <div className="flex flex-col gap-2 lg:w-[50%] lg:w-[60%]">
                             
                             <div className="grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-2 sm:gap-x-5">
@@ -119,17 +119,23 @@ export default function Perfil({ user, es_propio }: PerfilProps) {
                                 </p>
                             </div>
 
-                            <div className="flex flex-col gap-2 text-xs">
-                                <p className="mb-3 mt-3 leading-relaxed text-neutral-foreground">
-                                    {user.biografia ?? ''}
-                                </p>
+                            <div className="flex flex-col gap-2 text-sm">
+
+                                {user.biografia &&
+                                    <p className="mb-3 mt-3 leading-relaxed text-neutral-foreground">
+                                        {user.biografia}
+                                    </p>
+                                }
+
 
                                 {/* Fecha registro, convocatoria */}
                                 <div className="flex flex-col gap-2 text-neutral-foreground sm:flex-row sm:gap-5">
-                                    <span className="flex items-center gap-2">
+                                    <span className="flex items-center gap-2 mt-2">
                                         <CalendarDays size={15} /> En Proposite desde {formatMY(user.signed_up_at)}
                                     </span>
+
                                     {user.anio_convocatoria &&
+                                    
                                     <span className="flex items-center gap-2">
                                         <Target size={15} /> Convocatoria {user.anio_convocatoria}
                                     </span>}
@@ -140,17 +146,15 @@ export default function Perfil({ user, es_propio }: PerfilProps) {
                         {/* Solo puede verlo el usuario si no es su propio perfil */}
                         {!es_propio ? (
                             <div className="absolute right-5 md:right-10 top-3 md:top-6">
-                                <OptionsMenu items={
-                                    [{ 
-                                        label: 'Reportar', 
-                                        onSelect: () => reportUsuario.open(user.id) 
-                                    }]
-                                }/>
+                                <AccionesContenido
+                                    esAutor={false}
+                                    onReportar={() => reportUsuario.open(user.id)}
+                                />
                             </div>
                         ) : (
                             <Link
                                 href={route('perfil.edit')}
-                                className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-border 
+                                className="inline-flex w-max md:w-auto shrink-0 items-center gap-2 rounded-lg border border-border 
                                 px-4 py-3 text-xs font-semibold text-primary transition-colors hover:bg-tertiary"
                             >
                                 <Edit3 size={15} /> Editar perfil
@@ -158,15 +162,16 @@ export default function Perfil({ user, es_propio }: PerfilProps) {
                         )}
 
                     </div>
-                </section>
+                </SectionCard>
 
 
                 <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[1.2fr_0.8fr]">
                     
-                    <ProfileCard 
+                    <SectionCard 
                         brow={es_propio ? "Tu preparación" : "Su preparación"}
                         title={"Avance del temario"} 
                         link={es_propio ? { label: "Ver temario", route: "temario.index" } : undefined}
+                        className="md:p-6"
                     >
                         <div className="my-6 flex items-center gap-4 sm:gap-6">
                             <div 
@@ -185,54 +190,28 @@ export default function Perfil({ user, es_propio }: PerfilProps) {
                             </div>
 
                             <div className="min-w-0 flex-1">
-                                <span className="text-sm font-bold">
+                                <span className="font-bold">
                                     {mensajeProgreso}
                                 </span>
 
-                                <p className="mb-3 mt-2 text-xs leading-relaxed text-neutral-foreground">
+                                <p className="mb-3 mt-2 text-sm leading-relaxed text-neutral-foreground">
                                     {es_propio ? 'Has estudiado' : `${user.name} ha estudiado`}{' '}
                                     {user.progreso.temas_estudiados} de {user.progreso.total_temas} temas del temario oficial.
                                 </p>
                             </div>
                         </div>
-                    </ProfileCard>
+                    </SectionCard>
 
 
-                    <ProfileCard 
+                    <SectionCard 
                         brow={es_propio ? "Tu rendimiento" : "Su rendimiento"} 
                         title="Una mirada rápida"
+                        className="md:p-6"
                     >
-                        <>
                         <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-2.5">
-                            <div className="rounded-[11px] bg-neutral px-2 py-3.5 sm:px-3">
-                                <span className="block font-bold font-heading text-2xl font-bold text-primary">
-                                    {user.estadisticas.nota_media}
-                                </span>
-
-                                <span className="mt-2 block text-xs">
-                                    Nota media
-                                </span>
-                            </div>
-
-                            <div className="rounded-[11px] bg-neutral px-2 py-3.5 sm:px-3">
-                                <span className="block font-bold font-heading text-2xl font-bold text-primary">
-                                    {user.estadisticas.tests_realizados}
-                                </span>
-
-                                <span className="mt-2 block text-xs">
-                                    Tests realizados
-                                </span>
-                            </div>
-
-                            <div className="rounded-[11px] bg-neutral px-2 py-3.5 sm:px-3">
-                                <span className="block font-bold font-heading text-2xl font-bold text-primary">
-                                    {user.estadisticas.tests_aprobados}
-                                </span>
-
-                                <span className="mt-2 block text-xs">
-                                    Tests aprobados
-                                </span>
-                            </div>
+                            <StatCard variant="tile" value={user.estadisticas.nota_media} label="Nota media" />
+                            <StatCard variant="tile" value={user.estadisticas.tests_realizados} label="Tests realizados" />
+                            <StatCard variant="tile" value={user.estadisticas.tests_aprobados} label="Tests aprobados" />
                         </div>
 
                         <div className="mt-5 flex items-center gap-2 border-t border-border pt-4 text-xs text-neutral-foreground">
@@ -245,7 +224,7 @@ export default function Perfil({ user, es_propio }: PerfilProps) {
                                         'Su tema más fuerte es '
                                     }
                                     <span className="font-bold text-primary">
-                                        {user.tema_mas_fuerte.titulo} 
+                                        {user.tema_mas_fuerte.titulo.slice(0, user.tema_mas_fuerte.titulo.indexOf('.'))}
                                     </span>
                                 </span>
                             </>) : (
@@ -257,34 +236,49 @@ export default function Perfil({ user, es_propio }: PerfilProps) {
                                 </span>
                             )}
                         </div>
-                        </>
-                    </ProfileCard>
+                    </SectionCard>
                     
-                    <ProfileCard 
+                    <SectionCard 
                         brow={"En comunidad"} 
                         title={"Actividad reciente"} 
-                        className={es_propio ? '' : 'lg:col-span-2'}
+                        className={es_propio ? 'md:p-6' : 'md:p-6 lg:col-span-2'}
                     >
                         <div className="my-6 flex flex-col gap-5">
                             {user.actividad_reciente.length > 0 ? (
                             user.actividad_reciente.map((actividad) =>{
-
-                                const accion = actividad.tipo === 'comentario' ?
+                                
+                                const esComentario = actividad.tipo === 'comentario';
+                                
+                                const accion = esComentario ?
                                     (es_propio ? 'Comentaste' : 'Comentó') :
                                     (es_propio ? 'Publicaste' : 'Publicó');
                                 
                                 return (
-                                    <div key={actividad.id} className="flex gap-3">
-                                        <div>
-                                            <span className="text-sm font-bold">{accion}</span>
-                                            <p className="my-1 text-xs text-neutral-foreground">
-                                                {actividad.texto}
-                                            </p>
-                                            <small className="text-xs text-neutral-foreground">
-                                                {publishedSince(actividad.created_at)}
-                                            </small>
+                                    <Link 
+                                        key={actividad.id} 
+                                        href={esComentario 
+                                            // Con esto, al hacer clic en un comentario se abre la publicación y el navegador 
+                                            // salta al elemento con id="comentario-<uuid>".
+                                            ? route('foro.publicaciones.show', actividad.publicacion_id) + `#comentario-${actividad.id}`
+                                            : route('foro.publicaciones.show', actividad.id)
+                                        }
+                                        >
+                                        <div  className="flex gap-3">
+                                            <div>
+                                                <span className="text-sm font-bold">{accion}</span>
+                                                <p className="my-1 text-xs text-neutral-foreground">
+                                                    {actividad.texto.length > 150 
+                                                        // slice para cortar en el índice 100 y añadir puntos suspensivos
+                                                        ? actividad.texto.slice(0, 100) + '...'
+                                                        : actividad.texto
+                                                    }
+                                                </p>
+                                                <small className="text-xs text-neutral-foreground">
+                                                    {publishedSince(actividad.created_at, untilNow)}
+                                                </small>
+                                            </div>
                                         </div>
-                                    </div>
+                                    </Link>
                                 );
                             })
                             ) : (
@@ -296,7 +290,7 @@ export default function Perfil({ user, es_propio }: PerfilProps) {
                                 </div>
                             )}
                         </div>
-                    </ProfileCard>
+                    </SectionCard>
                     
 
                     {es_propio && (

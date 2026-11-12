@@ -36,8 +36,7 @@ class ForosController extends Controller
         return Inertia::render('foro/index', [
             'oposicion' => $oposicion,
             'publicaciones' => $publicaciones,
-            'miembros' => $oposicion->usuarios()
-                ->where('rol', Rol::OPOSITOR)->count(),
+            'miembros' => $oposicion->usuarios()->count(),
         ]);
     }
     
