@@ -49,7 +49,8 @@ html { scroll-behavior: smooth; }
 
     --ring:#818CF8;
 
-    --error: #db040b;
+    --error-foreground: #af191e;
+    --error: #f8eced;
 
     --success: #ecfdf5; 
     --success-foreground: #00a63e;
@@ -80,6 +81,7 @@ html { scroll-behavior: smooth; }
     
     --color-ring: var(--ring); 
     
+    --color-error-foreground: var(--error-foreground);
     --color-error: var(--error);
 
     --color-success: var(--success);

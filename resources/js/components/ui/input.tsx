@@ -20,7 +20,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 // 'focus:outline-hidden focus:border-muted-foreground',
                 'disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
                 className,
-                errors ? 'border-error! placeholder:text-error! focus:ring-4 focus:ring-error/20' : '',
+                errors ? 'border-error-foreground! placeholder:text-error-foreground! focus:ring-4 focus:ring-error-foreground/20' : '',
             )}
             ref={ref}
             {...props}

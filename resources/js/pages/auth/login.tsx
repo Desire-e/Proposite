@@ -1,12 +1,13 @@
 import { FormEventHandler, useState } from 'react';
 import { Link, useForm } from '@inertiajs/react';
-import { ArrowLeft, Eye, EyeOff, } from 'lucide-react';
+import { Eye, EyeOff, } from 'lucide-react';
 
 import { AuthLayout, type asideContentData } from '@/layouts/AuthLayout';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import AccentText from '@/components/ui/AccentText';
+import { BackLink } from '@/components/ui/BackLink';
 
 type LoginForm = {
     email: string;
@@ -49,24 +50,19 @@ export default function Login() {
                 <section className="flex items-center justify-center px-6 py-10 sm:px-10">
                     <div className="w-full max-w-md">
                         <div className="mb-10 flex items-center justify-between lg:hidden">
-                            <Link
-                                href={route('welcome')}
-                                className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-foreground"
-                            >
-                                <ArrowLeft className="size-4" /> Volver
-                            </Link>
+                            <BackLink routeName="welcome">Volver al inicio</BackLink>
                         </div>
 
                         <div className="mb-8">
-                            <span className="inline-flex items-center gap-2 
-                            text-xs font-bold uppercase tracking-[0.18em] text-secondary">
-                                <span className="size-2 rounded-full bg-secondary" />
-                                Proposite
+                            <span className="text-sm font-bold uppercase tracking-[0.18em] text-secondary">
+                                Tu jornada acompañada
                             </span>
-                            <h2 className="mt-3 font-heading text-4xl font-bold tracking-tight text-foreground">
+
+                            <h2 className="mt-1 font-heading text-4xl font-bold text-foreground">
                                 Inicio de sesión
                             </h2>
-                            <p className="mt-2 text-sm leading-6 text-neutral-foreground">
+
+                            <p className="mt-4 leading-6 text-neutral-foreground">
                                 Bienvenido de nuevo. Sigamos avanzando.
                             </p>
                         </div>
@@ -112,7 +108,7 @@ export default function Login() {
                                         variant="ghost"
                                         aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña' }
                                         onClick={() => setShowPassword((value) => !value,)}
-                                        className={`${errors.password ? 'text-error!' : ''}
+                                        className={`${errors.password ? 'text-error-foreground!' : ''}
                                         absolute right-0 top-1/2 -translate-y-1/2 
                                         text-neutral-foreground hover:text-primary`}
                                     >
@@ -137,7 +133,7 @@ export default function Login() {
 
                         <div className="my-7 h-px bg-border" />
 
-                        <p className="text-sm text-neutral-foreground">
+                        <p className="text-sm text-neutral-foreground text-center">
                             ¿No tienes una cuenta?{' '}
                             <AccentText underline={true}>
                                 <Link href={route('register')}>Regístrate</Link>
