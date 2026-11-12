@@ -1,6 +1,5 @@
 import { Head } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
-import { Link } from '@inertiajs/react';
+import { BackLink } from '@/components/ui/BackLink';
 
 export type asideContentData = {
     brow: string;
@@ -19,21 +18,16 @@ export function AuthLayout(
             <Head title={headTitle} />
 
             <aside className="hidden bg-primary p-10 text-primary-foreground lg:flex lg:flex-col lg:justify-between">
-                <Link
-                    href={route('welcome')}
-                    className="inline-flex w-fit items-center gap-2 
-                    font-semibold text-primary-foreground/80 transition hover:text-primary-foreground"
-                >
-                    <ArrowLeft className="size-5" />
+                <BackLink className="text-primary-foreground hover:text-primary-foreground/70" routeName="welcome">
                     Volver al inicio
-                </Link>
+                </BackLink>
 
                 <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-secondary">
+                    <p className="text-sm font-bold uppercase tracking-[0.16em] text-secondary">
                         {asideContent.brow}
                     </p>
 
-                    <h1 className="mt-5 max-w-md font-heading text-6xl font-bold leading-none">
+                    <h1 className="mt-3 max-w-md font-heading text-6xl font-bold leading-none">
                         {asideContent.title}
                     </h1>
 

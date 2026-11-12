@@ -17,7 +17,7 @@ export default function AppLogo({lightMode}: {lightMode: boolean}) {
                 </span>
                 <span 
                     className={`font-heading text-2xl font-bold 
-                    ${lightMode ? 'tracking-tight text-slate-900' : ''}`}
+                    ${lightMode ? 'text-slate-900' : ''}`}
                 >
                     proposite
                 </span>

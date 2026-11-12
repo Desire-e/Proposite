@@ -24,7 +24,6 @@ export interface NavItem {
     sectionId?: string;
 }
 
-// unused
 export interface SharedData {
     name: string;
     quote: { message: string; author: string };
@@ -32,14 +31,13 @@ export interface SharedData {
     [key: string]: unknown;
 }
 
-// unused
 export interface User {
     id: string;
     name: string;
     email: string;
     avatar?: string;
-    email_verified_at: string | null;
-    created_at: string;
-    updated_at: string;
+    email_verified_at?: string | null;
+    created_at?: string;
+    updated_at?: string;
     [key: string]: unknown; // This allows for additional properties...
 }

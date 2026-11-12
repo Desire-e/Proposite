@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { ArrowRight, Sparkles, } from 'lucide-react';
+import { SectionCard } from '@/components/ui/SectionCard';
 
 
 export default function Hero({ usersNumber=0 }: { usersNumber?: number}) {
@@ -44,18 +45,18 @@ export default function Hero({ usersNumber=0 }: { usersNumber?: number}) {
                             Ya tengo una cuenta <ArrowRight size={16} />
                         </Link>
                     </div>
-                    <p className="mt-8 text-sm text-neutral-foreground">
+                    <p className="mt-9 text-sm text-neutral-foreground">
                         <strong className="text-primary">
                             {usersAmount(usersNumber)}+
                         </strong> {' '} opositores ya forman parte de la comunidad
                     </p>
             </div>
-                <div className="relative rounded-[2rem] bg-tertiary p-6 sm:p-10">
+            <div className="relative rounded-[2rem] bg-tertiary p-6 sm:p-10">
                 <div className="absolute -right-4 -top-4 rounded-2xl bg-secondary px-4 py-3 text-sm font-bold text-secondary-foreground shadow-lg">
                     7 días de constancia
                 </div>
 
-                <div className="rounded-2xl border border-border bg-white p-6 shadow-xl shadow-primary/10">
+                <SectionCard as="div" className="p-6 shadow-xl shadow-primary/10">
                     <div className="mb-6 flex items-center gap-3 text-xs font-semibold text-neutral-foreground">
                         <span className="size-2 rounded-full bg-secondary" />
                         Comunidad · Ahora
@@ -71,24 +72,26 @@ export default function Hero({ usersNumber=0 }: { usersNumber?: number}) {
                                 Laura M.
                             </strong>
 
-                            <span className="text-xs text-neutral-foreground">
+                            <p className="text-xs text-neutral-foreground leading-5 md:leading-6">
                                 Administrativo del Estado
-                            </span>
+                            </p>
                         </div>
                     </div>
 
-                    <p className="mt-5 text-sm leading-6 text-neutral-foreground">
+                    <p className="mt-5 text-sm leading-5 md:leading-6 text-neutral-foreground">
                         “Hoy he terminado el tema 21. Un paso más cerca.”
                     </p>
 
-                    <div className="mt-5 flex items-center justify-between border-t border-border pt-4 text-xs text-neutral-foreground">
-                        <span>12 personas dijeron “Me sirvió”</span>
+                    <div className="mt-5 flex flex-wrap gap-2 
+                    items-center justify-between border-t border-border 
+                    pt-4 text-xs text-neutral-foreground">
+                        <span>12 personas reaccionaron “Me sirvió”</span>
 
                         <span className="font-bold text-primary">
                             Hace 2 h
                         </span>
                     </div>
-                </div>
+                </SectionCard>
             </div>
         </section>
     );

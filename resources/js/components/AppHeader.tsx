@@ -23,7 +23,7 @@ export const authMainNavItems: NavItem[] = [
     // { title: 'Configuración', url: '/configuración', icon: Bolt, },
     // { title: 'Estadísticas', url: '/estadisticas', icon: ChartSpline, },
     { title: 'Temario oficial', url: '/temario', },
-    { title: 'Tests', url: '/estadisticas', },
+    { title: 'Tests', url: '/tests', },
 ];
 
 
@@ -135,7 +135,7 @@ export function AppHeader() {
                 {/* -- Desktop center navigation -- */}
 
                 <nav 
-                    className="hidden items-center gap-8 text-sm font-medium text-slate-600 lg:flex" 
+                    className="hidden items-center gap-8 text-base lg:text-sm font-medium text-slate-600 lg:flex" 
                     aria-label="Navegación principal"
                 >
                     {(auth.user ? authMainNavItems : mainNavItems).map((item, i) =>{
@@ -168,7 +168,7 @@ export function AppHeader() {
                 <div className="hidden items-center gap-3 lg:flex">
                     <Link 
                         href="/login"
-                        className="rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-700 
+                        className="rounded-lg px-4 py-2.5 text-base lg:text-sm font-semibold text-slate-700 
                         transition duration-300 hover:bg-tertiary hover:text-primary"
                     >
                         Iniciar sesión
@@ -177,7 +177,7 @@ export function AppHeader() {
                     <Link 
                         href="/register"
                         className="inline-flex items-center gap-2 rounded-lg bg-primary 
-                        px-4 py-2.5 text-sm font-semibold text-white shadow-sm 
+                        px-4 py-2.5 text-base lg:text-sm font-semibold text-white shadow-sm 
                         transition duration-300 hover:bg-[#4338CA]"
                     >
                         Crear cuenta <ArrowRight aria-hidden="true" size={16} />
@@ -199,7 +199,7 @@ export function AppHeader() {
                 <Button
                     type="button"
                     variant="ghost"
-                    className="text-slate-700 transition hover:bg-tertiary lg:hidden"
+                    className="text-slate-700 transition hover:bg-tertiary lg:hidden text-base lg:text-sm"
                     onClick={() => setOpen((value) => !value)}
                     aria-expanded={open}
                     aria-controls="mobile-navigation"
@@ -220,7 +220,7 @@ export function AppHeader() {
             tabIndex={open ? 0 : -1}
             onClick={closeMenu}
             className={`
-                lg:hidden fixed inset-0 z-50 bg-slate-950/40
+                lg:hidden fixed inset-0 z-50 bg-slate-950/40 text-base lg:text-sm
                 transition-opacity duration-300 ease-in-out
                 ${open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}
             `}
@@ -247,7 +247,7 @@ export function AppHeader() {
             <div className="flex min-h-20 items-center justify-between border-b border-slate-200 p-5">
                 
                 {(!auth.user ? (
-                    <span className="font-heading text-xl font-bold tracking-tight text-slate-900">
+                    <span className="font-heading text-2xl font-bold text-slate-900">
                         proposite
                     </span>
                 ) : (
@@ -276,7 +276,7 @@ export function AppHeader() {
                     key={item.title}
                     href={item.url}
                     onClick={closeMenu}
-                    className="rounded-lg px-3 py-3 transition hover:bg-tertiary hover:text-primary"
+                    className="rounded-lg px-3 py-3 transition text-base hover:bg-tertiary hover:text-primary"
                 >
                     {item.title}
                 </Link>
@@ -287,7 +287,7 @@ export function AppHeader() {
                     key={item.title}
                     href={item.url}
                     onClick={closeMenu}
-                    className="rounded-lg px-3 py-3 transition hover:bg-tertiary hover:text-primary"
+                    className="rounded-lg px-3 py-3 text-base transition hover:bg-tertiary hover:text-primary"
                 >
                     {item.title}
                 </a>
@@ -311,7 +311,7 @@ export function AppHeader() {
                 <Link
                     href={route('login')}
                     onClick={() => { closeMenu(); }}
-                    className="w-full rounded-lg px-4 py-3 font-semibold text-primary 
+                    className="w-full rounded-lg px-4 py-3 text-base font-semibold text-primary 
                     transition hover:bg-tertiary"
                 >
                     Iniciar sesión
@@ -320,7 +320,7 @@ export function AppHeader() {
                 <Link
                     href={route('register')}
                     onClick={() => { closeMenu(); }}
-                    className="w-full rounded-lg bg-primary px-4 py-3 font-semibold text-white 
+                    className="w-full rounded-lg bg-primary px-4 py-3 text-base font-semibold text-white 
                     transition hover:bg-[#4338CA]"
                 >
                     Crear cuenta
