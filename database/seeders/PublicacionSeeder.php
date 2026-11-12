@@ -32,17 +32,13 @@ class PublicacionSeeder extends Seeder
         ];
 
         // Crear las publicaciones asociadas al usuario y a su oposición.
+        // La columna 'titulo' ya no existe: el contenido identifica la publicación
         foreach ($publicaciones as $publicacion) {
-            Publicacion::firstOrCreate(
-                [
-                    'usuario_id' => $usuario->id,
-                    'oposicion_id' => $usuario->oposicion->id,
-                    'titulo' => $publicacion['titulo'],
-                ],
-                [
-                    'contenido' => $publicacion['contenido'],
-                ]
-            );
+            Publicacion::firstOrCreate([
+                'usuario_id' => $usuario->id,
+                'oposicion_id' => $usuario->oposicion_id,
+                'contenido' => $publicacion['contenido'],
+            ]);
         }
     }
 }
