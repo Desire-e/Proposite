@@ -12,7 +12,7 @@ type UserAvatarProps = {
 const sizes = {
     sm: 'size-10 text-xs rounded-[11px]',
     md: 'size-12 text-base rounded-xl',
-    lg: 'size-20 text-2xl rounded-2xl',
+    lg: 'size-20 text-3xl rounded-2xl',
 };
 
 function getInitials(name: string): string {
@@ -51,8 +51,9 @@ export default function UserAvatar({
         <div
             role="img"
             aria-label={`Avatar de ${name}`}
-            className={`grid shrink-0 place-items-center font-heading font-bold text-primary
-                bg-primary/10 border-1 border-primary! ${sizes[size]} ${className}`}
+            className={`grid shrink-0 place-items-center font-bold 
+                text-primary-foreground bg-primary 
+                ${sizes[size]} ${className}`}
         >
             {getInitials(name)}
         </div>
