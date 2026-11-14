@@ -83,17 +83,18 @@ class TestsController extends Controller
         return to_route('tests.intento.show', $intento);
     }
 
-    public function showIntento(IntentoTest $intentoTest): Response
+    public function showIntento(IntentoTest $intentoTest): Response|RedirectResponse
     {
         Gate::authorize('view', $intentoTest);
 
-        // get() lee y persiste hasta que la sesión caduca (por defecto 
-        // 120 minutos, SESSION_LIFETIME en .env), o cuando se cierra sesión 
+        // get() lee y persiste hasta que la sesión caduca (por defecto
+        // 120 minutos, SESSION_LIFETIME en .env), o cuando se cierra sesión
         // Así el usuario puede recargar.
         $resultados = session()->get("correccion_intento.{$intentoTest->id}");
 
-        // Cuando caduca sesión, se redirige al listado de tests.
-        if (!$resultados) { return to_route('tests.index'); }
+        // Cuando caduca sesión, se redirige a la vista previa del test
+        // (devuelve RedirectResponse, por eso el tipo de retorno admite ambos)
+        if (!$resultados) { return to_route('tests.show', $intentoTest->test_id); }
 
         return Inertia::render('tests/resultado', $resultados);
     }
