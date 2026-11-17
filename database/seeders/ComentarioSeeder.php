@@ -2,30 +2,21 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Usuario;
-use App\Models\Publicacion;
+use App\Enums\Rol;
 use App\Models\Comentario;
+use App\Models\Publicacion;
+use App\Models\Usuario;
+use Illuminate\Database\Seeder;
 
 class ComentarioSeeder extends Seeder
 {
     /**
-     * Inserta comentarios en las tres publicaciones de Alba Heredia.
+     * Comentarios en las publicaciones de PublicacionSeeder. Cada comentario
+     * lo escribe un opositor aleatorio de la misma oposición que no sea
+     * el autor de la publicación.
      */
     public function run(): void
     {
-        $user = Usuario::where('email', 'alba@gmail.com')->firstOrFail();
-
-        // Comentaristas: otros usuarios de la misma oposición
-        $comentaristas = Usuario::where('oposicion_id', $user->oposicion_id)
-            ->where('id', '!=', $user->id)
-            ->get();
-
-        if ($comentaristas->isEmpty()) {
-            $this->command?->warn('No hay otros usuarios en la oposición del usuario. Ejecuta antes el seeder de usuarios.');
-            return;
-        }
-
         // Inicio del contenido de cada publicación => comentarios
         $comentariosPorPublicacion = [
             'Estoy empezando a preparar' => [
@@ -42,29 +33,44 @@ class ComentarioSeeder extends Seeder
                 'Yo hago unos tres test por semana y apunto en una libreta cada fallo con el artículo correspondiente.',
                 'Después de cada test reviso solo los fallos y las preguntas que acerté dudando. Es lo que más me ha subido la nota.',
             ],
+            '¿Cómo combináis el estudio' => [
+                'Yo entreno a primera hora y estudio por la tarde. Así llego al temario con la cabeza despejada.',
+                'Tres días de físico a la semana me bastan. El resto lo dedico al temario y a hacer test.',
+            ],
+            'Estoy con la Ley Orgánica 2/1986' => [
+                'Me hice una tabla con dos columnas, una por cuerpo, y fui rellenando sus funciones según las leía en la ley. Se ve mucho más claro.',
+                'Fíjate primero en las funciones que comparten y después en las exclusivas de cada cuerpo. A mí me ayudó a no mezclarlas.',
+            ],
         ];
 
         foreach ($comentariosPorPublicacion as $inicio => $comentarios) {
-            $publicacion = Publicacion::where('usuario_id', $user->id)
-                ->where('contenido', 'like', $inicio . '%')
-                ->first();
+            $publicacion = Publicacion::where('contenido', 'like', $inicio . '%')->first();
 
             if (! $publicacion) {
-                $this->command?->warn("Publicación no encontrada: {$inicio}...");
+                $this->command?->warn("Publicación no encontrada: {$inicio}... Ejecuta antes PublicacionSeeder.");
+                continue;
+            }
+
+            // Comentaristas: opositores de la misma oposición, salvo el autor
+            $comentaristas = Usuario::where('oposicion_id', $publicacion->oposicion_id)
+                ->where('rol', Rol::OPOSITOR)
+                ->where('id', '!=', $publicacion->usuario_id)
+                ->get();
+
+            if ($comentaristas->isEmpty()) {
+                $this->command?->warn("Nadie puede comentar en «{$inicio}...»: no hay otros opositores en su oposición.");
                 continue;
             }
 
             foreach ($comentarios as $i => $contenido) {
-                $autor = $comentaristas[$i % $comentaristas->count()];
-
-                // Evita duplicados al relanzar el seeder
+                // Evita duplicados al relanzar el seeder: busca por publicación y contenido, no por autor
                 Comentario::unguarded(fn () => Comentario::firstOrCreate(
                     [
-                        'usuario_id'     => $autor->id,
                         'publicacion_id' => $publicacion->id,
                         'contenido'      => $contenido,
                     ],
                     [
+                        'usuario_id' => $comentaristas->random()->id,
                         // Fechas escalonadas tras la publicación
                         'created_at' => $publicacion->created_at->copy()->addHours($i + 1),
                     ]
