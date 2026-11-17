@@ -11,8 +11,9 @@ use Illuminate\Database\Seeder;
 class IntentosTestSeeder extends Seeder
 {
     /**
-     * Cada uno de 3 opositores aleatorios hace 3 tests aleatorios
-     * de su oposición: 9 intentos en total.
+     * Intentos aleatorios: cada opositor hace (o no) algunos tests de su
+     * oposición, una o dos veces, con notas aleatorias. No depende de
+     * ningún usuario concreto.
      */
     public function run(): void
     {
@@ -21,55 +22,52 @@ class IntentosTestSeeder extends Seeder
             ->has('preguntas')
             ->withCount('preguntas')
             ->get()
-            ->groupBy(fn (Test $test) => $test->temario?->oposicion_id)
-            ->filter(fn ($tests, $oposicionId) => $oposicionId && $tests->count() >= 3);
+            ->groupBy(fn (Test $test) => $test->temario?->oposicion_id);
 
-        // Primera oposición (en orden aleatorio) con al menos 3 tests y 3 opositores
-        $oposicionId = $testsPorOposicion->keys()->shuffle()->first(
-            fn ($id) => Usuario::where('oposicion_id', $id)
-                ->where('rol', Rol::OPOSITOR)
-                ->count() >= 3
-        );
-
-        if (! $oposicionId) {
-            $this->command?->warn('Necesitas una oposición con al menos 3 tests y 3 opositores. Ejecuta antes TestsSeeder y crea los usuarios.');
+        if ($testsPorOposicion->isEmpty()) {
+            $this->command?->warn('No hay tests con preguntas. Ejecuta antes TestsSeeder.');
             return;
         }
 
-        $tests = $testsPorOposicion[$oposicionId]->random(3);
-
-        $usuarios = Usuario::where('oposicion_id', $oposicionId)
-            ->where('rol', Rol::OPOSITOR)
-            ->inRandomOrder()
-            ->limit(3)
+        $opositores = Usuario::where('rol', Rol::OPOSITOR)
+            ->whereNotNull('oposicion_id')
             ->get();
 
         $creados = 0;
 
-        foreach ($usuarios as $usuario) {
-            foreach ($tests as $test) {
-                // Evita duplicados al relanzar el seeder: un intento por usuario y test
-                $existe = IntentoTest::where('usuario_id', $usuario->id)
-                    ->where('test_id', $test->id)
-                    ->exists();
+        foreach ($opositores as $usuario) {
+            $tests = $testsPorOposicion->get($usuario->oposicion_id);
 
-                if ($existe) {
+            // Algunos opositores no han hecho ningún test todavía (1 de cada 4, aprox.)
+            if (! $tests || random_int(1, 4) === 1) {
+                continue;
+            }
+
+            // Subconjunto aleatorio de los tests de su oposición
+            foreach ($tests->random(random_int(1, $tests->count())) as $test) {
+                // Evita duplicados al relanzar el seeder
+                if (IntentoTest::where('usuario_id', $usuario->id)->where('test_id', $test->id)->exists()) {
                     continue;
                 }
 
-                // Nota coherente con el test: aciertos / preguntas * 10
-                $aciertos = random_int(0, $test->preguntas_count);
-                $nota = round($aciertos / $test->preguntas_count * 10, 3);
+                // Uno o dos intentos del mismo test
+                $intentos = random_int(1, 2);
 
-                // created_at no es fillable: forceFill para fechar el intento en el pasado
-                (new IntentoTest)->forceFill([
-                    'usuario_id' => $usuario->id,
-                    'test_id' => $test->id,
-                    'nota' => $nota,
-                    'created_at' => now()->subDays(random_int(1, 30))->subMinutes(random_int(0, 1439)),
-                ])->save();
+                for ($i = 0; $i < $intentos; $i++) {
+                    // Nota coherente con el test: aciertos / preguntas * 10
+                    $aciertos = random_int(0, $test->preguntas_count);
+                    $nota = round($aciertos / $test->preguntas_count * 10, 3);
 
-                $creados++;
+                    // created_at no es fillable: forceFill para fechar el intento en el pasado
+                    (new IntentoTest)->forceFill([
+                        'usuario_id' => $usuario->id,
+                        'test_id' => $test->id,
+                        'nota' => $nota,
+                        'created_at' => now()->subDays(random_int(1, 30))->subMinutes(random_int(0, 1439)),
+                    ])->save();
+
+                    $creados++;
+                }
             }
         }
 

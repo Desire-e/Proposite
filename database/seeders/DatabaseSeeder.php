@@ -7,9 +7,9 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Database\Seeders\OposicionSeeder;
 use Database\Seeders\TemarioAuxiliarAdministrativoSeeder;
-use Database\Seeders\TemarioMaestroPrimariaSeeder;
 use Database\Seeders\TemarioPoliciaNacionalSeeder;
 use Database\Seeders\RecursoSeeder;
+use Database\Seeders\UsuarioSeeder;
 use Database\Seeders\PublicacionSeeder;
 use Database\Seeders\ComentarioSeeder;
 use Database\Seeders\TestsSeeder;
@@ -43,9 +43,9 @@ class DatabaseSeeder extends Seeder {
         $this->call([
             OposicionSeeder::class,
             TemarioAuxiliarAdministrativoSeeder::class,
-            TemarioMaestroPrimariaSeeder::class,
             TemarioPoliciaNacionalSeeder::class,
             RecursoSeeder::class,
+            UsuarioSeeder::class,
             PublicacionSeeder::class,
             ComentarioSeeder::class,
             TestsSeeder::class,
