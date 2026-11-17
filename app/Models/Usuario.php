@@ -30,15 +30,15 @@ class Usuario extends Authenticatable {
     public $incrementing = false;
     protected $keyType = 'string';
 
+    // rol, deleted_by y oposicion_moderada_id no son asignables en masa:
+    // se asignan de forma explícita en el código
     protected $fillable = [
         'oposicion_id', 
         'name', 
         'email',
         'password',
-        'rol',
         'fecha_convocatoria',
         'biografia',
-        'deleted_by',
     ];
     
     public $timestamps = true;
@@ -105,6 +105,17 @@ class Usuario extends Authenticatable {
                 ->whereHas('publicacion')   // la publicación sigue activa
                 ->restore();
         });
+    }
+
+
+    /**
+     * Comunidad con la que trabaja el usuario:
+     * opositor la oposición en la que está inscrito
+     * admin la oposición que ha elegido moderar
+     */
+    public function comunidad(): ?Oposicion
+    {
+        return $this->esAdmin() ? $this->oposicionModerada : $this->oposicion;
     }
 
 
@@ -178,6 +189,11 @@ class Usuario extends Authenticatable {
 
     public function reportesResueltos(): HasMany {
         return $this->hasMany(Reporte::class, 'resuelto_por');
+    }
+
+    /** Oposición seleccionada. Si no seleccionó ninguna, null */
+    public function oposicionModerada(): BelongsTo {
+        return $this->belongsTo(Oposicion::class, 'oposicion_moderada_id');
     }
 
 }

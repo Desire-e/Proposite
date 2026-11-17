@@ -38,11 +38,13 @@ class RegistroController extends Controller {
         $validated = $request->safe()->except('acepta_terminos');
 
         // Procesamiento de datos
+        
         $validated['password'] = Hash::make($validated['password']);
-        $validated['rol'] = Rol::OPOSITOR->value;
 
-        // Creación de usuario válido 
-        $usuario = Usuario::create($validated);
+        $usuario = new Usuario($validated);
+        // rol no está en $fillable: se asigna aparte para que nunca llegue desde la petición
+        $usuario->rol = Rol::OPOSITOR;
+        $usuario->save();
 
         // Inicio de sesión
         Auth::login($usuario);
