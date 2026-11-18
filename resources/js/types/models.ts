@@ -11,8 +11,17 @@ export type UsuarioBasico = {
 export type Oposicion = {
     id?: string;
     nombre: string;
-    descripcion: string;
+    descripcion?: string;
 }
+
+export type Reporte = {
+    id: string;
+    reportable_id: string;
+    reportable_tipo: string;
+    motivo: string;
+    estado: string;
+    created_at: string;
+};
 
 // ====== Foro ======
 

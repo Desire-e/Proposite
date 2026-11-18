@@ -10,13 +10,17 @@ export type asideContentData = {
 
 export function AuthLayout(
     { children, headTitle, className = '', asideContent}: 
-    {children: React.ReactNode; headTitle: string; className?: string; asideContent: asideContentData }
+    {children: React.ReactNode; headTitle: string; className?: string; asideContent?: asideContentData }
 ) {
     return (
-        <main className={`grid min-h-screen lg:grid-cols-[0.85fr_1.15fr] ${className}`}>
-
+        <main 
+            className={`grid min-h-screen 
+            ${asideContent ? `lg:grid-cols-[0.85fr_1.15fr]` : `` } 
+            ${className}`}
+        >
             <Head title={headTitle} />
 
+            {asideContent && (
             <aside className="hidden bg-primary p-10 text-primary-foreground lg:flex lg:flex-col lg:justify-between">
                 <BackLink className="text-primary-foreground hover:text-primary-foreground/70" routeName="welcome">
                     Volver al inicio
@@ -40,6 +44,7 @@ export function AuthLayout(
                     {asideContent.phrase}
                 </p>
             </aside>
+            )}
 
             {children}
 

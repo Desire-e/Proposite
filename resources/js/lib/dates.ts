@@ -3,7 +3,11 @@
  * Saber desde hace cuanto fue publicado una publicacion/comentario
  */
 export function publishedSince(dateStr: string, untilNow: number = Date.now()): string {
-    const diffMs = untilNow - new Date(dateStr).getTime();
+    const date = new Date(dateStr);
+
+    if (Number.isNaN(date.getTime())) return '' 
+
+    const diffMs = untilNow - date.getTime();
 
     const secs = Math.floor(diffMs / 1000);
     const mins = Math.floor(secs / 60);
@@ -33,4 +37,20 @@ export function formatMY(dateStr: string): string {
         year: 'numeric',
         timeZone: 'UTC',
     }).format(date) // Aplica las opciones de formato a la fecha y devuelve resultado en texto
+}
+
+export function formatDMY(dateStr: string): string{
+
+    const date = new Date(dateStr)
+    
+    // comprueba si es fecha válida, convirtiendo a ms desde 1970 y comprobando isNaN 
+    if (Number.isNaN(date.getTime())) return '' 
+
+    return new Intl.DateTimeFormat('es-ES', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        timeZone: 'UTC',
+    }).format(date) // Aplica las opciones de formato a la fecha y devuelve resultado en texto
+
 }

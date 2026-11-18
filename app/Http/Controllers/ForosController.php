@@ -18,7 +18,7 @@ class ForosController extends Controller
     {
         $user = $request->user();
         
-        $oposicion = $user->oposicion;
+        $oposicion = $user->comunidad();
 
         // TODO.  Usa paginate()
         

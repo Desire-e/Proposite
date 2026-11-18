@@ -52,6 +52,10 @@ html { scroll-behavior: smooth; }
     --error-foreground: #af191e;
     --error: #f8eced;
 
+    --warn-foreground: #9b801e;
+    --warn: #f8f7ec;
+
+
     --success: #ecfdf5; 
     --success-foreground: #00a63e;
 

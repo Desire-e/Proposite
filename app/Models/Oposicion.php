@@ -5,10 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids; 
 use Illuminate\Database\Eloquent\SoftDeletes;
-
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Enums\EstadoReporte;
+
 use App\Models\Usuario;
+use App\Models\Reporte;
 use App\Models\Publicacion;
+use App\Models\Comentario;
 use App\Models\Tema;
 use Carbon\CarbonInterface;
 
@@ -28,6 +31,45 @@ class Oposicion extends Model {
     ];
     
     public $timestamps = false;
+
+
+    /**
+     * Reportes pendientes en la comunidad: a sus usuarios, a sus publicaciones
+     * y a los comentarios de sus publicaciones.
+     */
+    public function reportesPendientes(): array
+    {
+        // 1. Ids de todo lo que pertenece a esta oposición
+        $idsUsuarios = $this->usuarios()->pluck('id');
+        $idsPublicaciones = $this->publicaciones()->pluck('id');
+        $idsComentarios = Comentario::whereIn('publicacion_id', $idsPublicaciones)->pluck('id');
+
+        // 2. Contar los reportes pendientes de cada tipo.
+        // En reportable_tipo se guarda el alias del morph map ('usuario', 'publicacion',
+        // 'comentario', ver AppServiceProvider), no el nombre de la clase (Usuario::class).
+        $reportesUsuarios = Reporte::where('estado', EstadoReporte::PENDIENTE)
+            ->where('reportable_tipo', 'usuario')
+            ->whereIn('reportable_id', $idsUsuarios)
+            ->get();
+
+        $reportesPublicaciones = Reporte::where('estado', EstadoReporte::PENDIENTE)
+            ->where('reportable_tipo', 'publicacion')
+            ->whereIn('reportable_id', $idsPublicaciones)
+            ->get();
+
+        $reportesComentarios = Reporte::where('estado', EstadoReporte::PENDIENTE)
+            ->where('reportable_tipo', 'comentario')
+            ->whereIn('reportable_id', $idsComentarios)
+            ->get();
+
+        // 3. Sumar los tres
+        // return $reportesUsuarios + $reportesPublicaciones + $reportesComentarios;
+        return [
+            'usuarios'=> $reportesUsuarios,
+            'publicaciones'=>$reportesPublicaciones,
+            'comentarios'=>$reportesComentarios
+        ];
+    }
 
 
     private ?CarbonInterface $borradoEn = null;
