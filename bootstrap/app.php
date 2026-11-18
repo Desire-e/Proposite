@@ -7,6 +7,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use App\Http\Middleware\EnsureIsAdmin;
 use App\Http\Middleware\EnsureIsOpositor;
+use App\Http\Middleware\EnsureOposicionModerada;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -24,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([ 
             'admin' => EnsureIsAdmin::class, 
             'opositor' => EnsureIsOpositor::class,
+            'oposicion.moderada' => EnsureOposicionModerada::class,
         ]);
 
         // Usuarios no autenticados (guests) que intentan acceder a rutas protegidas 

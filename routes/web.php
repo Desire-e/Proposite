@@ -65,43 +65,11 @@ Route::middleware('auth')->get('/dashboard', function () {
     
 })->name('dashboard');
 
-
 // ==================
-// Opositor
+// Generales autenticado
 // ==================
 
-
-Route::middleware(['auth', 'opositor'])->group(function () {
-
-    // ====== Perfil propio ======
-
-    Route::get('/perfil', [PerfilController::class, 'show'])
-        ->name('perfil.show');
-    
-    // Editar perfil
-    Route::get('/perfil/editar', [PerfilController::class, 'edit'])
-        ->name('perfil.edit');
-
-    Route::patch('/perfil', [PerfilController::class, 'update'])
-        ->name('perfil.update');
-
-    // ====== Perfil ajeno ======
-    
-    Route::get('/opositores/{usuario}', [OpositoresController::class, 'show'])
-        ->name('opositores.show');
-
-    Route::post('/opositores/{usuario}/reportes', [ReportesController::class, 'storeUsuario'])
-        ->name('opositores.reportes.store');
-
-
-    // ====== Temario ======
-    
-    Route::get('/temario', [TemariosController::class, 'index'])
-        ->name('temario.index');
-
-    Route::patch('/temario/check', [TemariosController::class, 'toggleCheck'])
-        ->name('temario.check');
-
+Route::middleware(['auth', 'oposicion.moderada'])->group(function () {
 
     // ====== Foro ======
 
@@ -144,6 +112,15 @@ Route::middleware(['auth', 'opositor'])->group(function () {
         });
     });
     
+    // ====== Perfil ajeno ======
+
+    Route::get('/opositores/{usuario}', [OpositoresController::class, 'show'])
+        ->name('opositores.show');
+
+    // ====== Temario ======
+
+    Route::get('/temario', [TemariosController::class, 'index'])
+        ->name('temario.index');
 
 
     // TODO. PONER PARA ADMIN PERO SIN REGISTRAR RESULTADOS
@@ -160,10 +137,11 @@ Route::middleware(['auth', 'opositor'])->group(function () {
         Route::get('/{test}/show', [TestsController::class, 'show'])
             ->name('show'); // tests.show
 
-        // Realizando test
+        // Realizando intento de test
         Route::get('/{test}/intento', [TestsController::class, 'createIntento'])
             ->name('intento.create'); // tests.intento.create
 
+        // Insertar intento de test
         Route::post('/{test}/intento', [TestsController::class, 'storeIntento'])
             ->name('intento.store'); // tests.intento.store
 
@@ -176,16 +154,64 @@ Route::middleware(['auth', 'opositor'])->group(function () {
 
 
 // ==================
+// Opositor
+// ==================
+
+
+Route::middleware(['auth', 'opositor'])->group(function () {
+
+    // ====== Perfil propio ======
+
+    Route::get('/perfil', [PerfilController::class, 'show'])
+        ->name('perfil.show');
+    
+    // Editar perfil
+    Route::get('/perfil/editar', [PerfilController::class, 'edit'])
+        ->name('perfil.edit');
+
+    Route::patch('/perfil', [PerfilController::class, 'update'])
+        ->name('perfil.update');
+
+    // ====== Perfil ajeno ======
+    
+    Route::post('/opositores/{usuario}/reportes', [ReportesController::class, 'storeUsuario'])
+        ->name('opositores.reportes.store');
+
+    // ====== Temario ======
+
+    Route::patch('/temario/check', [TemariosController::class, 'toggleCheck'])
+        ->name('temario.check');
+});
+
+
+// ==================
 // Administrador
 // ==================
 
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    
-    Route::get('/panel', [AdminPanelController::class, 'index'])
-    ->name('panel');
+Route::middleware(['auth', 'admin', 'oposicion.moderada'])->prefix('admin')->name('admin.')->group(function () {
 
-    // otras rutas ...
+    // ====== Panel de administración en la oposición ======
+
+    Route::get('/panel', [AdminPanelController::class, 'index'])
+        ->name('panel');
+
+        
+    // reportes, baneos, tests, recursos (PEND-03 a PEND-07) ...
+
 });
+
+
+// Tras inicio de sesión administrador - seleccionar oposición a moderar
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('welcome', [AdminPanelController::class, 'welcome'])
+        ->name('welcome'); // admin.welcome
+
+    // seleccionar / cambiar oposición a moderar
+    Route::post('select', [AdminPanelController::class, 'selectOposicion'])
+        ->name('select'); // admin.select
+});
+
+
 
 
 // TODO.
