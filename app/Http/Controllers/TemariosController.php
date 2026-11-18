@@ -19,7 +19,8 @@ class TemariosController extends Controller
     public function index(Request $request): Response 
     {
         $user = $request->user();
-        $oposicion = $user->oposicion;
+        
+        $oposicion = $user->comunidad();
 
         // Temas marcados como estudiados
         $checked = $user->checkedTemario() 

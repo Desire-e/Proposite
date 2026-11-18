@@ -46,7 +46,7 @@ class HandleInertiaRequests extends Middleware
                 'quote' => ['message' => trim($message), 'author' => trim($author)],
                 'auth' => [
                     'user' => $request->user() 
-                        ? $request->user()->only('id', 'name') 
+                        ? $request->user()->only('id', 'name', 'rol') 
                         : null,
                 ],
             ]

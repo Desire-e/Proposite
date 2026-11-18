@@ -20,7 +20,7 @@ class PerfilService
         return [
             'id' => $user->id,
             'name' => $user->name,
-            'oposicion' => $user->oposicion->only(['nombre', 'descripcion']),
+            'oposicion' => $user->comunidad()->only(['nombre', 'descripcion']),
             'biografia' => $user->biografia,
             'signed_up_at' => $user->created_at,
             'anio_convocatoria' => $user->fecha_convocatoria?->format('Y'),
@@ -59,11 +59,11 @@ class PerfilService
      */
     private function progresoTemario(Usuario $user): array
     {
-        $totalTemas = $user->oposicion->temario()->count();
+        $totalTemas = $user->comunidad()->temario()->count();
 
         // Temas de esa oposición marcados como estudiados.
         $temasEstudiados = $user->checkedTemario() // obtiene temarios estudiados
-            ->where('temarios.oposicion_id', $user->oposicion_id) // solo temas de su oposición
+            ->where('temarios.oposicion_id', $user->comunidad()->id) // solo temas de su oposición
             ->count();
             
         $porcentaje = $totalTemas > 0 

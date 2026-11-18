@@ -29,7 +29,7 @@ class TestsService
 
         return [
             'usuario' => [
-                'oposicion' => $user->oposicion->nombre,
+                'oposicion' => $user->comunidad()->nombre,
                 'numero_tests_realizados' => $intentosUsuario->count(),
                 'porcentaje_tests_aprobados' => 
                     $this->porcentajeAprobados($intentosUsuario, $tests->count()),
@@ -100,7 +100,7 @@ class TestsService
     private function testsDeOposicion(Usuario $user): Collection
     {
         return Test::query()
-            ->whereHas('temario', fn ($q) => $q->where('oposicion_id', $user->oposicion_id))
+            ->whereHas('temario', fn ($q) => $q->where('oposicion_id', $user->comunidad()->id))
             ->with('temario:id,titulo')
             ->withCount(['preguntas', 'intentosTest'])
             ->get();
