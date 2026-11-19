@@ -1,6 +1,7 @@
 import { Heart } from 'lucide-react';
-import { router } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import { SharedData } from '@/types';
 
 type MeSirvioButtonProps = {
     publicacionId: string;
@@ -16,12 +17,20 @@ type MeSirvioButtonProps = {
  */
 export function MeSirvioButton({ publicacionId, activo, total, variant = 'compact', disabled = false }: MeSirvioButtonProps) {
     
+    const { auth } = usePage<SharedData>().props;
+    const esAdmin = auth.user.rol === 'administrador';
+
+
+
     // Estado local: corazón activo, total
     const [isActivo, setIsActivo] = useState(activo);
     const [totalActivo, setTotalActivo] = useState(total);
 
 
     const toggle = () => {
+        
+        if(esAdmin) return;
+
         // Estado siguiente: si estaba activo, se desactiva y baja el total;
         // si no, se activa y sube el total
         const siguienteActivo = !isActivo;

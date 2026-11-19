@@ -9,6 +9,7 @@ import { AccionesContenido } from '@/components/AccionesContenido';
 import { MeSirvioButton } from '@/components/MeSirvioButton';
 import { publishedSince } from '@/lib/dates';
 import { useUntilNow } from '@/hooks/use-until-now';
+import { EliminarButton } from '../admin/foro/EliminarButton';
 
 
 type PublicacionCardProps = {
@@ -26,6 +27,7 @@ export function PublicacionCard({ publicacion, onEliminar, onReportar }: Publica
 
     const { auth } = usePage<SharedData>().props;
     const esAutor = publicacion.usuario.id === auth.user.id;
+    const esAdmin = auth.user.rol === 'administrador';
 
     const urlPublicacion = route('foro.publicaciones.show', publicacion.id);
 
@@ -46,13 +48,15 @@ export function PublicacionCard({ publicacion, onEliminar, onReportar }: Publica
                     {publishedSince(publicacion.created_at, untilNow)}
                 </p>
 
-                <div className="relative z-10 shrink-0">
-                    <AccionesContenido
-                        esAutor={esAutor}
-                        onEliminar={onEliminar}
-                        onReportar={onReportar}
-                    />
-                </div>
+                {!esAdmin && (
+                    <div className="relative z-10 shrink-0">
+                        <AccionesContenido
+                            esAutor={esAutor}
+                            onEliminar={onEliminar}
+                            onReportar={onReportar}
+                        />
+                    </div>
+                )}
             </div>
 
             {/* Cuerpo: ancho completo en móvil, alineado con la fecha en escritorio
@@ -67,23 +71,30 @@ export function PublicacionCard({ publicacion, onEliminar, onReportar }: Publica
                     </Link>
 
                     {/* Acciones de la publicación */}
-                    <div className="relative z-10 mt-5 flex items-center gap-5
-                    border-t border-border pt-4 text-xs text-neutral-foreground">
-                        <MeSirvioButton
-                            publicacionId={publicacion.id}
-                            activo={publicacion.me_sirvio_activo}
-                            total={publicacion.me_sirvio_count}
-                        />
+                    <div className="relative z-10 mt-5 flex gap-5 border-t 
+                    border-border pt-4 text-xs text-neutral-foreground justify-between">
+                        <div className='flex items-center gap-5'>
+                            <MeSirvioButton
+                                publicacionId={publicacion.id}
+                                activo={publicacion.me_sirvio_activo}
+                                total={publicacion.me_sirvio_count}
+                            />
 
-                        <Link
-                            href={`${urlPublicacion}#comentarios`}
-                            className="inline-flex items-center rounded-xl transition gap-1.5
-                            text-xs text-neutral-foreground hover:text-primary"
-                        >
-                            <MessageCircle className="size-4" />
-                            {publicacion.comentarios_count}
-                        </Link>
+                            <Link
+                                href={`${urlPublicacion}#comentarios`}
+                                className="inline-flex items-center rounded-xl transition gap-1.5
+                                text-xs text-neutral-foreground hover:text-primary"
+                            >
+                                <MessageCircle className="size-4" />
+                                {publicacion.comentarios_count}
+                            </Link>
+                        </div>
+                        
+                        {esAdmin && (
+                            <EliminarButton onEliminar={onEliminar} />
+                        )}
                     </div>
+                    
                 </div>
             </div>
         </SectionCard>
