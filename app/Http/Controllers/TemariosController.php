@@ -10,44 +10,26 @@ use Inertia\Response;
 use Illuminate\Http\RedirectResponse;
 use App\Http\Requests\ToggleTemaRequest;
 
+use App\Services\TemarioService;
+
 
 class TemariosController extends Controller
 {
+    public function __construct(private TemarioService $temario) {}
+
+
     /**
      * Carga los datos del temario y renderiza
      */
     public function index(Request $request): Response 
     {
         $user = $request->user();
-        
+
         $oposicion = $user->comunidad();
 
-        // Temas marcados como estudiados
-        $checked = $user->checkedTemario() 
-            // guardar el estado de cada tema en una colección indexada por el ID del tema. [ '1'=>true, '1.1.'=> false, ... ]
-            ->pluck('checks_temario.checked', 'temarios.id');
-
-        // Temario, con recursos y estados marcados de cada uno 
-        $temario = $oposicion->temario()
-            // se carga también los recursos relacionados con cada tema
-            ->with('recursos') 
-            ->get()
-            // comparar textos siguiendo un orden natural
-            ->sortBy('numero_tema', SORT_NATURAL)
-            // se reinician los índices del array para que quede ordenado también
-            ->values()
-            ->map(fn (Tema $tema) => [
-            'id' => $tema->id,
-            'bloque' => $tema->bloque,
-            'numero_tema' => $tema->numero_tema,
-            'titulo' => $tema->titulo,
-            'recursos' => $tema->recursos ?? null,
-            'checked' => (bool) ($checked[$tema->id] ?? false), // devuelve el estado guardado o false si no existe
-        ]);
-
         return Inertia::render('temario/index', [
-            'temario' => $temario, 
-            'oposicion' => $oposicion,
+            'temario' => $this->temario->temarioData($oposicion, $user), 
+            'oposicion' => $oposicion->only('id', 'nombre'),
         ]);
     }
 
@@ -63,21 +45,18 @@ class TemariosController extends Controller
         $temaId = $request->validated()['tema'];
         $checked =  $request->boolean('checked');
 
-        // $existeFila = $user->checkedTemario()->where('temarios.id', $temaId)->exists();
-        // Comprueba sobre TODAS las filas del pivote, no solo las marcadas
+        // Comprueba sobre todas las filas del pivote, no solo las marcadas
         $existeFila = $user->checkTemario()->where('temario_id', $temaId)->exists();
 
-        // actualiza registro anterior
+
+        // si existe actualiza registro anterior; si no, inserta registro nuevo
         if($existeFila){
             $user->checkTemario()->updateExistingPivot($temaId, ['checked' => $checked]);
         }
-        // inserta nuevo registro
         else {
             $user->checkTemario()->attach($temaId, ['checked' => $checked]);
-            // $user->checkedTemario()->attach($temaId, ['checked'=>$checked]);
         }
 
-        // vuelve a la misma página y React recibe el temario actualizado.
         return back();
     }
 }
