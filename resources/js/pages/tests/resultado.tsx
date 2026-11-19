@@ -13,6 +13,7 @@ type ResultProps = {
         actual: number; 
         anterior: number | null 
     };
+    prueba?: boolean;
 }
 
 
@@ -41,7 +42,7 @@ type Opcion = {
 }
 
 
-export default function TestResult({test, correccion, nota }: ResultProps) {
+export default function TestResult({test, correccion, nota, prueba = false }: ResultProps) {
 
     const correctCount = correccion.filter(
         (corr) => corr.opciones.some((opc) => opc.selected && opc.es_correcta)
@@ -59,7 +60,10 @@ export default function TestResult({test, correccion, nota }: ResultProps) {
                 <div>
                     <SectionHeading 
                         as='h1'
-                        eyebrow='Test completado' 
+                        eyebrow={prueba 
+                            ? 'Modo prueba para administrador · no se guardará tu resultado' 
+                            : 'Test completado'
+                        } 
                         eyebrowClassName='text-success-foreground' 
                         eyebrowIcon={
                             <span className="size-2 rounded-full bg-success-foreground" />
@@ -72,7 +76,10 @@ export default function TestResult({test, correccion, nota }: ResultProps) {
                     <div className="mt-3 flex flex-wrap flex-col justify-between md:gap-5 gap-10 
                     sm:flex-row sm:items-end w-full">
                         <p className='flex flex-col gap-3 my-5 text-neutral-foreground'>
-                            Revisa tus respuestas. Aquí puedes ver qué has acertado y qué temas conviene repasar.
+                            {prueba
+                                ? 'Así verá la corrección un opositor. Este resultado no cuenta en ninguna estadística.'
+                                : 'Revisa tus respuestas. Aquí puedes ver qué has acertado y qué temas conviene repasar.'
+                            }
                         </p>
                     </div>
 
@@ -106,24 +113,27 @@ export default function TestResult({test, correccion, nota }: ResultProps) {
                         </div>
                     </div>
 
-                    <div className="mt-7 border-t border-border pt-5">
-                        <div className="flex justify-between text-sm">
-                            <span className="text-tertiary-foreground">
-                                Anterior intento
-                            </span>
+                    {nota.anterior !== null && (
+                        <div className="mt-7 border-t border-border pt-5">
+                            <div className="flex justify-between text-sm">
+                                <span className="text-tertiary-foreground">
+                                    Anterior intento
+                                </span>
 
-                            <strong className="text-primary">
-                                {nota.anterior} / 10
-                            </strong>
-                        </div>
+                                <strong className="text-primary">
+                                    {nota.anterior} / 10
+                                </strong>
+                            </div>
 
-                        {nota.anterior !== null && (
-                        <p className="mt-2 text-xs text-secondary">
-                            {nota.actual > nota.anterior
-                            ? 'Has mejorado respecto a tu intento anterior.'
-                            : 'Repasa los fallos para seguir mejorando.'}
-                        </p>)}
-                    </div>
+                            {nota.anterior !== null && (
+                            <p className="mt-2 text-xs text-secondary">
+                                {nota.actual > nota.anterior
+                                ? 'Has mejorado respecto a tu intento anterior.'
+                                : 'Repasa los fallos para seguir mejorando.'}
+                            </p>)}
+                        </div>                    
+                    )}
+
                 </div>
             </section>
 

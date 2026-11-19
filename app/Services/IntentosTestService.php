@@ -39,7 +39,7 @@ class IntentosTestService
      */
     public function registrar(Test $test, Usuario $usuario, array $respuestas): IntentoTest
     {
-        $resultados = $this->corregir($test, $usuario->id, $respuestas);
+        $resultados = $this->corregir($test, $usuario, $respuestas);
 
         $intento = IntentoTest::create([
             'usuario_id' => $usuario->id,
@@ -63,7 +63,7 @@ class IntentosTestService
      * @return array con el test, la corrección de cada pregunta
      * y la nota actual y anterior
      */
-    private function corregir(Test $test, int|string $usuarioId, array $respuestas): array
+    public function corregir(Test $test, ?Usuario $usuario, array $respuestas): array
     {
         // Preguntas del test, con sus opciones
         // keyBy('id') convierte una colección en otra cuyas claves son el valor del campo indicado
@@ -112,10 +112,11 @@ class IntentosTestService
 
         $nota = $this->calcularNota($correctas, $preguntas->count());
 
-        $notaAnterior = $test->intentosTest()
-            ->where('usuario_id', $usuarioId)
-            ->latest()
-            ->value('nota');
+        $notaAnterior = $usuario 
+            ? $test->intentosTest()
+                ->where('usuario_id', $usuario->id)
+                ->latest()->value('nota')
+            : null;
 
         return [
             'test' => $test->only('id', 'titulo', 'temario_id'),

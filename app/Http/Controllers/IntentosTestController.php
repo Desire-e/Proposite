@@ -33,9 +33,26 @@ class IntentosTestController extends Controller
     /**
      * Generar resultado del intento del test
      * Mostrar página de resultado del intento
+     * 
+     * Opositor: corrige, guarda el intento y redirige al resultado.
+     * Administrador: modo prueba, corrige y muestra el resultado sin guardar nada.
      */
     public function store(StoreIntentoRequest $request, Test $test): RedirectResponse
     {
+
+        $respuestas = $request->validated()['respuestas'];
+
+        if ($request->user()->esAdmin()) {
+            // No crea intento: solo necesita poder ver el test 
+            // (modo de prueba)
+            Gate::authorize('view', $test);
+
+            // Va directo a resultado, sin generar test
+            return Inertia::render('tests/resultado', [
+                ...$this->intentos->corregir($test, null, $respuestas),
+                'prueba' => true,
+            ]);
+        }
         // Laravel elige la policy por el tipo del argumento, y $test es 
         // un Test, así que busca TestPolicy::intento, que no existe.
         Gate::authorize('create', [IntentoTest::class, $test]);
@@ -43,7 +60,7 @@ class IntentosTestController extends Controller
         $resultados = $this->intentos->registrar(
             $test,
             $request->user(),
-            $request->validated()['respuestas']
+            $respuestas
         );
 
         return to_route('tests.intento.show', $resultados);
