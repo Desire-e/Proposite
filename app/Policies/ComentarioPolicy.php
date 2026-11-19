@@ -15,7 +15,6 @@ class ComentarioPolicy
         if (!$usuario->esAdmin()) { return null; }
 
         return match ($ability) { 
-            'view' => Response::allow(), 
             'create' => Response::deny('Los administradores no pueden realizar esta acción.'),
             default  => null,
         };
@@ -27,7 +26,7 @@ class ComentarioPolicy
      */
     public function view(Usuario $usuario, Comentario $comentario): Response
     {
-        return $this->visibleParaOpositor($usuario, $comentario)
+        return $this->visibleParaUsuario($usuario, $comentario)
             ? Response::allow()
             : Response::denyAsNotFound();
     }
@@ -51,18 +50,13 @@ class ComentarioPolicy
             return Response::denyAsNotFound();
         }
 
-        // Admin puede eliminar cualquier comentario activo
-        if ($usuario->esAdmin()) {
-            return Response::allow();
+        if(!$usuario->esAdmin() && !$this->esAutor($usuario, $comentario)){
+            return Response::deny('Solo puedes eliminar tus propios comentarios.');
         }
 
-        if (!$this->visibleParaOpositor($usuario, $comentario)) {
-            return Response::denyAsNotFound();
-        }
-
-        return $this->esAutor($usuario, $comentario)
+        return $this->visibleParaUsuario($usuario, $comentario)
             ? Response::allow()
-            : Response::deny('Solo puedes eliminar tus propios comentarios.');
+            : Response::denyAsNotFound();
     }    
 
 
@@ -71,12 +65,14 @@ class ComentarioPolicy
      * Visible para un opositor: comentario no eliminado
      * y publicación visible (no eliminada, misma oposición).
      */
-    private function visibleParaOpositor(Usuario $usuario, Comentario $comentario): bool
+    private function visibleParaUsuario(Usuario $usuario, Comentario $comentario): bool
     {
+        $oposicionId = $usuario->comunidad()->id;
+
         $publicacion = $comentario->publicacion; 
 
         return !$comentario->trashed() 
-            && $usuario->oposicion_id === $publicacion->oposicion_id;
+            && $oposicionId === $publicacion->oposicion_id;
     }
 
     private function esAutor(Usuario $usuario, Comentario $comentario): bool

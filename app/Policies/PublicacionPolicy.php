@@ -71,11 +71,17 @@ class PublicacionPolicy
      */
     public function delete(Usuario $usuario, Publicacion $publicacion): Response
     {
-        // Admin: puede eliminar cualquiera, salvo las ya eliminadas
+        // Admin: puede eliminar cualquiera, salvo las ya eliminadas o fuera de la
+        // comunidad que modera
         if ($usuario->esAdmin()) {
-            return $publicacion->trashed()
-                ? Response::deny('Esta publicación ya está eliminada.')
-                : Response::allow();
+            if ($publicacion->trashed()){
+                return Response::deny('Esta publicación ya está eliminada.');
+            }
+            else if($usuario->comunidad()->id !== $publicacion->oposicion_id){
+                return Response::denyAsNotFound();
+            }
+            
+            return Response::allow();
         }
 
         if (!$this->visibleParaOpositor($usuario, $publicacion)) {

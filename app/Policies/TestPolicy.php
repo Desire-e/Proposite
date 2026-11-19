@@ -16,15 +16,9 @@ use Illuminate\Auth\Access\Response;
 class TestPolicy
 {
 
-    public function before(Usuario $usuario, string $ability): Response|null
-    {
-        return $usuario->esAdmin() ? Response::allow() : null;
-    }
-
-
     public function view(Usuario $usuario, Test|OpcionRespuesta|Pregunta $model): Response
     {
-        return $this->visibleParaOpositor($usuario, $model)
+        return $this->visibleParaUsuario($usuario, $model)
             ? Response::allow()
             : Response::denyAsNotFound();
     }
@@ -59,22 +53,24 @@ class TestPolicy
     }
 
 
-    private function visibleParaOpositor(Usuario $usuario, Test|OpcionRespuesta|Pregunta $model): bool
+    private function visibleParaUsuario(Usuario $usuario, Test|OpcionRespuesta|Pregunta $model): bool
     {
+        $oposicionId = $usuario->comunidad()->id;
+
         if ($model instanceof Test) {
             $test = $model;
             return !$test->trashed()
-                && $usuario->oposicion_id === $test->temario->oposicion_id;
+                && $oposicionId === $test->temario->oposicion_id;
         }
         else if ($model instanceof Pregunta) {
             $pregunta = $model;
             return !$pregunta->trashed()
-                && $usuario->oposicion_id === $pregunta->test->temario->oposicion_id;
+                && $oposicionId === $pregunta->test->temario->oposicion_id;
         }
         else {
             $opcion = $model;
             return !$opcion->trashed()
-                && $usuario->oposicion_id === $opcion->pregunta->test->temario->oposicion_id;
+                && $oposicionId === $opcion->pregunta->test->temario->oposicion_id;
         }
     }
 }
