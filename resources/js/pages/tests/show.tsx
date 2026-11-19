@@ -6,7 +6,8 @@ import { SectionCard } from '@/components/ui/SectionCard';
 import { CtaCard } from '@/components/ui/CtaCard';
 import { BackLink } from '@/components/ui/BackLink';
 import { duracionRecomendada } from '@/lib/tests';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
+import { type SharedData } from '@/types';
 
 type Usuario = {
     mejor_nota: number | null;
@@ -17,6 +18,8 @@ type Usuario = {
 export default function TestShow({ test, usuario }: { test: Test, usuario: Usuario }) {
 
     const duracion = duracionRecomendada(test.preguntas_count);
+    const { auth } = usePage<SharedData>().props;
+    const esAdmin = auth.user.rol === 'administrador';
 
     return (
         <AppLayout headTitle={`Test de ${test.titulo}`}>
@@ -62,22 +65,31 @@ export default function TestShow({ test, usuario }: { test: Test, usuario: Usuar
                     <aside className="relative overflow-hidden rounded-3xl bg-primary p-7 text-primary-foreground shadow-xl shadow-primary/10">
                         <div className="absolute -right-12 -top-12 size-40 rounded-full bg-secondary/30" />
 
-                        <div className="relative">
-                            <p className="text-xs font-bold uppercase tracking-[0.16em] text-tertiary">
-                                Tu mejor nota
-                            </p>
-
-                            <p className="mt-5 lg:text-5xl text-4xl font-bold">
-                                {usuario.mejor_nota != null ? usuario.mejor_nota : '—'}
-                            </p>
-
-                            <p className="mt-1 text-sm text-tertiary">
-                                {usuario.ultima_nota != null
-                                ? `Última nota: ${usuario.ultima_nota}`
-                                : 'Todavía no has realizado este test'}
-                            </p>
-
-                        </div>
+                            {esAdmin ? (
+                                <div className="relative">
+                                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-tertiary">
+                                        Modo prueba
+                                    </p>
+                                    <p className="mt-5 text-sm leading-6 text-tertiary">
+                                        Puedes hacer el test para revisarlo. Tu resultado no se guarda
+                                        ni cuenta en las estadísticas de la comunidad.
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="relative">
+                                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-tertiary">
+                                        Tu mejor nota
+                                    </p>
+                                    <p className="mt-5 lg:text-5xl text-4xl font-bold">
+                                        {usuario.mejor_nota != null ? usuario.mejor_nota : '—'}
+                                    </p>
+                                    <p className="mt-1 text-sm text-tertiary">
+                                        {usuario.ultima_nota != null
+                                        ? `Última nota: ${usuario.ultima_nota}`
+                                        : 'Todavía no has realizado este test'}
+                                    </p>
+                                </div>
+                            )}
                     </aside>
                 </div>
 
@@ -142,7 +154,6 @@ export default function TestShow({ test, usuario }: { test: Test, usuario: Usuar
                     </SectionCard>
 
                     <aside className="space-y-5">
-
                         <CtaCard
                             icon={ListChecks}
                             title="Siguiente paso"
@@ -150,7 +161,7 @@ export default function TestShow({ test, usuario }: { test: Test, usuario: Usuar
                             link={{ label: 'Abrir mi temario', route: 'temario.index' }}
                             className="rounded-3xl p-6"
                         />
-
+                            
                         <SectionCard
                             icon={Trophy}
                             title="La comunidad avanza"

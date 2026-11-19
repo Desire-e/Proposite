@@ -125,12 +125,11 @@ export default function TestResult({test, correccion, nota, prueba = false }: Re
                                 </strong>
                             </div>
 
-                            {nota.anterior !== null && (
                             <p className="mt-2 text-xs text-secondary">
                                 {nota.actual > nota.anterior
                                 ? 'Has mejorado respecto a tu intento anterior.'
                                 : 'Repasa los fallos para seguir mejorando.'}
-                            </p>)}
+                            </p>
                         </div>                    
                     )}
 
