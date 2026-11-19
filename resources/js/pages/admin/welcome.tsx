@@ -1,19 +1,20 @@
 import { type FormEventHandler } from 'react';
-import { useForm } from '@inertiajs/react';
+import { useForm, usePage } from '@inertiajs/react';
 import { ShieldCheck, ArrowRight, Check, Users, } from 'lucide-react'
-import { type UsuarioBasico } from '@/types/models'
 import { AuthLayout } from '@/layouts/AuthLayout';
 import { BackLink } from '@/components/ui/BackLink';
 
 import { ComunidadDropdown, type ComunidadOption } from '@/components/admin/ComunidadDropdown';
+import { SharedData } from '@/types';
 
-type AdminWelcomeProps = {
-    comunidades: ComunidadOption[];
-    admin: UsuarioBasico;
-}
 
-export default function AdminWelcome({ comunidades, admin }: AdminWelcomeProps) {
+export default function AdminWelcome(
+    { comunidades }: { comunidades: ComunidadOption[]}
+) {
     
+    const { auth } = usePage<SharedData>().props;
+    const admin = auth.user;
+
     const { data, setData, post, processing, errors, clearErrors,} =
         useForm<{oposicion_id: string}>({
             oposicion_id: '',
@@ -31,11 +32,13 @@ export default function AdminWelcome({ comunidades, admin }: AdminWelcomeProps) 
     return (
         <AuthLayout headTitle='Área de administración | Proposite' className='mx-auto max-w-4xl'>
 
-            <BackLink routeName={'logout'} method={'post'}>Volver a inicio</BackLink>
+            <div className="mt-10 m-5 items-left">
+                <BackLink routeName={'logout'} method={'post'}>Volver a inicio</BackLink>
+            </div>
 
             <div className="flex flex-col flex-1 items-center mx-5">
                 <div className="w-full max-w-2xl"> 
-
+                    
                     <div className="mx-auto flex size-14 items-center justify-center 
                     rounded-2xl bg-tertiary text-primary">
                         <ShieldCheck className="size-7" />
