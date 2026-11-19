@@ -8,11 +8,12 @@ import { StatCard } from '@/components/ui/StatCard'
 import { CtaCard } from '@/components/ui/CtaCard'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 
+// Estadísticas a null para el administrador (no genera intentos)
 type Usuario = {
     oposicion: string,
-    numero_tests_realizados: number,
-    porcentaje_tests_aprobados: number,
-    ranking: number;
+    numero_tests_realizados: number | null,
+    porcentaje_tests_aprobados: number | null,
+    ranking: number | null;
 }
 
 export default function TestsIndex({ usuario, tests }: {usuario: Usuario, tests: TestListado[]}) {
@@ -42,24 +43,26 @@ export default function TestsIndex({ usuario, tests }: {usuario: Usuario, tests:
                     description="Pon a prueba lo que has estudiado, detecta tus puntos débiles y avanza con una preparación más segura."
                 />
 
-                {/* Estadísticas */}
-                <section className="mt-8 grid gap-4 sm:grid-cols-3">
-                    <StatCard
-                        icon={BookOpenCheck}
-                        value={usuario.numero_tests_realizados}
-                        label="tests realizados"
-                    />
-                    <StatCard
-                        icon={CheckCircle2}
-                        value={`${usuario.porcentaje_tests_aprobados}%`}
-                        label="tests aprobados"
-                    />
-                    <StatCard
-                        icon={Trophy}
-                        value={`Top # ${usuario.ranking}`}
-                        label="de tu comunidad"
-                    />
-                </section>
+                {/* Estadísticas (solo opositor) */}
+                {usuario.numero_tests_realizados !== null && (
+                    <section className="mt-8 grid gap-4 sm:grid-cols-3">
+                        <StatCard
+                            icon={BookOpenCheck}
+                            value={usuario.numero_tests_realizados}
+                            label="tests realizados"
+                        />
+                        <StatCard
+                            icon={CheckCircle2}
+                            value={`${usuario.porcentaje_tests_aprobados}%`}
+                            label="tests aprobados"
+                        />
+                        <StatCard
+                            icon={Trophy}
+                            value={`Top # ${usuario.ranking}`}
+                            label="de tu comunidad"
+                        />
+                    </section>
+                )}
 
                 {/* Biblioteca de tests */}
                 <section className="mt-10">

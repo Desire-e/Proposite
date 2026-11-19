@@ -27,13 +27,16 @@ class TestsService
         // [test_id => intento], para no buscar en la colección en cada vuelta
         $intentosPorTest = $intentosUsuario->keyBy('test_id');
 
+        // El administrador no genera intentos (modo prueba): sin estadísticas
+        $esAdmin = $user->esAdmin();
+
         return [
             'usuario' => [
                 'oposicion' => $user->comunidad()->nombre,
-                'numero_tests_realizados' => $intentosUsuario->count(),
-                'porcentaje_tests_aprobados' => 
+                'numero_tests_realizados' => $esAdmin ? null : $intentosUsuario->count(),
+                'porcentaje_tests_aprobados' => $esAdmin ? null :
                     $this->porcentajeAprobados($intentosUsuario, $tests->count()),
-                'ranking' => 
+                'ranking' => $esAdmin ? null :
                     $this->posicionRanking($user, $ultimosIntentos),
             ],
             
