@@ -7,6 +7,13 @@ import { PageHero } from '@/components/PageHero';
 import { TemaItem } from '@/components/temario/TemaItem';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { ProgressBar } from '@/components/ui/ProgressBar';
+import { SharedData } from '@/types';
+import { usePage } from '@inertiajs/react'
+
+import { useRecursoForm } from '@/hooks/use-recurso-form';
+import { useDelete } from '@/hooks/use-delete';
+import { RecursoModal } from '@/components/RecursoModal';
+import { DeleteModal } from '@/components/DeleteModal';
 
 type Bloque ={ 
     nombre: string | null; 
@@ -118,16 +125,31 @@ export default function Temario(
         );
     };
 
+    /** Acciones de administrador: añadir y eliminar recurso */
+    const { auth } = usePage<SharedData>().props;
+    const esAdmin = auth.user.rol === 'administrador';
+
+    const recursoForm = useRecursoForm();
+    const deleteRecurso = useDelete('admin.temario.recursos.delete');
 
     return (
         <AppLayout headTitle="Temario oficial | Proposite">
 
+        {esAdmin && 
+            <>
+                <RecursoModal recursoForm={recursoForm} />
+                <DeleteModal 
+                    deletion={deleteRecurso}
+                    title="¿Eliminar este recurso?" 
+                />
+            </>
+        }
             <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8 lg:py-10">
                 <PageHero
                     eyebrow="Tu preparación"
                     title={`Temario de ${oposicion.nombre}`}
                     description="Consulta el temario oficial, marca cada tema cuando lo hayas estudiado. Tu progreso se guardará en tu perfil para que puedas volver cuando quieras."
-                    aside={
+                    aside={!esAdmin && (
                         // Progreso
                         <div className="w-full max-w-xs rounded-2xl bg-background p-5 shadow-sm">
                             <div className="mb-3 flex items-end justify-between">
@@ -147,7 +169,7 @@ export default function Temario(
                                 como estudiados
                             </p>
                         </div>
-                    }
+                    )}
                 />
 
                 {/* Temas */}
@@ -177,7 +199,19 @@ export default function Temario(
                                         key={tema.id}
                                         tema={tema}
                                         disabled={savingCheck}
-                                        onToggle={() => toggleCheck(tema.id, tema.checked)}
+                                        onToggle={() => 
+                                            toggleCheck(tema.id, tema.checked)
+                                        }
+                                        esAdmin={esAdmin}
+                                        onAddRecurso={
+                                            () => recursoForm.openCreate(tema.id)
+                                        }
+                                        onEditRecurso={
+                                            (recurso) => recursoForm.openEdit(recurso)
+                                        }
+                                        onDeleteRecurso={
+                                            (id) => deleteRecurso.open(id)
+                                        }
                                     />
                                 ))}
                             </div>

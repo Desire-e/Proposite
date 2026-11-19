@@ -13,13 +13,12 @@ use App\Http\Controllers\PublicacionesController;
 use App\Http\Controllers\ComentariosController;
 use App\Http\Controllers\ReportesController;
 use App\Http\Controllers\TestsController;
+use App\Http\Controllers\IntentosTestController;
 
 use App\Http\Controllers\Admin\PanelController as AdminPanelController;
+use App\Http\Controllers\Admin\ComunidadController as AdminComunidadController;
+use App\Http\Controllers\Admin\RecursosController as AdminRecursosController;
 
-// use App\Http\Controllers\RecursosController;
-// use App\Http\Controllers\IntentosTestController;
-
-// use App\Http\Controllers\Admin\RecursosController as AdminRecursosController;
 // use App\Http\Controllers\Admin\ReportesController as AdminReportesController;
 // use App\Http\Controllers\Admin\TestsController as AdminTestsController;
 // use App\Http\Controllers\Admin\OpositoresController as AdminUsuariosController;
@@ -195,19 +194,30 @@ Route::middleware(['auth', 'admin', 'oposicion.moderada'])->prefix('admin')->nam
     Route::get('/panel', [AdminPanelController::class, 'index'])
         ->name('panel');
 
-        
-    // reportes, baneos, tests, recursos (PEND-03 a PEND-07) ...
+    // ====== Temario ======
 
+    Route::prefix('temario')->name('temario.')->group(function () {
+
+        // Añadir, editar, eliminar recursos de un tema
+        Route::post('/{tema}/recursos', [AdminRecursosController::class, 'store'])
+            ->name('recursos.store'); // admin.temario.recursos.store
+        Route::delete('/recursos/{recurso}', [AdminRecursosController::class, 'delete'])
+            ->name('recursos.delete'); // admin.temario.recursos.delete
+        Route::patch('/recursos/{recurso}', [AdminRecursosController::class, 'update'])
+            ->name('recursos.update'); // admin.temario.recursos.update
+    });
+
+    // reportes, baneos, tests, ... 
 });
 
 
 // Tras inicio de sesión administrador - seleccionar oposición a moderar
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('welcome', [AdminPanelController::class, 'welcome'])
+    Route::get('welcome', [AdminComunidadController::class, 'index'])
         ->name('welcome'); // admin.welcome
 
     // seleccionar / cambiar oposición a moderar
-    Route::post('select', [AdminPanelController::class, 'selectOposicion'])
+    Route::post('select', [AdminComunidadController::class, 'select'])
         ->name('select'); // admin.select
 });
 

@@ -48,6 +48,7 @@ export type Comentario = {
 // ====== Temario ======
 
 export type Recurso = {
+    id: string;
     subido_por: string;
     temario_id: string;
     titulo: string;
