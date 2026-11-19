@@ -228,12 +228,11 @@ export default function Perfil({ user, es_propio }: PerfilProps) {
                                     </span>
                                 </span>
                             </>) : (
-                                <span>
+                                <p className="text-sm text-neutral-foreground">
                                     {es_propio ? 
-                                        'Aún no has realizado ningún test.' : 
-                                        'Aún no ha realizado ningún test.'
+                                        'Aún no has realizado ningún test.' : 'Aún no ha realizado ningún test.'
                                     }
-                                </span>
+                                </p>
                             )}
                         </div>
                     </SectionCard>
@@ -282,12 +281,11 @@ export default function Perfil({ user, es_propio }: PerfilProps) {
                                 );
                             })
                             ) : (
-                                <div className="flex gap-3 text-sm">
+                                <p className="text-sm text-neutral-foreground">
                                     {es_propio ? 
-                                    'Aún no tienes actividad.' : 
-                                        'Aún no tiene actividad.'
+                                    'Aún no tienes actividad.' : 'Aún no tiene actividad.'
                                     }
-                                </div>
+                                </p>
                             )}
                         </div>
                     </SectionCard>

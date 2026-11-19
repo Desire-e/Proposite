@@ -9,7 +9,7 @@ import { AccionesContenido } from '@/components/AccionesContenido';
 import { MeSirvioButton } from '@/components/MeSirvioButton';
 import { publishedSince } from '@/lib/dates';
 import { useUntilNow } from '@/hooks/use-until-now';
-import { EliminarButton } from '../admin/foro/EliminarButton';
+import { EliminarButton } from '../EliminarButton';
 
 
 type PublicacionCardProps = {

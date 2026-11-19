@@ -1,11 +1,7 @@
 
-import { useState } from 'react'
-
 import { 
-    ArrowRight, Activity, AlertTriangle, Ban, BookOpen, Check, FileQuestion,
-    Flag, Link2, MoreHorizontal, Plus, ShieldCheck, Trash2, Users, BookOpenCheck,
-    ArrowLeft,
-    MessageCircle
+    ArrowRight, BookOpen, FileQuestion,
+    Flag, Link2, Plus, ShieldCheck, Users, BookOpenCheck,
 } from 'lucide-react'
 
 import { BackLink } from '@/components/ui/BackLink';
@@ -17,7 +13,6 @@ import { useForm } from '@inertiajs/react';
 import { Oposicion } from '@/types/models';
 
 import AdminPanelCard from '@/components/admin/AdminPanelCard';
-import { formatDMY } from '@/lib/dates';
 import { Reporte } from '@/types/models';
 import ReportePendienteCard from '@/components/admin/ReportePendienteCard';
 
@@ -148,7 +143,7 @@ export default function Panel(
 
                 <div id='reportes-pendientes' className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1fr)_350px]">
                     <section>
-                        <div className="flex flex-col gap-4 border-b border-border p-5 mb-8
+                        <div className="flex flex-col gap-4 border-b border-border pb-5 pl-0
                             sm:flex-row sm:items-center sm:justify-between">
                             <div>
                                 <p className="text-xs font-bold uppercase tracking-[0.14em] text-secondary">
@@ -173,19 +168,24 @@ export default function Panel(
                             </label> */}
                         </div>
 
-                        <div className="divide-y divide-border">
+                        <div className="flex flex-col gap-5 divide-y divide-border mt-10">
                             {/* {visibleReports.map((report) => ( */}
-
-                            {reportes_pendientes.map((reporte) => (
-                                <ReportePendienteCard 
-                                    key={reporte.id}
-                                    reporte={reporte}
-                                    // TODO.
-                                    // onOmitir={omitirReporte}
-                                    // onEliminar={eliminarReporte}
-                                    // onSuspender={suspenderUsuario}
-                                />
-                            ))}
+                            {reportes_pendientes.length > 0 ? (
+                                reportes_pendientes.map((reporte) => (
+                                    <ReportePendienteCard 
+                                        key={reporte.id}
+                                        reporte={reporte}
+                                        // TODO.
+                                        // onOmitir={omitirReporte}
+                                        // onEliminar={eliminarReporte}
+                                        // onBanear={banearUsuario}
+                                    />
+                                ))
+                            ) : (
+                                <p className='text-sm text-neutral-foreground'>
+                                    Sin reportes pendientes en esta comunidad
+                                </p>
+                            )}
 
                             {/* {visibleReports.length === 0 && (
                                 <div className="p-10 text-center text-sm text-neutral-foreground">
@@ -237,51 +237,51 @@ export default function Panel(
                             </div>
                         </section>
 
-                        <section className="rounded-2xl border border-border bg-background p-5">
+                        {/* <section className="rounded-2xl border border-border bg-background p-5">
                             <div className="flex items-center gap-3">
                                 <div className="flex size-9 items-center justify-center rounded-lg bg-tertiary text-primary">
-                                <Activity className="size-4" />
+                                    <Activity className="size-4" />
                                 </div>
 
                                 <div>
-                                <h2 className="text-sm font-bold">
-                                    Actividad reciente
-                                </h2>
+                                    <h2 className="text-sm font-bold">
+                                        Actividad reciente
+                                    </h2>
 
-                                <p className="text-xs text-neutral-foreground">
-                                    Últimas acciones del equipo
-                                </p>
+                                    <p className="text-xs text-neutral-foreground">
+                                        Últimas acciones del equipo
+                                    </p>
                                 </div>
                             </div>
 
                             <ul className="mt-5 space-y-4 text-xs">
                                 <li className="flex gap-3">
-                                <span className="mt-1 size-2 shrink-0 rounded-full bg-secondary" />
+                                    <span className="mt-1 size-2 shrink-0 rounded-full bg-secondary" />
 
-                                <span className="text-neutral-foreground">
-                                    <strong className="text-foreground">Marta S.</strong>{' '}
-                                    resolvió un reporte
+                                    <span className="text-neutral-foreground">
+                                        <strong className="text-foreground">Marta S.</strong>{' '}
+                                        resolvió un reporte
 
-                                    <span className="mt-1 block text-[10px]">
-                                    Hace 8 min
+                                        <span className="mt-1 block text-[10px]">
+                                        Hace 8 min
+                                        </span>
                                     </span>
-                                </span>
                                 </li>
 
                                 <li className="flex gap-3">
-                                <span className="mt-1 size-2 shrink-0 rounded-full bg-primary" />
+                                    <span className="mt-1 size-2 shrink-0 rounded-full bg-primary" />
 
-                                <span className="text-neutral-foreground">
-                                    <strong className="text-foreground">David R.</strong>{' '}
-                                    publicó un recurso legal
+                                    <span className="text-neutral-foreground">
+                                        <strong className="text-foreground">David R.</strong>{' '}
+                                        publicó un recurso legal
 
-                                    <span className="mt-1 block text-[10px]">
-                                    Hace 42 min
+                                        <span className="mt-1 block text-[10px]">
+                                        Hace 42 min
+                                        </span>
                                     </span>
-                                </span>
                                 </li>
                             </ul>
-                        </section>
+                        </section> */}
                     </aside>
                 </div>
             </div>
