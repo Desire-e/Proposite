@@ -1,13 +1,13 @@
 import type { ReactNode } from 'react'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
-import { AlertTriangle, CheckCircle2, Info, X } from 'lucide-react'
+import { AlertTriangle, CheckCircle2, Info, X, Plus } from 'lucide-react'
 import { Dialog, DialogDescription, DialogOverlay, DialogPortal, DialogTitle } from '@/components/ui/dialog'
 
 type FeedbackModalProps = {
     open: boolean
     title: string
     description: string
-    tone?: 'danger' | 'success' | 'warning'
+    tone?: 'danger' | 'success' | 'warning' | 'normal'
     confirmLabel?: string
     cancelLabel?: string
     onConfirm?: () => void
@@ -19,6 +19,11 @@ type FeedbackModalProps = {
 }
 
 const tones = {
+    normal: {
+        icon: Plus,
+        iconClass: 'bg-tertiary text-primary',
+        action: 'bg-primary hover:bg-tertiary hover:text-tertiary-foreground disabled:opacity-50',
+    },
     danger: {
         icon: AlertTriangle,
         iconClass: 'bg-red-100 text-red-700',
