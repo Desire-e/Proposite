@@ -2,15 +2,17 @@
 
 namespace App\Services;
 
-use App\Models\Test;
+use App\Models\IntentoTest;
 use App\Models\Pregunta;
+use App\Models\Test;
 use App\Models\Usuario;
+
 use Illuminate\Validation\ValidationException;
 
 class IntentosTestService
 {
     /**
-     * @param test que quiere realizar
+     * Datos para realizar un intento del @param test
      */
     public function createIntentoData(Test $test): array
     {
@@ -26,12 +28,42 @@ class IntentosTestService
         ];
     }
 
+
     /**
-     * @param test del intento realizado
-     * @param usuarioId que hizo el intento
+     * Corrige el intento, lo guarda y deja la corrección en sesión
+     * para mostrarla en la página de resultado.
+     *
+     * @param test realizado
+     * @param usuario que hizo el intento
      * @param respuestas marcadas
      */
-    public function storeIntentoData(Test $test, int|string $usuarioId, array $respuestas): array
+    public function registrar(Test $test, Usuario $usuario, array $respuestas): IntentoTest
+    {
+        $resultados = $this->corregir($test, $usuario->id, $respuestas);
+
+        $intento = IntentoTest::create([
+            'usuario_id' => $usuario->id,
+            'test_id' => $test->id,
+            'nota' => $resultados['nota']['actual'],
+        ]);
+
+        // Correción mostrada temporalmente (sesión flash), ligado al intento
+        session()->put("correccion_intento.{$intento->id}", $resultados);
+
+        return $intento;
+    }
+
+
+    // ====================
+    // Correción (cálculos)
+    // ====================
+
+
+    /**
+     * @return array con el test, la corrección de cada pregunta
+     * y la nota actual y anterior
+     */
+    private function corregir(Test $test, int|string $usuarioId, array $respuestas): array
     {
         // Preguntas del test, con sus opciones
         // keyBy('id') convierte una colección en otra cuyas claves son el valor del campo indicado
@@ -40,7 +72,7 @@ class IntentosTestService
             ->get()
             ->keyBy('id');
 
-        $respuestasCorregidas = [];
+        $correcciones = [];
         $correctas = 0;
 
         foreach ($respuestas as $r) {
@@ -50,16 +82,14 @@ class IntentosTestService
 
             $pregunta = $preguntas->get($r['pregunta_id']);
             $opcion = $pregunta?->opcionesRespuesta->firstWhere('id', $r['respuesta_id']);
-            
+
             if (!$pregunta || !$opcion) {
                 throw ValidationException::withMessages(
                     ['respuestas' => 'Respuesta no válida para este test.']
-                    );
+                );
             }
 
             // --- Corrección ---
-            // Número de correctas
-            // Preguntas correctas (1) e incorrectas (0)
 
             $correctas += $opcion->es_correcta ? 1 : 0;
 
@@ -77,6 +107,8 @@ class IntentosTestService
         }
 
         // --- Calcular nota sobre 10 y obtener nota anterior ---
+        // Se consulta ANTES de crear el nuevo intento; si no, la
+        // "anterior" sería la que se acaba de guardar
 
         $nota = $this->calcularNota($correctas, $preguntas->count());
 
@@ -90,16 +122,11 @@ class IntentosTestService
             'correccion' => $correcciones,
             'nota' => [
                 'actual' => number_format($nota, 2),
-                'anterior' => $notaAnterior ? number_format($notaAnterior, 2) : null
-            ]
+                'anterior' => $notaAnterior ? number_format($notaAnterior, 2) : null,
+            ],
         ];
-    }
+    }    
 
-
-
-    // ====================
-    // Cálculos
-    // ====================
 
     private function calcularNota(int $correctas, int $total): float
     {
@@ -109,10 +136,10 @@ class IntentosTestService
     }
 
 
-
     // ====================
     // Consultas
     // ====================
+
 
     /**
      * @return array de preguntas del test 
