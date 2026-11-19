@@ -137,15 +137,15 @@ Route::middleware(['auth', 'oposicion.moderada'])->group(function () {
             ->name('show'); // tests.show
 
         // Realizando intento de test
-        Route::get('/{test}/intento', [TestsController::class, 'createIntento'])
+        Route::get('/{test}/intento', [IntentosTestController::class, 'create'])
             ->name('intento.create'); // tests.intento.create
 
         // Insertar intento de test
-        Route::post('/{test}/intento', [TestsController::class, 'storeIntento'])
+        Route::post('/{test}/intento', [IntentosTestController::class, 'store'])
             ->name('intento.store'); // tests.intento.store
 
         // Ver resultado de un intento concreto
-        Route::get('intento/{intentoTest}', [TestsController::class, 'showIntento'])
+        Route::get('intento/{intentoTest}', [IntentosTestController::class, 'show'])
             ->name('intento.show'); // tests.intento.show
     });
 
