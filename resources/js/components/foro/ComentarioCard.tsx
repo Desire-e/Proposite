@@ -7,6 +7,7 @@ import UserAvatar from '@/components/ui/UserAvatar';
 import { AccionesContenido } from '@/components/AccionesContenido';
 import { publishedSince } from '@/lib/dates';
 import { useUntilNow } from '@/hooks/use-until-now';
+import { EliminarButton } from '../admin/foro/EliminarButton';
 
 type ComentarioCardProps = {
     comentario: Comentario;
@@ -24,6 +25,7 @@ export function ComentarioCard({ comentario, id, onEliminar, onReportar }: Comen
 
     const { auth } = usePage<SharedData>().props;
     const esAutor = comentario.usuario_id === auth.user.id;
+    const esAdmin = auth.user.rol === 'administrador';
 
     return (
         <SectionCard as="article" className="relative">
@@ -48,14 +50,18 @@ export function ComentarioCard({ comentario, id, onEliminar, onReportar }: Comen
                         </p>
                     </div>
                 </div>
-
                 <div className="relative z-10 shrink-0">
+                {esAdmin ? (
+                    <EliminarButton onEliminar={onEliminar} />
+                ) : (
                     <AccionesContenido
                         esAutor={esAutor}
                         onEliminar={onEliminar}
                         onReportar={onReportar}
                     />
+                )}
                 </div>
+
             </div>
         </SectionCard>
     );

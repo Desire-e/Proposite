@@ -1,6 +1,9 @@
 import { Bell, UserRound, } from 'lucide-react';
 import { type Oposicion, type PublicacionFeed } from '@/types/models';
 
+import { SharedData } from '@/types';
+import { usePage } from '@inertiajs/react';
+
 import AppLayout from '@/layouts/AppLayout';
 import { PageHero } from '@/components/PageHero';
 import { FormularioContenido } from '@/components/foro/FormularioContenido';
@@ -53,6 +56,12 @@ export default function Feed(
      */
     const reportPublicacion = useReport('foro.publicaciones.reportes.store');
 
+    /**
+     * Ocultar funciones de opositor/admin
+     */
+    const page = usePage<SharedData>();
+    const { auth } = page.props;
+    const esAdmin = auth.user.rol === 'administrador';
 
     return (
         <AppLayout headTitle={`Foro de ${oposicion.nombre} | Proposite`}>
@@ -82,16 +91,17 @@ export default function Feed(
                 {/* Contenido principal */}
                 <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
                     <section>
-
                         {/* Crear publicación */}
-                        <FormularioContenido
-                            url={route('foro.publicaciones.store')}
-                            label="Crear una publicación"
-                            placeholder="¿Qué quieres compartir con tu comunidad?"
-                            submitLabel="Publicar"
-                            rows={6}
-                            preserveScroll={false}
-                        />
+                        {!esAdmin && (
+                            <FormularioContenido
+                                url={route('foro.publicaciones.store')}
+                                label="Crear una publicación"
+                                placeholder="¿Qué quieres compartir con tu comunidad?"
+                                submitLabel="Publicar"
+                                rows={6}
+                                preserveScroll={false}
+                            />
+                        )}
 
                         {/* Conversaciones */}
                         <div className="mt-7 flex flex-col gap-4">
