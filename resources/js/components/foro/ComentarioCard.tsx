@@ -7,7 +7,7 @@ import UserAvatar from '@/components/ui/UserAvatar';
 import { AccionesContenido } from '@/components/AccionesContenido';
 import { publishedSince } from '@/lib/dates';
 import { useUntilNow } from '@/hooks/use-until-now';
-import { EliminarButton } from '../admin/foro/EliminarButton';
+import { EliminarButton } from '../EliminarButton';
 
 type ComentarioCardProps = {
     comentario: Comentario;

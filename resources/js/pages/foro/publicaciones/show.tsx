@@ -21,7 +21,7 @@ import { useReport } from '@/hooks/use-report';
 import { ReportModal } from '@/components/ReportModal';
 import { DeleteModal } from '@/components/DeleteModal';
 import { useDelete } from '@/hooks/use-delete';
-import { EliminarButton } from '@/components/admin/foro/EliminarButton';
+import { EliminarButton } from '@/components/EliminarButton';
 
 type Publicacion = {
     id: string;
@@ -170,7 +170,9 @@ export default function Publicacion({
                                 />
                             ))
                         ) : (
-                            <p className='text-sm text-neutral-foreground my-10'>Aún no hay comentarios</p>
+                            <p className='text-sm text-neutral-foreground my-10'>
+                                Aún no hay comentarios
+                            </p>
                         )}
 
                     </div>
