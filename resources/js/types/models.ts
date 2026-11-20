@@ -21,6 +21,13 @@ export type Reporte = {
     motivo: string;
     estado: string;
     created_at: string;
+    // Si el reportable es un comentario, vendrá con este dato.
+    // Relación de Reporte-Comentario, se recibe comentario.id y 
+    // comentario.publicacion_id
+    reportable?: { 
+        id: string; 
+        publicacion_id: string 
+    } | null;
 };
 
 // ====== Foro ======

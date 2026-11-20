@@ -7,13 +7,13 @@ type AdminPanelCardProps = {
     Icon: LucideIcon;
     title: string;
     count?: number;
-    link: {
+    link?: {
         label: string;
         href: string;
-    }
+    } | null;
 }
 
-export default function AdminPanelCard({Icon, title, count=0, link}: AdminPanelCardProps){
+export default function AdminPanelCard({Icon, title, count=0, link = null}: AdminPanelCardProps){
     return(
         <article className="flex flex-col flex-wrap w-full md:w-[48%] lg:w-[23%] p-5 
         rounded-2xl bg-white border border-border gap-2">
@@ -34,13 +34,15 @@ export default function AdminPanelCard({Icon, title, count=0, link}: AdminPanelC
                 </strong>
             </div>
 
-            <Link 
-                href={link.href}
-                className="inline-flex items-center gap-2 mt-1 text-xs font-medium 
-                text-tertiary-foreground"
-            >
-                {link.label} <ArrowRight className="size-3"/>
-            </Link>
+            {link && (
+                <Link 
+                    href={link.href}
+                    className="inline-flex items-center gap-2 mt-1 text-xs font-medium 
+                    text-tertiary-foreground"
+                >
+                    {link.label} <ArrowRight className="size-3"/>
+                </Link>
+            )}
         </article>
     );
 }

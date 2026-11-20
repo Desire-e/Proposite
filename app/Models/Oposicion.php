@@ -60,6 +60,10 @@ class Oposicion extends Model {
         $reportesComentarios = Reporte::where('estado', EstadoReporte::PENDIENTE)
             ->where('reportable_tipo', 'comentario')
             ->whereIn('reportable_id', $idsComentarios)
+            // reportable: relación morphTo en Reporte con los reportables
+            // devuelve el reportable (comentario), se obtiene los campos concretos id, publicacion_id
+            // id es necesario para que Laravel relacione comentario-publicación
+            ->with('reportable:id,publicacion_id')
             ->get();
 
         // 3. Sumar los tres

@@ -27,12 +27,31 @@ function etiquetaReportable(tipo: string) {
     return 'Contenido';
 }
 
+
+/** Enlace al contenido reportado; null si no se puede enlazar */
+function urlReportable(reporte: Reporte): string | null {
+    switch (reporte.reportable_tipo) {
+        case 'usuario':
+            return route('opositores.show', reporte.reportable_id);
+        case 'publicacion':
+            return route('foro.publicaciones.show', reporte.reportable_id);
+        case 'comentario':
+            // Publicación del comentario + ancla al comentario (id en publicaciones/show)
+            return reporte.reportable
+                ? `${route('foro.publicaciones.show', reporte.reportable.publicacion_id)}#comentario-${reporte.reportable_id}`
+                : null;
+        default:
+            return null;
+    }
+}
+
 export default function ReportePendienteCard(
     { reporte, onOmitir, onEliminar, onSuspender }
     : ReportePendienteCardProps
 ) {
 
     const Icon = iconoReportable(reporte.reportable_tipo);
+    const url = urlReportable(reporte);
 
     return (
         <article className="p-5 rounded-xl bg-white border border-border">
@@ -52,19 +71,21 @@ export default function ReportePendienteCard(
                         {formatDMY(reporte.created_at)}
                     </p>
 
-                    <Link 
-                        // TODO poner route() a la publicacion/perfil
-                        href='#ejemplo'
-                        className="inline-flex items-center gap-2 mt-2 text-xs font-medium 
-                        text-tertiary-foreground"
-                    >
-                        Ver {etiquetaReportable(reporte.reportable_tipo)} <ArrowRight className="size-3"/>
-                    </Link>
+                    {url && (
+                        <Link 
+                            href={url}
+                            className="inline-flex items-center gap-2 mt-2 text-xs font-medium 
+                            text-tertiary-foreground"
+                        >
+                            Ver {etiquetaReportable(reporte.reportable_tipo)} <ArrowRight className="size-3"/>
+                        </Link>
+                    )}
+
                 </div>
             </div>
 
 
-            <div className="mt-4 flex flex-wrap justify-end gap-2">
+            <div className="mt-4 flex flex-wrap md:justify-end gap-2">
                 <button
                     type="button"
                     onClick={() => onOmitir?.(reporte)}
@@ -74,17 +95,19 @@ export default function ReportePendienteCard(
                     <Check className="size-3.5" />
                     Omitir
                 </button>
-
-                <button
-                    type="button"
-                    onClick={() => onEliminar?.(reporte)}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-error! bg-error text-error-foreground 
-                    px-3 py-2 text-xs font-semibold transition hover:bg-neutral hover:text-error-foreground hover:border 
-                    hover:border-error-foreground!"
-                >
-                    <Trash2 className="size-3.5" />
-                    Eliminar contenido
-                </button>
+                
+                {reporte.reportable_tipo !== 'usuario' && (
+                    <button
+                        type="button"
+                        onClick={() => onEliminar?.(reporte)}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-error! bg-error text-error-foreground 
+                        px-3 py-2 text-xs font-semibold transition hover:bg-neutral hover:text-error-foreground hover:border 
+                        hover:border-error-foreground!"
+                    >
+                        <Trash2 className="size-3.5" />
+                        Eliminar contenido
+                    </button>
+                )}
 
                 <button
                     type="button"
