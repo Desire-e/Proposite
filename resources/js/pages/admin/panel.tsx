@@ -4,7 +4,6 @@ import {
     Flag, Link2, Plus, ShieldCheck, Users, BookOpenCheck,
 } from 'lucide-react'
 
-import { BackLink } from '@/components/ui/BackLink';
 import AppLayout from '@/layouts/AppLayout';
 
 import { ComunidadDropdown, type ComunidadOption } from '@/components/admin/ComunidadDropdown';
@@ -70,9 +69,6 @@ export default function Panel(
         <AppLayout headTitle={`Administración de ${oposicion_moderada.nombre} | Proposite`}>
             <div className="mx-auto w-full max-w-6xl px-4 py-6">
 
-                {/* TODO. CSMBIAR */}
-                <BackLink routeName={'logout'} method={'post'} className='mb-10'>LOGOUT PROVISIONAL</BackLink>
-
                 <div className='flex flex-col mb-8 '>
                     <p className="mb-2 flex items-center gap-2 text-xs font-bold 
                     uppercase tracking-[0.16em] text-secondary">
@@ -117,18 +113,17 @@ export default function Panel(
                         }} 
                     />
                     <AdminPanelCard Icon={Users} title='Usuarios' count={usuarios_count} 
-                        link={{
-                            label:'Ver usuarios', 
-                            // TODO. route(...)
-                            href:'#ejemplo'
-                        }} 
+                        // link={{
+                        //     label:'Ver usuarios', 
+                        //     // TODO. route(...)
+                        //     href:'#ejemplo'
+                        // }} 
                     />
 
                     <AdminPanelCard Icon={BookOpenCheck}  title='Recursos' count={recursos_count} 
                         link={{
                             label:'Recursos publicados', 
-                            // TODO. route(...)
-                            href:'#ejemplo'
+                            href:route('temario.index')
                         }} 
                     />
 
@@ -136,7 +131,7 @@ export default function Panel(
                         link={{
                             label:'Tests publicados', 
                             // TODO. route(...)
-                            href:'#ejemplo'
+                            href:route('tests.index')
                         }} 
                     />
                 </section>
