@@ -5,7 +5,15 @@ namespace Database\Seeders;
 // use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Database\Seeders\AvatarSeeder;
+use Database\Seeders\OposicionSeeder;
+use Database\Seeders\TemarioAuxiliarAdministrativoSeeder;
+use Database\Seeders\TemarioPoliciaNacionalSeeder;
+use Database\Seeders\RecursoSeeder;
+use Database\Seeders\UsuarioSeeder;
+use Database\Seeders\PublicacionSeeder;
+use Database\Seeders\ComentarioSeeder;
+use Database\Seeders\TestsSeeder;
+use Database\Seeders\IntentosTestSeeder;
 
 /**
  * Running Seeders:
@@ -33,7 +41,15 @@ class DatabaseSeeder extends Seeder {
          * The call method accepts an array of seeder classes that should be executed
          */
         $this->call([
-            AvatarSeeder::class,
+            OposicionSeeder::class,
+            TemarioAuxiliarAdministrativoSeeder::class,
+            TemarioPoliciaNacionalSeeder::class,
+            RecursoSeeder::class,
+            UsuarioSeeder::class,
+            PublicacionSeeder::class,
+            ComentarioSeeder::class,
+            TestsSeeder::class,
+            IntentosTestSeeder::class,
         ]);
         
     }

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Carbon\CarbonInterface;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -18,19 +19,7 @@ use App\Models\Reporte;
 
 class Publicacion extends Model {
 
-    /**
-     * SoftDeletes. Gestión de deleted_at
-     * 
-     * $publicacion->delete(); No elimina físicamente, establece deleted_at=fecha/hora actual.
-     * Publicacion::withTrashed()->get(); Para consultas incluyendo eliminadas.
-     * Publicacion::onlyTrashed()->get(); Para consultas eliminadas.
-     * $publicacion->restore(); Restaurar.
-     * $publicacion->forceDelete(); Eliminarla físicamente.
-     */
-
     use HasUuids, SoftDeletes;
-    // NOTA. No necesitas declarar manualmente deleted_at en $fillable, 
-    // ni añadir un cast específico para que SoftDeletes funcione.
     
     protected $table = "publicaciones";
 
@@ -41,7 +30,6 @@ class Publicacion extends Model {
     protected $fillable = [
         'usuario_id',
         'oposicion_id', 
-        'titulo', 
         'contenido',
     ];
     
@@ -55,6 +43,29 @@ class Publicacion extends Model {
     public $timestamps = true;
     public const UPDATED_AT = null;
 
+
+    private ?CarbonInterface $borradoEn = null;
+
+    protected static function booted(): void
+    {
+        static::deleted(function (Publicacion $publicacion) {
+            if ($publicacion->isForceDeleting()) { return; }
+
+            $publicacion->comentarios()->delete();
+        });
+
+        static::restoring(function (Publicacion $publicacion) {
+            $publicacion->borradoEn = $publicacion->deleted_at;
+        });
+
+        static::restored(function (Publicacion $publicacion) {
+            $publicacion->comentarios()->onlyTrashed()
+                ->where('deleted_at', '>=', $publicacion->borradoEn)
+                ->whereHas('usuario')
+                ->restore();
+        });
+    }
+    
     
     // Relaciones
 
@@ -76,15 +87,16 @@ class Publicacion extends Model {
         return $this->belongsTo(Oposicion::class, 'oposicion_id');
     }
 
+    // TODO. El admin, si quiere ver los comentarios de una publicación eliminada, 
+    // que los vea por una ruta de admin específica con su propia consulta withTrashed(), 
+    // no por la página pública del foro.
     public function comentarios(): HasMany {
         return $this->hasMany(Comentario::class, 'publicacion_id');
+        // ->withTrashed();
     }
 
-    // colección de Usuario, cada uno con
-    // $publicacion->usuariosMeSirvio()->wherePivot('checked', true)
-    public function usuariosMeSirvio(): BelongsToMany {
-        return $this->belongsToMany(Usuario::class, 'me_sirvio', 'publicacion_id', 'usuario_id')
-                ->withPivot('checked'); 
+    public function meSirvio(): BelongsToMany
+    {
+        return $this->belongsToMany(Usuario::class, 'me_sirvio', 'publicacion_id', 'usuario_id');
     }
-
 }

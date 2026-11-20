@@ -12,13 +12,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use App\Models\Oposicion;
-use App\Models\Avatar;
 use App\Models\Reporte;
 use App\Models\Publicacion;
 use App\Models\Comentario;
 use App\Models\Test;
 use App\Models\IntentoTest;
 use App\Models\Recurso;
+use Carbon\CarbonInterface;
 
 
 class Usuario extends Authenticatable {
@@ -30,17 +30,15 @@ class Usuario extends Authenticatable {
     public $incrementing = false;
     protected $keyType = 'string';
 
+    // rol, deleted_by y oposicion_moderada_id no son asignables en masa:
+    // se asignan de forma explícita en el código
     protected $fillable = [
         'oposicion_id', 
         'name', 
         'email',
         'password',
-        'rol',
         'fecha_convocatoria',
         'biografia',
-        'suspendido',
-        'suspendido_por',
-        'avatar_id',
     ];
     
     public $timestamps = true;
@@ -53,20 +51,75 @@ class Usuario extends Authenticatable {
         return [
             'rol'=> Rol::class, // enum de roles
             'fecha_convocatoria' => 'date',
-            'suspendido' => 'boolean',
         ];
     }
 
+    // Obtener si es admin 
+    public function esAdmin(): bool { return $this->rol === Rol::ADMIN; }
 
     // Relaciones
-    
-    public function avatar(): BelongsTo{
-        return $this->belongsTo(Avatar::class, 'avatar_id');
-    }
     
     public function intentosTests(): HasMany {
         return $this->hasMany(IntentoTest::class, 'usuario_id');
     }
+
+
+    private ?CarbonInterface $borradoEn = null;
+
+    // Método especial de los modelos Eloquent de Laravel que se ejecuta una sola vez, 
+    // cuando la clase del modelo se usa por primera vez (al arrancar la petición). 
+    // Es el sitio oficial para registrar cosas que deben estar activas durante toda la vida del modelo
+    
+    protected static function booted(): void 
+    {
+        static::deleted(function (Usuario $usuario) {
+            // En force delete se propaga soft deletes: las FK con cascadeOnDelete se encargan del borrado físico.
+            if ($usuario->isForceDeleting()) { return; }
+
+            // Publicaciones: cada delete arrastra sus comentarios
+            $usuario->publicaciones()->get()->each->delete();
+            // Comentarios del usuario en publicaciones ajenas
+            $usuario->comentarios()->get()->each->delete();
+            $usuario->intentosTests()->delete();
+
+            // Los reportes (enviados y recibidos) se conservan
+        });
+
+        static::restoring(function (Usuario $usuario) {
+            $usuario->borradoEn = $usuario->deleted_at;
+        });
+
+        // Al restaurar el usuario (revocar baneo), restaurar también hijos
+        static::restored(function (Usuario $usuario) {
+            $usuario->publicaciones()->onlyTrashed()
+                ->where('deleted_at', '>=', $usuario->borradoEn)
+                ->get()->each->restore();
+
+            $usuario->intentosTests()->onlyTrashed()
+                ->where('deleted_at', '>=', $usuario->borradoEn)
+                ->whereHas('test')          // el test sigue activo
+                ->restore();
+
+            $usuario->comentarios()->onlyTrashed()
+                ->where('deleted_at', '>=', $usuario->borradoEn)
+                ->whereHas('publicacion')   // la publicación sigue activa
+                ->restore();
+        });
+    }
+
+
+    /**
+     * Comunidad con la que trabaja el usuario:
+     * opositor la oposición en la que está inscrito
+     * admin la oposición que ha elegido moderar
+     */
+    public function comunidad(): ?Oposicion
+    {
+        return $this->esAdmin() ? $this->oposicionModerada : $this->oposicion;
+    }
+
+
+    // Relaciones
 
     // ================
     // OPOSITOR
@@ -94,8 +147,8 @@ class Usuario extends Authenticatable {
         );
     }
     
-    public function suspendidoPor(): BelongsTo{
-        return $this->belongsTo(Usuario::class, 'suspendido_por');
+    public function baneadoPor(): BelongsTo{
+        return $this->belongsTo(Usuario::class, 'deleted_by');
     }
 
     public function publicaciones(): HasMany {
@@ -106,17 +159,24 @@ class Usuario extends Authenticatable {
         return $this->hasMany(Comentario::class, 'usuario_id');
     }
 
-    public function temarioMarcado(): BelongsToMany {
-        return $this->belongsToMany(Tema::class, 'check_temario')
-                ->withPivot('checked'); 
+    // Temario, marcado o no
+    public function checkTemario(): BelongsToMany {
+        return $this->belongsToMany(Tema::class, 'checks_temario', 'usuario_id', 'temario_id')
+            ->withPivot('checked');
+    }
+
+    // Temario, solo el marcado como estudiado
+    public function checkedTemario(): BelongsToMany {
+        return $this->checkTemario()
+            ->wherePivot('checked', true);
     }
 
     // ================
     // ADMIN
     // ================
 
-    public function usuariosSuspendidos(): HasMany {
-        return $this->hasMany(Usuario::class, 'suspendido_por');
+    public function usuariosBaneados(): HasMany {
+        return $this->hasMany(Usuario::class, 'deleted_by');
     }
 
     public function testsCreados(): HasMany {
@@ -129,6 +189,11 @@ class Usuario extends Authenticatable {
 
     public function reportesResueltos(): HasMany {
         return $this->hasMany(Reporte::class, 'resuelto_por');
+    }
+
+    /** Oposición seleccionada. Si no seleccionó ninguna, null */
+    public function oposicionModerada(): BelongsTo {
+        return $this->belongsTo(Oposicion::class, 'oposicion_moderada_id');
     }
 
 }

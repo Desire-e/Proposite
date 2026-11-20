@@ -60,6 +60,10 @@ class Reporte extends Model {
         // 'reportable_tipo' => Reportable::class,
     ];
 
+    public function resuelto(): bool {
+        return $this->estado === EstadoReporte::RESUELTO;
+    }
+
 
     // Relaciones
 
@@ -75,7 +79,7 @@ class Reporte extends Model {
             'reportable', 
             'reportable_tipo', 
             'reportable_id'
-        );
+        )->withTrashed(); // incluye reportes a reportables que fueron eliminados
     }
 
     public function usuarioReporta(): BelongsTo {

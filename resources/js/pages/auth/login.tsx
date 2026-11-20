@@ -1,104 +1,146 @@
-import { Head, useForm } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useState } from 'react';
+import { Link, useForm } from '@inertiajs/react';
+import { Eye, EyeOff, } from 'lucide-react';
 
+import { AuthLayout, type asideContentData } from '@/layouts/AuthLayout';
 import InputError from '@/components/input-error';
-import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import AuthLayout from '@/layouts/auth-layout';
+import AccentText from '@/components/ui/AccentText';
+import { BackLink } from '@/components/ui/BackLink';
 
-interface LoginForm {
+type LoginForm = {
     email: string;
     password: string;
-    remember: boolean;
-}
+};
 
-interface LoginProps {
-    status?: string;
-    canResetPassword: boolean;
-}
+const aside: asideContentData = {
+    brow: "Tu preparación continúa",
+    title: "Que bien verte de nuevo.",
+    description: "Retoma tu preparación, consulta tu progreso y sigue avanzando acompañado por la comunidad.",
+    phrase: "Comunidad, recursos y constancia en un mismo lugar.",
+} 
 
-export default function Login({ status, canResetPassword }: LoginProps) {
-    const { data, setData, post, processing, errors, reset } = useForm<LoginForm>({
+
+
+export default function Login() {
+    const { data, setData, post, processing, errors, clearErrors, reset, } = 
+    useForm<LoginForm>({
         email: '',
         password: '',
-        remember: false,
     });
 
-    const submit: FormEventHandler = (e) => {
-        e.preventDefault();
+    const [showPassword, setShowPassword] = useState(false);
+
+    const submit: FormEventHandler = (event) => {
+        event.preventDefault();
+
         post(route('login'), {
             onFinish: () => reset('password'),
         });
     };
 
     return (
-        <AuthLayout title="Log in to your account" description="Enter your email and password below to log in">
-            <Head title="Log in" />
+            <AuthLayout 
+                headTitle="Inicio de sesión" 
+                className="!min-h-screen !bg-neutral"
+                asideContent={aside}    
+            >
 
-            <form className="flex flex-col gap-6" onSubmit={submit}>
-                <div className="grid gap-6">
-                    <div className="grid gap-2">
-                        <Label htmlFor="email">Email address</Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            required
-                            autoFocus
-                            tabIndex={1}
-                            autoComplete="email"
-                            value={data.email}
-                            onChange={(e) => setData('email', e.target.value)}
-                            placeholder="email@example.com"
-                        />
-                        <InputError message={errors.email} />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <div className="flex items-center">
-                            <Label htmlFor="password">Password</Label>
-                            {canResetPassword && (
-                                <TextLink href={route('password.request')} className="ml-auto text-sm" tabIndex={5}>
-                                    Forgot password?
-                                </TextLink>
-                            )}
+                <section className="flex items-center justify-center px-6 py-10 sm:px-10">
+                    <div className="w-full max-w-md">
+                        <div className="mb-10 flex items-center justify-between lg:hidden">
+                            <BackLink routeName="welcome">Volver al inicio</BackLink>
                         </div>
-                        <Input
-                            id="password"
-                            type="password"
-                            required
-                            tabIndex={2}
-                            autoComplete="current-password"
-                            value={data.password}
-                            onChange={(e) => setData('password', e.target.value)}
-                            placeholder="Password"
-                        />
-                        <InputError message={errors.password} />
+
+                        <div className="mb-8">
+                            <span className="text-sm font-bold uppercase tracking-[0.18em] text-secondary">
+                                Tu jornada acompañada
+                            </span>
+
+                            <h2 className="mt-1 font-heading text-4xl font-bold text-foreground">
+                                Inicio de sesión
+                            </h2>
+
+                            <p className="mt-4 leading-6 text-neutral-foreground">
+                                Bienvenido de nuevo. Sigamos avanzando.
+                            </p>
+                        </div>
+
+                        <form onSubmit={submit} noValidate className="flex flex-col gap-5">
+                            <div className="flex flex-col gap-2 text-sm font-medium text-foreground">
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    autoComplete="email"
+                                    value={data.email}
+                                    aria-invalid={Boolean(errors.email)}
+                                    onChange={(e) => {
+                                        setData('email', e.target.value)
+                                        clearErrors('email');
+                                    }}
+                                    errors={errors.email ? true : false}
+                                    disabled={processing} 
+                                    placeholder="Email"
+                                />
+                                <InputError className='!font-normal' message={errors.email} />
+                            </div>
+
+                            <div className="flex flex-col gap-2 text-sm font-medium text-foreground">
+
+                                <div className="relative">
+                                    <Input
+                                        type={ showPassword ? 'text' : 'password' }
+                                        autoComplete="current-password"
+                                        value={data.password}
+                                        disabled={processing}
+                                        placeholder="Contraseña"
+                                        aria-invalid={Boolean(errors.password)}
+                                        onChange={(event) => {
+                                            setData('password', event.target.value,);
+                                            clearErrors('password');
+                                        }}
+                                        
+                                    />
+
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña' }
+                                        onClick={() => setShowPassword((value) => !value,)}
+                                        className={`${errors.password ? 'text-error-foreground!' : ''}
+                                        absolute right-0 top-1/2 -translate-y-1/2 
+                                        text-neutral-foreground hover:text-primary`}
+                                    >
+                                        {showPassword ? 
+                                        ( <EyeOff className="size-4" />) : 
+                                        ( <Eye className="size-4" /> )}
+                                    </Button>
+                                </div>
+                                <InputError className='!font-normal' message={errors.password} />
+                            </div>
+
+                            <Button
+                                type="submit"
+                                disabled={processing}
+                                className="mt-3 h-12 w-full rounded-xl bg-primary font-semibold 
+                                text-primary-foreground shadow-lg shadow-primary/20 
+                                transition hover:bg-tertiary-foreground"
+                            >
+                                {processing ? 'Entrando…' : 'Iniciar sesión'}
+                            </Button>
+                        </form>
+
+                        <div className="my-7 h-px bg-border" />
+
+                        <p className="text-sm text-neutral-foreground text-center">
+                            ¿No tienes una cuenta?{' '}
+                            <AccentText underline={true}>
+                                <Link href={route('register')}>Regístrate</Link>
+                            </AccentText>
+                        </p>
                     </div>
-
-                    <div className="flex items-center space-x-3">
-                        <Checkbox id="remember" name="remember" tabIndex={3} />
-                        <Label htmlFor="remember">Remember me</Label>
-                    </div>
-
-                    <Button type="submit" className="mt-4 w-full" tabIndex={4} disabled={processing}>
-                        {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                        Log in
-                    </Button>
-                </div>
-
-                <div className="text-muted-foreground text-center text-sm">
-                    Don't have an account?{' '}
-                    <TextLink href={route('register')} tabIndex={5}>
-                        Sign up
-                    </TextLink>
-                </div>
-            </form>
-
-            {status && <div className="mb-4 text-center text-sm font-medium text-green-600">{status}</div>}
-        </AuthLayout>
+                </section>
+            </AuthLayout>
     );
 }

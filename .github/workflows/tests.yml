@@ -49,5 +49,13 @@ jobs:
       - name: Generate Application Key
         run: php artisan key:generate
 
+      # - name: Tests
+      #   run: ./vendor/bin/phpunit
+      
       - name: Tests
-        run: ./vendor/bin/phpunit
+        run: |
+          if [ -d tests/Unit ] || [ -d tests/Feature ]; then
+            ./vendor/bin/phpunit
+          else
+            echo "No hay pruebas automatizadas que ejecutar."
+          fi

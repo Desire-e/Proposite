@@ -24,6 +24,12 @@ return new class extends Migration
                     ->nullOnDelete();
             
             // Relación polimórfica. Apunta a tablas usuarios, comentarios y publicaciones
+            /**
+             * Comportamiento con eliminación de reportable:
+             * Sofdeletes - el reporte sigue resolviendo su reportable 
+             * (pero por defecto, morphTo excluye los registros eliminados)
+             * forceDelete - null
+             */
             $table->uuid('reportable_id');
 
             $table->enum('reportable_tipo', array_column(Reportable::cases(), 'value'));
