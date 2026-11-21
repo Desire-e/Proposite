@@ -36,7 +36,7 @@ export default function AdminWelcome(
                 <BackLink routeName={'logout'} method={'post'}>Volver a inicio</BackLink>
             </div>
 
-            <div className="flex flex-col flex-1 items-center mx-5">
+            <div className="flex flex-col flex-1 items-center mx-5 mb-10">
                 <div className="w-full max-w-2xl"> 
                     
                     <div className="mx-auto flex size-14 items-center justify-center 

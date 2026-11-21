@@ -2,55 +2,55 @@
 
 namespace Database\Seeders;
 
-// use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Database\Seeders\OposicionSeeder;
-use Database\Seeders\TemarioAuxiliarAdministrativoSeeder;
-use Database\Seeders\TemarioPoliciaNacionalSeeder;
-use Database\Seeders\RecursoSeeder;
-use Database\Seeders\UsuarioSeeder;
-use Database\Seeders\PublicacionSeeder;
-use Database\Seeders\ComentarioSeeder;
-use Database\Seeders\TestsSeeder;
-use Database\Seeders\IntentosTestSeeder;
 
 /**
- * Running Seeders:
- * php artisan db:seed
- * 
- * --class option to specify a specific seeder class to run individually:
- * php artisan db:seed --class=UserSeeder
+ * Ejecutar los seeders:
+ * php artisan db:seed            (en producción: php artisan db:seed --force)
+ *
+ * Uno concreto:
+ * php artisan db:seed --class=UsuarioSeeder
+ *
+ * Requiere ADMIN_PASSWORD y DEMO_PASSWORD en el .env (ver config/demo.php).
  */
 
-// Documentación: https://laravel.com/framework/docs/12.x/seeding#writing-seeders
+// Documentación: https://laravel.com/docs/12.x/seeding#writing-seeders
 
 class DatabaseSeeder extends Seeder {
 
     /**
      * Seed the application's database.
+     *
+     * El orden importa: cada seeder usa los datos de los anteriores.
      */
     public function run(): void {
 
-        /**
-         * Within the DatabaseSeeder class, you may use the call method to 
-         * execute additional seed classes. 
-         * 
-         * call() method allows you to break up your database seeding into 
-         * multiple files so that no single seeder class becomes too large. 
-         * The call method accepts an array of seeder classes that should be executed
-         */
         $this->call([
+            // Datos oficiales (BOE)
             OposicionSeeder::class,
             TemarioAuxiliarAdministrativoSeeder::class,
             TemarioPoliciaNacionalSeeder::class,
             RecursoSeeder::class,
+
+            // Usuarios: administrador, cuentas de demo y opositores aleatorios
             UsuarioSeeder::class,
+
+            // Comunidad: publicaciones con sus comentarios, y «me sirvió»
             PublicacionSeeder::class,
-            ComentarioSeeder::class,
+            MeSirvioSeeder::class,
+
+            // Estudio: tests, intentos y temas marcados
             TestsSeeder::class,
             IntentosTestSeeder::class,
+            CheckTemarioSeeder::class,
+
+            // Moderación: reportes y un baneado por oposición
+            ReporteSeeder::class,
+            BaneoSeeder::class,
+
+            // Progreso garantizado de las cuentas de demo (al final, sobre todo lo anterior)
+            CuentasDemoSeeder::class,
         ]);
-        
+
     }
 }
