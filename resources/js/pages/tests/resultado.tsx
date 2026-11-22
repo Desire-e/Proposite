@@ -143,7 +143,7 @@ export default function TestResult({test, correccion, nota, prueba = false }: Re
                             Revisión detallada
                         </p>
 
-                        <h2 className="mt-2 font-serif text-3xl font-bold">
+                        <h2 className="mt-2 font-heading text-3xl font-bold">
                             Tus respuestas
                         </h2>
                     </div>
