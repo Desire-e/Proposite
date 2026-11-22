@@ -42,10 +42,12 @@ export default function UserAvatar({
 }: UserAvatarProps) {
 
     const { auth } = usePage<SharedData>().props;
+
     const name = username.trim() !== '' ? 
         username.trim() : 
         auth.user?.name ?? ''; 
 
+    const admin = auth.user.rol === 'administrador';
 
     const avatar = (
         <div
@@ -62,9 +64,11 @@ export default function UserAvatar({
     // Si no se proporciona id, devuelve avatar no clickable
     if (!userId) return avatar;
 
-    // Si es el propio usuario, lleva a su perfil, si no, a perfil ajeno
+    // Si es el propio usuario, lleva a su perfil/panel admin, si no, a perfil ajeno
     const href = userId === auth.user?.id
-        ? route('perfil.show')
+        ? admin 
+            ? route('admin.panel') 
+            : route('perfil.show') 
         : route('opositores.show', userId);
 
     return (
