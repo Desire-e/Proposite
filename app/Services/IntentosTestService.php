@@ -66,43 +66,66 @@ class IntentosTestService
     public function corregir(Test $test, ?Usuario $usuario, array $respuestas): array
     {
         // Preguntas del test, con sus opciones
-        // keyBy('id') convierte una colección en otra cuyas claves son el valor del campo indicado
         $preguntas = $test->preguntas()
             ->with('opcionesRespuesta')
             ->get()
-            ->keyBy('id');
+            ->keyBy('id'); // convierte una colección en otra cuyas claves son el id
 
-        $correcciones = [];
-        $correctas = 0;
+        // --- Opciones seleccionadas ---
+
+        $seleccionadas = [];
 
         foreach ($respuestas as $r) {
-            // --- Validación extra ---
-            // La pregunta debe pertenecer al test
-            // La opción debe pertenecer a la pregunta
+            $seleccionadas[$r['pregunta_id']] = $r['respuesta_id'];
+        }
+        
+        // --- Validación de preguntas y opciones seleccionadas ---
+        // Si la pregunta de la opcion seleccionada no existe en las preguntas del test
+        // Si la opcion seleccionada no existe entre las opciones de la pregunta
+        
+        foreach($seleccionadas as $preguntaId => $respuestaId) {
 
-            $pregunta = $preguntas->get($r['pregunta_id']);
-            $opcion = $pregunta?->opcionesRespuesta->firstWhere('id', $r['respuesta_id']);
+            $pregunta = $preguntas->firstWhere('id', $preguntaId);
 
-            if (!$pregunta || !$opcion) {
+            if(!$pregunta || !$pregunta->opcionesRespuesta->contains('id', $respuestaId)){
                 throw ValidationException::withMessages(
                     ['respuestas' => 'Respuesta no válida para este test.']
                 );
             }
+        }
 
-            // --- Corrección ---
+        // --- Corrección ---
+        
+        // Array de pregunta-respuesta corregidas
+        $correcciones = [];
+        // Número de correctas
+        $correctas = 0;
 
-            $correctas += $opcion->es_correcta ? 1 : 0;
+        foreach($preguntas as $preg) {
 
+            // Opción seleccionada o null si no respondió
+            $seleccionada = $seleccionadas[$preg->id] ?? null;
+
+            // Todas las opciones corregidas y número de correctas
+            $opciones = [];
+
+            foreach($preg->opcionesRespuesta as $opc) {
+
+                if ($opc->id === $seleccionada && $opc->es_correcta) $correctas++;
+
+                $opciones[] = [
+                    'id' => $opc->id,
+                    'contenido' => $opc->contenido,
+                    'es_correcta' => (bool) $opc->es_correcta,
+                    'selected' => $opc->id === $seleccionada
+                ];
+            }
+
+            // Correcciones
             $correcciones[] = [
-                'pregunta' => $pregunta->only('id', 'enunciado'),
-                'opciones' => $pregunta->opcionesRespuesta
-                    ->map(fn ($o) => [
-                        'id' => $o->id,
-                        'contenido' => $o->contenido,
-                        'es_correcta' => (bool) $o->es_correcta,
-                        'selected' => $o->id === $opcion->id,
-                    ])
-                    ->all(),
+                'pregunta' => $preg->only('id', 'enunciado'),
+                'sin_contestar' => $seleccionada === null,
+                'opciones' => $opciones,
             ];
         }
 
@@ -113,9 +136,7 @@ class IntentosTestService
         $nota = $this->calcularNota($correctas, $preguntas->count());
 
         $notaAnterior = $usuario 
-            ? $test->intentosTest()
-                ->where('usuario_id', $usuario->id)
-                ->latest()->value('nota')
+            ? $test->intentosTest()->where('usuario_id', $usuario->id)->latest()->value('nota')
             : null;
 
         return [
@@ -123,7 +144,7 @@ class IntentosTestService
             'correccion' => $correcciones,
             'nota' => [
                 'actual' => number_format($nota, 2),
-                'anterior' => $notaAnterior ? number_format($notaAnterior, 2) : null,
+                'anterior' => $notaAnterior !== null ? number_format($notaAnterior, 2) : null,
             ],
         ];
     }    

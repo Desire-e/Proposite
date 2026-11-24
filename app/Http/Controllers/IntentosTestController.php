@@ -37,7 +37,7 @@ class IntentosTestController extends Controller
      * Opositor: corrige, guarda el intento y redirige al resultado.
      * Administrador: modo prueba, corrige y muestra el resultado sin guardar nada.
      */
-    public function store(StoreIntentoRequest $request, Test $test): RedirectResponse
+    public function store(StoreIntentoRequest $request, Test $test): Response|RedirectResponse
     {
 
         $respuestas = $request->validated()['respuestas'];
