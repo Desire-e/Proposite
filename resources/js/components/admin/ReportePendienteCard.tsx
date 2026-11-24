@@ -7,7 +7,7 @@ type ReportePendienteCardProps = {
     reporte: Reporte;
     onOmitir?: (reporte: Reporte) => void;
     onEliminar?: (reporte: Reporte) => void;
-    onSuspender?: (reporte: Reporte) => void;
+    onBanear?: (reporte: Reporte) => void;
 };
 
 /** Icono según el reportable tipo */
@@ -46,7 +46,7 @@ function urlReportable(reporte: Reporte): string | null {
 }
 
 export default function ReportePendienteCard(
-    { reporte, onOmitir, onEliminar, onSuspender }
+    { reporte, onOmitir, onEliminar, onBanear }
     : ReportePendienteCardProps
 ) {
 
@@ -111,13 +111,13 @@ export default function ReportePendienteCard(
 
                 <button
                     type="button"
-                    onClick={() => onSuspender?.(reporte)}
+                    onClick={() => onBanear?.(reporte)}
                     className="inline-flex items-center gap-1.5 rounded-lg bg-error-foreground px-3 py-2 text-xs font-semibold 
                     text-primary-foreground border border-error-foreground transition hover:bg-neutral hover:text-error-foreground 
                     hover:border hover:border-error-foreground!"
                 >
                     <Ban className="size-3.5" />
-                    Suspender usuario
+                    {reporte.reportable_tipo === 'usuario' ? 'Banear usuario' : 'Banear autor'}
                 </button>
             </div>
         </article>

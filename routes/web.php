@@ -18,8 +18,8 @@ use App\Http\Controllers\IntentosTestController;
 use App\Http\Controllers\Admin\PanelController as AdminPanelController;
 use App\Http\Controllers\Admin\ComunidadController as AdminComunidadController;
 use App\Http\Controllers\Admin\RecursosController as AdminRecursosController;
+use App\Http\Controllers\Admin\ReportesController as AdminReportesController;
 
-// use App\Http\Controllers\Admin\ReportesController as AdminReportesController;
 // use App\Http\Controllers\Admin\TestsController as AdminTestsController;
 // use App\Http\Controllers\Admin\OpositoresController as AdminUsuariosController;
 
@@ -206,6 +206,24 @@ Route::middleware(['auth', 'admin', 'oposicion.moderada'])->prefix('admin')->nam
         Route::patch('/recursos/{recurso}', [AdminRecursosController::class, 'update'])
             ->name('recursos.update'); // admin.temario.recursos.update
     });
+
+    // ====== Reportes ======
+
+    Route::prefix('reportes')->name('reportes.')->group(function () {
+
+        // Omitir reporte
+        Route::post('/{reporte}', [AdminReportesController::class, 'omitir'])
+            ->name('omitir'); // admin.reportes.omitir
+
+        // Eliminar comentario / publicación reportado
+        Route::delete('/{reporte}/contenido', [AdminReportesController::class, 'eliminarContenido'])
+            ->name('eliminar.contenido'); // admin.reportes.eliminar.contenido
+        
+        // Banear usuario reportado
+        Route::delete('/{reporte}/usuario', [AdminReportesController::class, 'banearUsuario'])
+            ->name('banear.usuario'); // admin.reportes.banear.usuario
+    });
+
 
     // reportes, baneos, tests, ... 
 });
