@@ -25,6 +25,7 @@ type Test = {
 
 type Correccion = {
     pregunta: Pregunta;
+    sin_contestar: boolean;
     opciones: Opcion[];
 }
 
@@ -73,19 +74,9 @@ export default function TestResult({test, correccion, nota, prueba = false }: Re
                         size='xl'
                     />
 
-                    <div className="mt-3 flex flex-wrap flex-col justify-between md:gap-5 gap-10 
-                    sm:flex-row sm:items-end w-full">
-                        <p className='flex flex-col gap-3 my-5 text-neutral-foreground'>
-                            {prueba
-                                ? 'Así verá la corrección un opositor. Este resultado no cuenta en ninguna estadística.'
-                                : 'Revisa tus respuestas. Aquí puedes ver qué has acertado y qué temas conviene repasar.'
-                            }
-                        </p>
-                    </div>
-
                     <Link
                         href={route('tests.intento.create', test.id)}
-                        className="mt-3 inline-flex items-center gap-2 rounded-xl bg-primary 
+                        className="mt-10 inline-flex items-center gap-2 rounded-xl bg-primary 
                         px-4 py-3 text-sm font-bold text-primary-foreground"
                     >
                         <RotateCcw className="size-4" />
@@ -148,7 +139,7 @@ export default function TestResult({test, correccion, nota, prueba = false }: Re
                         </h2>
                     </div>
 
-                    <span className="rounded-full bg-tertiary px-3 py-1.5 text-xs font-bold text-tertiary-foreground">
+                    <span className="rounded-full px-3 py-1.5 text-sm font-bold text-tertiary-foreground">
                         {correctCount} de {correccion.length} correctas
                     </span>
                 </div>
@@ -158,21 +149,31 @@ export default function TestResult({test, correccion, nota, prueba = false }: Re
                         return (
                             <SectionCard 
                                 as='div'
-                                className="sm:p-7"
+                                className={`sm:p-7`}
                                 key={corr.pregunta.id}
                             >
-                                <div className="flex items-start gap-4">
-                                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full 
-                                    bg-tertiary text-sm font-bold text-primary">
-                                        {index + 1}
-                                    </span>
-                                    <h3 className="text-base font-bold leading-7">
-                                        {corr.pregunta.enunciado}
-                                    </h3>
+                                <div className='flex flex-wrap lg:justify-between justify-end'>
+                                    <div className={`flex items-start gap-4 ${corr.sin_contestar ? `opacity-50`: ``}`}>
+                                        <span className="flex size-8 shrink-0 items-center justify-center rounded-full 
+                                        bg-tertiary text-sm font-bold text-primary">
+                                            {index + 1}
+                                        </span>
+                                        <h3 className="text-base font-bold leading-7">
+                                            {corr.pregunta.enunciado}
+                                        </h3>
+                                    </div>
+                                    
+                                    {corr.sin_contestar && 
+                                        <div className='flex items-center rounded-2xl bg-tertiary text-tertiary-foreground 
+                                        text-xs font-semibold px-3 lg:py-0 py-1 flex-wrap mt-2'>
+                                            Sin responder
+                                        </div>                                    
+                                    }
                                 </div>
 
                                 {/* TODO. CREAR COMPONENTE tests/ResponseOption.tsx */}
-                                <div className="min-w-0 flex-1">
+                                
+                                <div className={`min-w-0 flex-1 ${corr.sin_contestar ? `opacity-70`: ``}`}>
                                     <div className="mt-5 grid gap-2">
                                         {corr.opciones.map((opc) => {
                                             return (
