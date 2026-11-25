@@ -9,32 +9,30 @@ class UsuarioPolicy
 {
     public function before(Usuario $usuario, string $ability): Response|bool|null
     {
-        if (!$usuario->esAdmin()) { 
-            return match ($ability) { 
-                'view' => null, 
-                'delete' => Response::deny('Solo los administradores pueden realizar esta operación.'), 
-                'recover' => Response::deny('Solo los administradores pueden realizar esta operación.'), 
-                default  => null,
-            };            
+        if (!$usuario->esAdmin()) {
+            return match ($ability) {
+                'viewAny', 'delete', 'recover' => Response::deny('Solo los administradores pueden realizar esta operación.'),
+                default => null,
+            };
         }
 
-        return match ($ability) { 
-            'view' => Response::allow(), 
-            default  => null,
+        return match ($ability) {
+            'update' => Response::deny('Los administradores no pueden realizar esta acción.'),
+            default => null,
         };
     }
 
+
+    public function viewAny(Usuario $usuario): Response
+    {
+        // Solo admin (before())
+        return Response::allow();
+    }
+
+
     public function view(Usuario $usuario, Usuario $perfil): Response
     {
-        // Los administradores no tienen perfil público
-        if ($perfil->esAdmin()) {
-            return $usuario->esAdmin()
-                ? Response::allow()
-                : Response::denyAsNotFound(); // responde 404 not found
-        }
-
-        // Un opositor solo ve perfiles activos de su misma oposición
-        return ($this->visibleParaOpositor($usuario, $perfil))
+        return ($this->visibleParaUsuario($usuario, $perfil))
             ? Response::allow()
             : Response::denyAsNotFound();
     }
@@ -44,6 +42,12 @@ class UsuarioPolicy
      */
     public function delete(Usuario $usuario, Usuario $perfil): Response
     {
+        // Solo admin (before())
+
+        if (! $this->visibleParaUsuario($usuario, $perfil)){
+            return Response::denyAsNotFound();
+        } 
+
         if ($perfil->esAdmin()) {
             return Response::deny('No puedes banear a otro administrador.');
         }
@@ -54,6 +58,8 @@ class UsuarioPolicy
     }
 
     public function update(Usuario $usuario, Usuario $perfil): Response {
+        // Solo opositor (before()), admin no tiene perfil propio editable, solo panel
+
         return $perfil->id === $usuario->id 
             ? Response::allow()
             : Response::deny('No puedes modificar un perfil ajeno.');
@@ -63,6 +69,16 @@ class UsuarioPolicy
      * Suprimir baneo
      */
     public function recover(Usuario $usuario, Usuario $perfil): Response {
+        // Solo admin (before())
+    
+        if (! $this->visibleParaUsuario($usuario, $perfil)){
+            return Response::denyAsNotFound();
+        }
+
+        if ($perfil->esAdmin()) {
+            return Response::deny('No puedes recuperar a otro administrador.');
+        }
+
         return !$perfil->trashed()
             ? Response::deny('Este usuario no estaba baneado.')
             : Response::allow();
@@ -70,9 +86,21 @@ class UsuarioPolicy
 
 
 
-    private function visibleParaOpositor(Usuario $usuario, Usuario $perfil): bool
+    private function visibleParaUsuario(Usuario $usuario, Usuario $perfil): bool
     {
-        return !$perfil->trashed() 
-            && $usuario->oposicion_id === $perfil->oposicion_id;
+        $mismaComunidad = $perfil->oposicion_id === $usuario->comunidad()->id;
+        
+        return match ($usuario->esAdmin()) {
+            // Admin: ve admins, ve opositores de misma comunidad moderada
+            true => 
+                $perfil->esAdmin() 
+                || (! $perfil->esAdmin() && $mismaComunidad),
+            // Opositor: ve solo opositores de misma comunidad no baneados
+            false => 
+                ! $perfil->esAdmin() && ! $perfil->trashed() && $mismaComunidad, 
+            
+            // Cualquier otro caso: no ve nada
+            default => false,
+        };
     }
 }
