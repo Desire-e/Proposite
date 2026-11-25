@@ -70,24 +70,24 @@ export default function Panel(
     // Omitir
     const omitirReporte = (reporte: Reporte) => {
         router.post(
-            route('admin.reportes.omitir', { reporte: reporte.id }),
+            route('admin.reportes.omit', { reporte: reporte.id }),
             { },
             { preserveScroll: true }
         );
     };  
 
     // Eliminar contenido
-    const eliminarReporte = (reporte: Reporte) => {
+    const deleteContent = (reporte: Reporte) => {
         router.delete(
-            route('admin.reportes.eliminar.contenido', { reporte: reporte.id }),
+            route('admin.reportes.delete', { reporte: reporte.id }),
             { preserveScroll: true }
         );
     }; 
 
     // Banear usuario
-    const banearUsuario = (reporte: Reporte) => {
+    const banUsuario = (reporte: Reporte) => {
         router.delete(
-            route('admin.reportes.banear.usuario', { reporte: reporte.id }),
+            route('admin.reportes.ban', { reporte: reporte.id }),
             { preserveScroll: true }
         );
     };
@@ -140,11 +140,10 @@ export default function Panel(
                         }} 
                     />
                     <AdminPanelCard Icon={Users} title='Usuarios' count={usuarios_count} 
-                        // TODO.
-                        // link={{
-                        //     label:'Ver usuarios', 
-                        //     href:'#ejemplo'
-                        // }} 
+                        link={{
+                            label:'Ver usuarios', 
+                            href:route('admin.usuarios.index')
+                        }} 
                     />
 
                     <AdminPanelCard Icon={BookOpenCheck}  title='Recursos' count={recursos_count} 
@@ -170,7 +169,7 @@ export default function Panel(
                                 <p className="text-xs font-bold uppercase tracking-[0.14em] text-secondary">
                                     Cola de moderación
                                 </p>
-                                <h2 className="mt-1 font-heading text-3xl font-bold">
+                                <h2 className="mt-1 font-heading text-2xl font-bold">
                                     Reportes pendientes
                                 </h2>
                             </div>
@@ -197,8 +196,8 @@ export default function Panel(
                                         key={reporte.id}
                                         reporte={reporte}
                                         onOmitir={omitirReporte}
-                                        onEliminar={eliminarReporte}
-                                        onBanear={banearUsuario}
+                                        onEliminar={deleteContent}
+                                        onBanear={banUsuario}
                                     />
                                 ))
                             ) : (
