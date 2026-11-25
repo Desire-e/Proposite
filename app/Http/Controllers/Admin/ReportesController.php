@@ -13,8 +13,6 @@ use App\Enums\EstadoReporte;
 use App\Enums\Reportable;
 
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Inertia\Response;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
@@ -28,7 +26,7 @@ class ReportesController extends Controller
     /**
      * Omitir un reporte
      */
-    public function omitir(Request $request, Reporte $reporte): RedirectResponse 
+    public function omit(Request $request, Reporte $reporte): RedirectResponse 
     {
         Gate::authorize('solve', $reporte);
 
@@ -43,7 +41,7 @@ class ReportesController extends Controller
     /**
      * Banear un usuario reportado
      */
-    public function banearUsuario(Request $request, Reporte $reporte): RedirectResponse
+    public function banUsuario(Request $request, Reporte $reporte): RedirectResponse
     {
         Gate::authorize('solve', $reporte);
 
@@ -68,6 +66,8 @@ class ReportesController extends Controller
             : null;
 
         if ($usuario !== null) {
+            Gate::authorize('delete', $usuario);
+
             $usuario->deleted_by = $request->user()->id;
             $usuario->save();
             $usuario->delete();
@@ -87,24 +87,31 @@ class ReportesController extends Controller
     /**
      * Eliminar contenido reportado
      */
-    public function eliminarContenido(Request $request, Reporte $reporte): RedirectResponse
+    public function deleteContent(Request $request, Reporte $reporte): RedirectResponse
     {
         Gate::authorize('solve', $reporte);
 
-
+        // Usuarios se banean
         if ($reporte->reportable_tipo === Reportable::USUARIO->value) {
-            // Usuarios se banean
             return back();
         }
+        // Resolver reportable publicación
         else if ($reporte->reportable_tipo === Reportable::PUBLICACION->value) {
-            // Resolver reportable publicación
             $publicacion = Publicacion::find($reporte->reportable_id);
-            if ($publicacion !== null) $publicacion->delete();
+            
+            if ($publicacion !== null) {
+                Gate::authorize('delete', $publicacion);
+                $publicacion->delete();
+            }
         }
+        // Resolver reportable comentario
         else if ($reporte->reportable_tipo === Reportable::COMENTARIO->value) {
-            // Resolver reportable comentario
-            $comentario = Comentario::find($reporte->reportable_id);
-            if ($comentario !== null) $comentario->delete();
+            $comentario = Comentario::find($reporte->reportable_id);            
+            
+            if ($comentario !== null) {
+                Gate::authorize('delete', $comentario);
+                $comentario->delete();
+            }
         }
         else { return back(); }
         
