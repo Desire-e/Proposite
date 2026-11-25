@@ -20,7 +20,7 @@ class PublicacionPolicy
      */
     public function before(Usuario $usuario, string $ability): Response|bool|null
     {
-        // No admin - reglas normales
+        // Opositor, reglas normales
         if (!$usuario->esAdmin()) { return null; }
 
         // Admin
@@ -29,8 +29,7 @@ class PublicacionPolicy
             'view' => Response::allow(), 
             
             // No puede
-            'create' => Response::deny('Los administradores no pueden realizar esta acción.'),
-            'react' => Response::deny('Los administradores no pueden realizar esta acción.'),
+            'create', 'react' => Response::deny('Los administradores no pueden realizar esta acción.'),
 
             // Cualquier otra acción, reglas concretas de la ability
             default  => null,
@@ -43,7 +42,7 @@ class PublicacionPolicy
      */
     public function view(Usuario $usuario, Publicacion $publicacion): Response
     {
-        return $this->visibleParaOpositor($usuario, $publicacion)
+        return $this->visibleParaUsuario($usuario, $publicacion)
             ? Response::allow()
             : Response::denyAsNotFound();
     }
@@ -61,7 +60,7 @@ class PublicacionPolicy
      */
     public function react(Usuario $usuario, Publicacion $publicacion): Response
     {
-        return $this->visibleParaOpositor($usuario, $publicacion)
+        return $this->visibleParaUsuario($usuario, $publicacion)
             ? Response::allow()
             : Response::denyAsNotFound();
     }
@@ -71,37 +70,43 @@ class PublicacionPolicy
      */
     public function delete(Usuario $usuario, Publicacion $publicacion): Response
     {
-        // Admin: puede eliminar cualquiera, salvo las ya eliminadas o fuera de la
-        // comunidad que modera
-        if ($usuario->esAdmin()) {
-            if ($publicacion->trashed()){
-                return Response::deny('Esta publicación ya está eliminada.');
-            }
-            else if($usuario->comunidad()->id !== $publicacion->oposicion_id){
-                return Response::denyAsNotFound();
-            }
-            
-            return Response::allow();
-        }
-
-        if (!$this->visibleParaOpositor($usuario, $publicacion)) {
+        if (!$this->visibleParaUsuario($usuario, $publicacion)) {
             return Response::denyAsNotFound();
         }
 
-        return $this->esAutor($usuario, $publicacion)
-            ? Response::allow()
-            : Response::deny('Solo puedes eliminar tus propias publicaciones.');
+        // Publicacion eliminada no puede eliminarlo nadie
+        if ($publicacion->trashed()) {
+            return Response::denyAsNotFound();
+        }
+
+        // Solo admin o autor pueden eliminar
+        if($usuario->esAdmin()){
+            return Response::allow();
+        }
+
+        return !$this->esAutor($usuario, $publicacion)
+                ? Response::deny('Solo puedes eliminar tus propias publicaciones.')
+                : Response::allow();
     }
 
 
 
     /**
-     * Visible para un opositor: no eliminada y de su oposición.
+     * Visible para un opositor o admin
      */
-    private function visibleParaOpositor(Usuario $usuario, Publicacion $publicacion): bool
+    private function visibleParaUsuario(Usuario $usuario, Publicacion $publicacion): bool
     {
-        return ! $publicacion->trashed()
-            && $usuario->oposicion_id === $publicacion->oposicion_id;
+        $oposicionId = $usuario->comunidad()->id;
+        
+        $mismaComunidad = $publicacion->oposicion_id === $oposicionId;
+
+        return match ($usuario->esAdmin()) {
+            // Admin: ve publicaciones de misma comunidad moderada
+            true => $mismaComunidad,
+            
+            // Opositor: ve publicaciones de misma comunidad y no eliminados
+            false => $mismaComunidad && !$publicacion->trashed(),
+        };
     }
 
     private function esAutor(Usuario $usuario, Publicacion $publicacion): bool

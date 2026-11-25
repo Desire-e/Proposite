@@ -18,10 +18,10 @@ use App\Http\Controllers\IntentosTestController;
 use App\Http\Controllers\Admin\PanelController as AdminPanelController;
 use App\Http\Controllers\Admin\ComunidadController as AdminComunidadController;
 use App\Http\Controllers\Admin\RecursosController as AdminRecursosController;
+use App\Http\Controllers\Admin\ReportesController as AdminReportesController;
 
-// use App\Http\Controllers\Admin\ReportesController as AdminReportesController;
 // use App\Http\Controllers\Admin\TestsController as AdminTestsController;
-// use App\Http\Controllers\Admin\OpositoresController as AdminUsuariosController;
+use App\Http\Controllers\Admin\OpositoresController as AdminUsuariosController;
 
 
 /*****************************
@@ -201,10 +201,47 @@ Route::middleware(['auth', 'admin', 'oposicion.moderada'])->prefix('admin')->nam
         // Añadir, editar, eliminar recursos de un tema
         Route::post('/{tema}/recursos', [AdminRecursosController::class, 'store'])
             ->name('recursos.store'); // admin.temario.recursos.store
+
         Route::delete('/recursos/{recurso}', [AdminRecursosController::class, 'delete'])
             ->name('recursos.delete'); // admin.temario.recursos.delete
+        
         Route::patch('/recursos/{recurso}', [AdminRecursosController::class, 'update'])
             ->name('recursos.update'); // admin.temario.recursos.update
+    });
+
+    // ====== Reportes ======
+
+    Route::prefix('reportes')->name('reportes.')->group(function () {
+
+        // Omitir reporte
+        Route::post('/{reporte}', [AdminReportesController::class, 'omit'])
+            ->name('omit'); // admin.reportes.omit
+
+        // Eliminar comentario / publicación reportado
+        Route::delete('/{reporte}/contenido', [AdminReportesController::class, 'deleteContent'])
+            ->name('delete'); // admin.reportes.delete
+        
+        // Banear usuario reportado
+        Route::delete('/{reporte}/usuario', [AdminReportesController::class, 'banUsuario'])
+            ->name('ban'); // admin.reportes.ban
+    });
+
+
+    // ====== Listado de usuarios ======
+
+    Route::prefix('usuarios')->name('usuarios.')->group(function () {
+
+        Route::get('/', [AdminUsuariosController::class, 'index'])
+            ->name('index'); // admin.usuarios.index
+
+        Route::patch('/{usuario}', [AdminUsuariosController::class, 'recover'])
+            ->withTrashed() // La ruta necesita withTrashed(). Sin él, {usuario} no encuentra a un usuario baneado y devuelve 404
+            ->name('recover'); // admin.usuarios.recover
+
+        // Banear usuario NO reportado
+        Route::delete('/{usuario}', [AdminUsuariosController::class, 'ban'])
+            ->name('ban'); // admin.usuarios.ban
+        
     });
 
     // reportes, baneos, tests, ... 

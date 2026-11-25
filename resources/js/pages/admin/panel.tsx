@@ -8,11 +8,11 @@ import AppLayout from '@/layouts/AppLayout';
 
 import { ComunidadDropdown, type ComunidadOption } from '@/components/admin/ComunidadDropdown';
 import { type FormEventHandler } from 'react';
-import { useForm } from '@inertiajs/react';
-import { Oposicion } from '@/types/models';
+import { useForm, router } from '@inertiajs/react';
+import { type Oposicion } from '@/types/models';
 
 import AdminPanelCard from '@/components/admin/AdminPanelCard';
-import { Reporte } from '@/types/models';
+import { type Reporte } from '@/types/models';
 import ReportePendienteCard from '@/components/admin/ReportePendienteCard';
 
 
@@ -65,6 +65,33 @@ export default function Panel(
     const selectedOposicion = comunidades.find((c) => (c.id === data.oposicion_id));
 
 
+    /** Acciones sobre reportes */
+
+    // Omitir
+    const omitirReporte = (reporte: Reporte) => {
+        router.post(
+            route('admin.reportes.omit', { reporte: reporte.id }),
+            { },
+            { preserveScroll: true }
+        );
+    };  
+
+    // Eliminar contenido
+    const deleteContent = (reporte: Reporte) => {
+        router.delete(
+            route('admin.reportes.delete', { reporte: reporte.id }),
+            { preserveScroll: true }
+        );
+    }; 
+
+    // Banear usuario
+    const banUsuario = (reporte: Reporte) => {
+        router.delete(
+            route('admin.reportes.ban', { reporte: reporte.id }),
+            { preserveScroll: true }
+        );
+    };
+
     return (
         <AppLayout headTitle={`Administración de ${oposicion_moderada.nombre} | Proposite`}>
             <div className="mx-auto w-full max-w-6xl px-4 py-6">
@@ -113,11 +140,10 @@ export default function Panel(
                         }} 
                     />
                     <AdminPanelCard Icon={Users} title='Usuarios' count={usuarios_count} 
-                        // link={{
-                        //     label:'Ver usuarios', 
-                        //     // TODO. route(...)
-                        //     href:'#ejemplo'
-                        // }} 
+                        link={{
+                            label:'Ver usuarios', 
+                            href:route('admin.usuarios.index')
+                        }} 
                     />
 
                     <AdminPanelCard Icon={BookOpenCheck}  title='Recursos' count={recursos_count} 
@@ -130,7 +156,6 @@ export default function Panel(
                     <AdminPanelCard Icon={BookOpen} title='Tests' count={tests_count} 
                         link={{
                             label:'Tests publicados', 
-                            // TODO. route(...)
                             href:route('tests.index')
                         }} 
                     />
@@ -144,7 +169,7 @@ export default function Panel(
                                 <p className="text-xs font-bold uppercase tracking-[0.14em] text-secondary">
                                     Cola de moderación
                                 </p>
-                                <h2 className="mt-1 font-heading text-3xl font-bold">
+                                <h2 className="mt-1 font-heading text-2xl font-bold">
                                     Reportes pendientes
                                 </h2>
                             </div>
@@ -170,10 +195,9 @@ export default function Panel(
                                     <ReportePendienteCard 
                                         key={reporte.id}
                                         reporte={reporte}
-                                        // TODO.
-                                        // onOmitir={omitirReporte}
-                                        // onEliminar={eliminarReporte}
-                                        // onBanear={banearUsuario}
+                                        onOmitir={omitirReporte}
+                                        onEliminar={deleteContent}
+                                        onBanear={banUsuario}
                                     />
                                 ))
                             ) : (
@@ -212,22 +236,24 @@ export default function Panel(
                             </p>
 
                             <div className="mt-5 flex flex-col gap-2">
+                                {/* TODO. */}
                                 <button
-                                type="button"
-                                className="flex items-center gap-3 rounded-xl bg-background px-4 py-3 text-left text-sm font-semibold text-foreground hover:bg-secondary hover:text-secondary-foreground"
+                                    type="button"
+                                    className="flex items-center gap-3 rounded-xl bg-background px-4 py-3 text-left text-sm font-semibold text-foreground hover:bg-secondary hover:text-secondary-foreground"
                                 >
-                                <FileQuestion className="size-4 text-primary" />
-                                Crear test
-                                <span className="ml-auto">→</span>
+                                    <FileQuestion className="size-4 text-primary" />
+                                    Crear test
+                                    <span className="ml-auto">→</span>
                                 </button>
-
+                                
+                                {/* TODO. */}
                                 <button
-                                type="button"
-                                className="flex items-center gap-3 rounded-xl bg-background px-4 py-3 text-left text-sm font-semibold text-foreground hover:bg-secondary hover:text-secondary-foreground"
+                                    type="button"
+                                    className="flex items-center gap-3 rounded-xl bg-background px-4 py-3 text-left text-sm font-semibold text-foreground hover:bg-secondary hover:text-secondary-foreground"
                                 >
-                                <Link2 className="size-4 text-primary" />
-                                Añadir recurso legal
-                                <span className="ml-auto">→</span>
+                                    <Link2 className="size-4 text-primary" />
+                                    Añadir recurso legal
+                                    <span className="ml-auto">→</span>
                                 </button>
                             </div>
                         </section>

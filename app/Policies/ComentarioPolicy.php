@@ -10,14 +10,16 @@ use App\Models\Publicacion;
 
 class ComentarioPolicy
 {
-    public function before(Usuario $usuario, string $ability): Response|bool|null
+    public function before(Usuario $usuario, string $ability): Response|null
     {
-        if (!$usuario->esAdmin()) { return null; }
+        // Opositor
+        if (!$usuario->esAdmin())  return null; 
 
-        return match ($ability) { 
-            'create' => Response::deny('Los administradores no pueden realizar esta acción.'),
-            default  => null,
-        };
+        // Admin
+        if ($ability === 'create') {
+            return Response::deny('Los administradores no pueden realizar esta acción.');
+        }
+        else return null;
     }
 
 
@@ -45,39 +47,47 @@ class ComentarioPolicy
      */
     public function delete(Usuario $usuario, Comentario $comentario): Response
     {
+        if (!$this->visibleParaUsuario($usuario, $comentario)) {
+            return Response::denyAsNotFound();
+        }
+
         // Comentario eliminado no puede eliminarlo nadie
         if ($comentario->trashed()) {
             return Response::denyAsNotFound();
         }
 
-        if(!$usuario->esAdmin() && !$this->esAutor($usuario, $comentario)){
-            return Response::deny('Solo puedes eliminar tus propios comentarios.');
+        // Solo admin o autor pueden eliminar
+        if($usuario->esAdmin()){
+            return Response::allow();
         }
 
-        return $this->visibleParaUsuario($usuario, $comentario)
-            ? Response::allow()
-            : Response::denyAsNotFound();
+        return !$this->esAutor($usuario, $comentario)
+            ? Response::deny('Solo puedes eliminar tus propios comentarios.')
+            : Response::allow();
     }    
 
-
+    
 
     /**
-     * Visible para un opositor: comentario no eliminado
-     * y publicación visible (no eliminada, misma oposición).
+     * Visible para un opositor o admin
      */
     private function visibleParaUsuario(Usuario $usuario, Comentario $comentario): bool
     {
         $oposicionId = $usuario->comunidad()->id;
+        
+        $mismaComunidad = $comentario->publicacion()->withTrashed()->value('oposicion_id') === $oposicionId;
 
-        $publicacion = $comentario->publicacion; 
-
-        return !$comentario->trashed() 
-            && $oposicionId === $publicacion->oposicion_id;
+        return match ($usuario->esAdmin()) {
+            // Admin: ve comentarios de misma comunidad moderada
+            true => $mismaComunidad,
+            
+            // Opositor: ve comentarios de misma comunidad y no eliminados
+            false => $mismaComunidad && !$comentario->trashed(),
+        };
     }
 
     private function esAutor(Usuario $usuario, Comentario $comentario): bool
     {
         return $usuario->id === $comentario->usuario_id;
     }
-
 }
