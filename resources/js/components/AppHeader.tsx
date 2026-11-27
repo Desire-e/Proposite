@@ -20,16 +20,29 @@ export const mainNavItems: NavItem[] = [
 ];
 export const authMainNavItems: NavItem[] = [
     { title: 'Foro', url: '/foro', },
-    // { title: 'Configuración', url: '/configuración', icon: Bolt, },
-    // { title: 'Estadísticas', url: '/estadisticas', icon: ChartSpline, },
     { title: 'Temario oficial', url: '/temario', },
     { title: 'Tests', url: '/tests', },
+];
+
+export const adminMainNavItems: NavItem[] = [
+    { title: 'Panel', url: '/admin/panel', },
+    { title: 'Usuarios', url: '/admin/usuarios', },
+    { title: 'Reportes', url: '/admin/panel#reportes-pendientes', },
 ];
 
 
 export function AppHeader() {
     const page = usePage<SharedData>();
     const { auth } = page.props;
+
+    const esAdmin = auth.user?.rol === "administrador";
+    const generalItems = !auth.user ? mainNavItems : authMainNavItems;
+    const adminItems = esAdmin ? adminMainNavItems : [];
+    
+    // Lista plana para el observer y para isItemActive
+    const navItems = [...adminItems, ...generalItems];
+
+
 
     const currentPath = page.url.split(/[?#]/)[0]; // divide un objeto String en un array de subcadenas
 
@@ -38,8 +51,7 @@ export function AppHeader() {
 
     // Observa nav items anclas activos/inactivos de la pagina actual
     useEffect(() => {
-        const navItems = auth.user ? authMainNavItems : mainNavItems;
-    
+
         const sections = navItems
             .filter((item) => item.sectionId)
             .map((item) => document.getElementById(item.sectionId!))
@@ -80,7 +92,8 @@ export function AppHeader() {
         sections.forEach((section) => observer.observe(section));
 
         return () => observer.disconnect();
-    }, [currentPath, auth.user]);
+    }, [currentPath, auth.user, esAdmin]);
+
 
 
     // Mobile navigation
@@ -107,7 +120,7 @@ export function AppHeader() {
         };
     }, [open]);
 
-    const activeItemStyles = 'text-primary';
+
 
     function isItemActive(item: NavItem): boolean {
         if (item.sectionId) {
@@ -125,6 +138,36 @@ export function AppHeader() {
     }
 
 
+    // Links del navegador
+    function NavLinks({ items, mobile = false }: { items: NavItem[]; mobile?: boolean }) {
+        return items.map((item) => {
+            const isActive = isItemActive(item);
+            const Tag = item.url.startsWith('#') ? 'a' : Link;
+
+            return (
+                <Tag
+                    key={item.title}
+                    href={item.url}
+                    aria-current={isActive ? (item.sectionId ? 'location' : 'page') : undefined}
+                    onClick={() => {
+                        if (item.sectionId) setActiveAnchor(item.sectionId);
+                        if (mobile) closeMenu();
+                    }}
+                    className={cn(
+                        mobile
+                            ? 'rounded-lg px-3 py-3 text-base transition hover:bg-tertiary hover:text-primary'
+                            : 'inline-flex items-center rounded-full px-3 py-2 transition-colors',
+                        isActive ? 'text-primary' : !mobile && 'text-neutral-foreground hover:text-primary',
+                    )}
+                >
+                    {item.title}
+                </Tag>
+            );
+        });
+    }
+
+
+
     return (
         <>
         <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-background/95 backdrop-blur">
@@ -135,63 +178,48 @@ export function AppHeader() {
                 {/* -- Desktop center navigation -- */}
 
                 <nav 
-                    className="hidden items-center gap-8 text-base lg:text-sm font-medium text-slate-600 lg:flex" 
+                    className="hidden items-center gap-5 text-base lg:text-sm 
+                    font-medium text-neutral-foreground lg:flex"
                     aria-label="Navegación principal"
                 >
-                    {(auth.user ? authMainNavItems : mainNavItems).map((item, i) =>{
+                    <NavLinks items={adminItems} />
 
-                        const isActive = isItemActive(item);
-                        
-                        return ( 
-                            <Link 
-                                key={i} href={item.url}
-                                aria-current={ 
-                                    isActive ? item.sectionId 
-                                    ? 'location' : 'page' : undefined
-                                }
-                                onClick={() => { if (item.sectionId) { setActiveAnchor(item.sectionId); }}}
-                                className={cn(
-                                    'inline-flex items-center rounded-full px-3 py-2 transition-colors',
-                                    isActive ? activeItemStyles : 'text-slate-600 hover:text-primary',
-                                )}
-                             >
-                                {item.title}
-                            </Link>
-                        )
-                    })}
+                    {adminItems.length > 0 && (
+                        <span aria-hidden="true" className="h-7 w-[2px] bg-border" />
+                    )}
+
+                    <NavLinks items={generalItems} />
                 </nav>
-
 
                 {/* -- Desktop right navigation -- */}
 
                 {(!auth.user ? (
-                <div className="hidden items-center gap-3 lg:flex">
-                    <Link 
-                        href="/login"
-                        className="rounded-lg px-4 py-2.5 text-base lg:text-sm font-semibold text-slate-700 
-                        transition duration-300 hover:bg-tertiary hover:text-primary"
-                    >
-                        Iniciar sesión
-                    </Link>
+                    <div className="hidden items-center gap-3 lg:flex">
+                        <Link 
+                            href="/login"
+                            className="rounded-lg px-4 py-2.5 text-base lg:text-sm font-semibold text-neutral-foreground 
+                            transition duration-300 hover:bg-tertiary hover:text-primary"
+                        >
+                            Iniciar sesión
+                        </Link>
 
-                    <Link 
-                        href="/register"
-                        className="inline-flex items-center gap-2 rounded-lg bg-primary 
-                        px-4 py-2.5 text-base lg:text-sm font-semibold text-white shadow-sm 
-                        transition duration-300 hover:bg-[#4338CA]"
-                    >
-                        Crear cuenta <ArrowRight aria-hidden="true" size={16} />
-                    </Link>
-                </div>
+                        <Link 
+                            href="/register"
+                            className="inline-flex items-center gap-2 rounded-lg bg-primary 
+                            px-4 py-2.5 text-base lg:text-sm font-semibold text-white shadow-sm 
+                            transition duration-300 hover:bg-[#4338CA]"
+                        >
+                            Crear cuenta <ArrowRight aria-hidden="true" size={16} />
+                        </Link>
+                    </div>
                 ) : (
+                    <div className="hidden items-center gap-7 lg:flex">
+                        <UserAvatar size='md' userId={auth.user.id} username={auth.user.name} />
 
-                <div className="hidden items-center gap-7 lg:flex">
-                    <UserAvatar size='md' userId={auth.user.id} username={auth.user.name} />
-
-                    <Link className="flex items-center gap-2 cursor-pointer" method="post" href={route('logout')} as="button">
-                        <Icon iconNode={LogOut} className="h-4 w-4" />
-                    </Link>
-                </div>
+                        <Link className="flex items-center gap-2 cursor-pointer" method="post" href={route('logout')} as="button">
+                            <Icon iconNode={LogOut} className="h-4 w-4" />
+                        </Link>
+                    </div>
                 ))}
 
                 {/* -- Mobile navigation -- */}
@@ -199,7 +227,7 @@ export function AppHeader() {
                 <Button
                     type="button"
                     variant="ghost"
-                    className="text-slate-700 transition hover:bg-tertiary lg:hidden text-base lg:text-sm"
+                    className="text-neutral-foreground transition hover:bg-tertiary lg:hidden text-base lg:text-sm"
                     onClick={() => setOpen((value) => !value)}
                     aria-expanded={open}
                     aria-controls="mobile-navigation"
@@ -226,8 +254,6 @@ export function AppHeader() {
             `}
             aria-hidden={!open}
         />
-
-        {/* -- Mobile navigation -- */}
         
         {/* Panel lateral */}
         <nav
@@ -244,24 +270,24 @@ export function AppHeader() {
             `}
         >
             {/* Cabecera del panel */}
-            <div className="flex min-h-20 items-center justify-between border-b border-slate-200 p-5">
+            <div className="flex min-h-20 items-top justify-between border-b border-border p-5">
                 
                 {(!auth.user ? (
-                    <span className="font-heading text-2xl font-bold text-slate-900">
+                    <span className="font-heading text-2xl font-bold">
                         proposite
                     </span>
                 ) : (
-                    <>
-                    <UserAvatar size='md' userId={auth.user.id} username={auth.user.name} /> 
-                    {auth.user.name}
-                    </>
+                    <div className='flex min-w-0 gap-3 items-center'>
+                        <UserAvatar size='md' userId={auth.user.id} username={auth.user.name} /> 
+                        <p className='font-semibold min-w-0 break-words text-lg'>{auth.user.name}</p>
+                    </div>
                 ))}
 
                 <Button
                     type="button"
                     variant="ghost"
                     onClick={closeMenu}
-                    className="rounded-lg p-2 text-slate-700 transition hover:bg-tertiary"
+                    className="rounded-lg p-2 text-neutral-foreground transition hover:bg-tertiary"
                     aria-label="Cerrar menú"
                 >
                     <X aria-hidden="true" />
@@ -269,64 +295,45 @@ export function AppHeader() {
             </div>
 
             {/* Navegación */}
-            <div className="flex flex-1 flex-col gap-2 overflow-y-auto px-5 py-5 text-sm font-medium text-slate-700">
-                {auth.user ? (<>
-                {authMainNavItems.map((item) => (
-                <Link
-                    key={item.title}
-                    href={item.url}
-                    onClick={closeMenu}
-                    className="rounded-lg px-3 py-3 transition text-base hover:bg-tertiary hover:text-primary"
-                >
-                    {item.title}
-                </Link>
-                ))}
-                </>) : (<>
-                {mainNavItems.map((item) => (
-                <a
-                    key={item.title}
-                    href={item.url}
-                    onClick={closeMenu}
-                    className="rounded-lg px-3 py-3 text-base transition hover:bg-tertiary hover:text-primary"
-                >
-                    {item.title}
-                </a>
-                ))}</>
-                )}
+
+            <div className="flex flex-1 flex-col gap-2 overflow-y-auto px-5 py-5 text-sm font-medium text-neutral-foreground">
+                <NavLinks items={adminItems} mobile />
+
+                {adminItems.length > 0 && <hr className="my-2 border-border" />}
+
+                <NavLinks items={generalItems} mobile />
             </div>
 
             {/* Acciones inferiores */}
             <div className="flex flex-col gap-3 border-t border-slate-200 p-5">
                 {auth.user ? (<>
-                
-                <Link 
-                    className="flex items-center gap-2 cursor-pointer text-sm" 
-                    method="post" 
-                    href={route('logout')} 
-                    as="button"
-                >
-                    <Icon iconNode={LogOut} className="h-4 w-4" /> Cerrar sesión
-                </Link>
+                    <Link 
+                        className="flex items-center gap-2 cursor-pointer text-sm" 
+                        method="post" 
+                        href={route('logout')} 
+                        as="button"
+                    >
+                        <Icon iconNode={LogOut} className="h-4 w-4" /> Cerrar sesión
+                    </Link>
                 </>) : (<>
-                <Link
-                    href={route('login')}
-                    onClick={() => { closeMenu(); }}
-                    className="w-full rounded-lg px-4 py-3 text-base font-semibold text-primary 
-                    transition hover:bg-tertiary"
-                >
-                    Iniciar sesión
-                </Link>
+                    <Link
+                        href={route('login')}
+                        onClick={() => { closeMenu(); }}
+                        className="w-full rounded-lg px-4 py-3 text-base font-semibold text-primary 
+                        transition hover:bg-tertiary"
+                    >
+                        Iniciar sesión
+                    </Link>
 
-                <Link
-                    href={route('register')}
-                    onClick={() => { closeMenu(); }}
-                    className="w-full rounded-lg bg-primary px-4 py-3 text-base font-semibold text-white 
-                    transition hover:bg-[#4338CA]"
-                >
-                    Crear cuenta
-                </Link>
-                </>
-                )}
+                    <Link
+                        href={route('register')}
+                        onClick={() => { closeMenu(); }}
+                        className="w-full rounded-lg bg-primary px-4 py-3 text-base font-semibold text-white 
+                        transition hover:bg-[#4338CA]"
+                    >
+                        Crear cuenta
+                    </Link>
+                </>)}
             </div>
         </nav>
         </>
