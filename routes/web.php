@@ -19,9 +19,8 @@ use App\Http\Controllers\Admin\PanelController as AdminPanelController;
 use App\Http\Controllers\Admin\ComunidadController as AdminComunidadController;
 use App\Http\Controllers\Admin\RecursosController as AdminRecursosController;
 use App\Http\Controllers\Admin\ReportesController as AdminReportesController;
-
-// use App\Http\Controllers\Admin\TestsController as AdminTestsController;
 use App\Http\Controllers\Admin\OpositoresController as AdminUsuariosController;
+use App\Http\Controllers\Admin\TestsController as AdminTestsController;
 
 
 /*****************************
@@ -194,7 +193,7 @@ Route::middleware(['auth', 'admin', 'oposicion.moderada'])->prefix('admin')->nam
     Route::get('/panel', [AdminPanelController::class, 'index'])
         ->name('panel');
 
-    // ====== Temario ======
+    // ====== Gestionar temario ======
 
     Route::prefix('temario')->name('temario.')->group(function () {
 
@@ -209,7 +208,7 @@ Route::middleware(['auth', 'admin', 'oposicion.moderada'])->prefix('admin')->nam
             ->name('recursos.update'); // admin.temario.recursos.update
     });
 
-    // ====== Reportes ======
+    // ====== Gestionar reportes ======
 
     Route::prefix('reportes')->name('reportes.')->group(function () {
 
@@ -227,7 +226,7 @@ Route::middleware(['auth', 'admin', 'oposicion.moderada'])->prefix('admin')->nam
     });
 
 
-    // ====== Listado de usuarios ======
+    // ====== Listado y gestionar usuarios ======
 
     Route::prefix('usuarios')->name('usuarios.')->group(function () {
 
@@ -241,10 +240,26 @@ Route::middleware(['auth', 'admin', 'oposicion.moderada'])->prefix('admin')->nam
         // Banear usuario NO reportado
         Route::delete('/{usuario}', [AdminUsuariosController::class, 'ban'])
             ->name('ban'); // admin.usuarios.ban
-        
     });
 
-    // reportes, baneos, tests, ... 
+    // ====== Gestionar tests ======
+
+    Route::prefix('tests')->name('tests.')->group(function () {
+
+        // Añadir, editar, eliminar test
+        Route::get('/create', [AdminTestsController::class, 'create'])
+            ->name('create'); // admin.tests.create
+        Route::post('/', [AdminTestsController::class, 'store'])
+            ->name('store'); // admin.tests.store
+
+        Route::get('/{test}/edit', [AdminTestsController::class, 'edit'])
+            ->name('edit'); // admin.tests.edit
+        Route::patch('/{test}', [AdminTestsController::class, 'update'])
+            ->name('update'); // admin.tests.update
+
+        Route::delete('/{test}', [AdminTestsController::class, 'delete'])
+            ->name('delete'); // admin.tests.delete        
+    });
 });
 
 
