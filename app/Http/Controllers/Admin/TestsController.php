@@ -17,8 +17,14 @@ use App\Http\Requests\Admin\StoreTestRequest;
 
 class TestsController extends Controller
 {
+
+    /**
+     * Crear nuevo test
+     */
     public function create(Request $request): Response 
     {
+        Gate::authorize('create', Test::class);
+
         $oposicion = auth()->user()->comunidad();
 
         $temario = Tema::where('oposicion_id', $oposicion->id)
@@ -28,7 +34,7 @@ class TestsController extends Controller
             ->get();
 
         return Inertia::render('admin/tests/create', [
-            'oposicion' => $oposicion->nombre,
+            'oposicion' => $oposicion->only('id', 'nombre'),
             'temario' => $temario 
         ]);
     }
