@@ -67,8 +67,9 @@ export type Tema = {
     bloque: string | null;
     numero_tema: string;
     titulo: string;
+    
     recursos?: Recurso[] | null;
-    checked: boolean;
+    checked?: boolean;
 }
 
 // ====== Tests ======

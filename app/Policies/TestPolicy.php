@@ -15,6 +15,19 @@ use Illuminate\Auth\Access\Response;
 
 class TestPolicy
 {
+    public function before(Usuario $usuario, string $ability): Response|null
+    {
+        if(!$usuario->esAdmin()) {
+            return match ($ability) {
+                'create', 'update', 'delete' => 
+                    Response::deny('Solo los administradores pueden realizar esta acción.'),
+                default => null,
+            };
+        }
+
+        return null;
+    }
+
 
     public function view(Usuario $usuario, Test|OpcionRespuesta|Pregunta $model): Response
     {
@@ -29,48 +42,51 @@ class TestPolicy
      */
     public function create(Usuario $usuario): Response
     {
-        return Response::deny('Solo los administradores pueden realizar esta acción.');
+        return Response::allow();
     }
 
     public function update(Usuario $usuario, Test|OpcionRespuesta|Pregunta $model): Response
     {
-        return Response::deny('Solo los administradores pueden realizar esta acción.');
+        return $this->visibleParaUsuario($usuario, $model)
+            ? Response::allow()
+            : Response::denyAsNotFound();
     }
 
     public function delete(Usuario $usuario, Test|OpcionRespuesta|Pregunta $model): Response
     {
-        return Response::deny('Solo los administradores pueden realizar esta acción.');
+        return $this->visibleParaUsuario($usuario, $model)
+            ? Response::allow()
+            : Response::denyAsNotFound();
     }
 
-    public function restore(Usuario $usuario, Test|OpcionRespuesta|Pregunta $model): Response
-    {
-        return Response::deny('Solo los administradores pueden realizar esta acción.');
-    }
+    // public function restore(Usuario $usuario, Test|OpcionRespuesta|Pregunta $model): Response
+    // {
+    //     return Response::deny('Solo los administradores pueden realizar esta acción.');
+    // }
 
-    public function forceDelete(Usuario $usuario, Test|OpcionRespuesta|Pregunta $model): Response
-    {
-        return Response::deny('Solo los administradores pueden realizar esta acción.');
-    }
+    // public function forceDelete(Usuario $usuario, Test|OpcionRespuesta|Pregunta $model): Response
+    // {
+    //     return Response::deny('Solo los administradores pueden realizar esta acción.');
+    // }
 
 
     private function visibleParaUsuario(Usuario $usuario, Test|OpcionRespuesta|Pregunta $model): bool
     {
         $oposicionId = $usuario->comunidad()->id;
+        $admin = $usuario->esAdmin();
 
         if ($model instanceof Test) {
-            $test = $model;
-            return !$test->trashed()
-                && $oposicionId === $test->temario->oposicion_id;
+            $mismaOposicion = $oposicionId === $model->temario->oposicion_id;
         }
         else if ($model instanceof Pregunta) {
-            $pregunta = $model;
-            return !$pregunta->trashed()
-                && $oposicionId === $pregunta->test->temario->oposicion_id;
+            $mismaOposicion = $oposicionId === $pregunta->test->temario->oposicion_id;
         }
         else {
-            $opcion = $model;
-            return !$opcion->trashed()
-                && $oposicionId === $opcion->pregunta->test->temario->oposicion_id;
+            $mismaOposicion = $oposicionId === $opcion->pregunta->test->temario->oposicion_id; 
         }
+
+        return $admin 
+            ?  $mismaOposicion
+            : !$model->trashed() && $mismaOposicion;
     }
 }
