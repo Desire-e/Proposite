@@ -4,11 +4,20 @@ import { type TestListado } from '@/types/models';
 
 import { SectionCard } from '@/components/ui/SectionCard';
 import { duracionRecomendada } from '@/lib/tests';
+import { EliminarButton } from '../EliminarButton';
+
+
+type TestCardProps = {
+    test: TestListado;
+    esAdmin?: boolean;
+    onEliminar?: () => void | null;
+    onEditar?: string | null;
+}
 
 /**
  * Test del listado de tests disponibles
  */
-export function TestCard({ test }: { test: TestListado }) {
+export function TestCard({ test, esAdmin = false, onEliminar, onEditar }: TestCardProps) {
 
     // != null: una nota de 0 también cuenta como test realizado
     const realizado = test.ultima_nota != null;
@@ -24,7 +33,7 @@ export function TestCard({ test }: { test: TestListado }) {
                     ? 'bg-success text-success-foreground'
                     : 'text-tertiary-foreground bg-tertiary'
                 }`}>
-                    {realizado
+                    {realizado && !esAdmin 
                         ? (<><CheckCircle2 className="size-4" /> Completado</>)
                         : (<>Disponible</>)
                     }
@@ -47,18 +56,40 @@ export function TestCard({ test }: { test: TestListado }) {
             <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
                 <span className="text-xs text-neutral-foreground">
                     {test.intentos_comunidad_count} intentos de la comunidad
-                    {realizado && ` · Tu última nota ${test.ultima_nota}`}
+                    {realizado && !esAdmin && ` · Tu última nota ${test.ultima_nota}`}
                 </span>
 
-                <Link
-                    href={route('tests.show', test.id)}
-                    className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5
-                    text-xs font-bold text-primary-foreground transition hover:bg-tertiary
-                    hover:text-tertiary-foreground"
-                >
-                    {realizado ? 'Repetir test' : 'Empezar test'}
-                    <ArrowRight className="size-4" />
-                </Link>
+
+
+                <div className='flex gap-2 items-center'>
+                    <Link
+                        href={route('tests.show', test.id)}
+                        className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5
+                        text-xs font-bold text-primary-foreground transition hover:bg-tertiary
+                        hover:text-tertiary-foreground"
+                    >
+                        {realizado ? 'Repetir test' : 'Empezar test'}
+                        <ArrowRight className="size-4" />
+                    </Link>
+
+                    {esAdmin &&
+                        <div className='flex gap-2 items-center'>
+                            { onEliminar && <EliminarButton onEliminar={onEliminar} /> }
+
+                            { onEditar &&
+                                <Link
+                                    href={onEditar}
+                                    aria-label={`Editar test ${test.titulo}`}
+                                    className='flex items-center rounded-xl font-semibold text-xs px-2 py-0! bg-tertiary z-10 
+                                    text-tertiary-foreground border border-tertiary-foreground/80! cursor-pointer h-8 m-0'
+                                >
+                                    Editar
+                                </Link>
+                            }
+                        </div>
+                    }
+
+                </div>
             </div>
         </SectionCard>
     );

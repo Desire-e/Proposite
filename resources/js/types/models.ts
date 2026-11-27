@@ -87,3 +87,17 @@ export type Test = {
 export type TestListado = Test & {
     ultima_nota: number | null;
 }
+
+/** Creación de un test */
+export type Pregunta = {
+    id?: string;
+    enunciado: string;
+    opciones: Opcion[];
+}
+
+export type Opcion = {
+    id?: string;
+    contenido: string;
+    es_correcta: boolean;
+}
+
