@@ -200,7 +200,7 @@ export default function Temario(
                                         tema={tema}
                                         disabled={savingCheck}
                                         onToggle={() => 
-                                            toggleCheck(tema.id, tema.checked)
+                                            toggleCheck(tema.id, tema.checked ?? false)
                                         }
                                         esAdmin={esAdmin}
                                         onAddRecurso={

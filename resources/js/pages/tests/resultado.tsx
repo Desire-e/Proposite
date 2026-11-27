@@ -43,7 +43,7 @@ type Opcion = {
 }
 
 
-export default function TestResult({test, correccion, nota, prueba = false }: ResultProps) {
+export default function TestResult({test, correccion, nota }: ResultProps) {
 
     const correctCount = correccion.filter(
         (corr) => corr.opciones.some((opc) => opc.selected && opc.es_correcta)
@@ -61,10 +61,7 @@ export default function TestResult({test, correccion, nota, prueba = false }: Re
                 <div>
                     <SectionHeading 
                         as='h1'
-                        eyebrow={prueba 
-                            ? 'Modo prueba para administrador · no se guardará tu resultado' 
-                            : 'Test completado'
-                        } 
+                        eyebrow={'Test completado'} 
                         eyebrowClassName='text-success-foreground' 
                         eyebrowIcon={
                             <span className="size-2 rounded-full bg-success-foreground" />
