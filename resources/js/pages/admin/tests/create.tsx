@@ -9,26 +9,15 @@ import Textarea from '@/components/ui/Textarea';
 import { type Tema, type Oposicion } from '@/types/models';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
+import { Pregunta } from '@/types/models';
 
 
-/** 
- * Formulario 
- */
 type TestsCreateForm = {
     tema_id: string;
     titulo: string;
     descripcion: string;
     preguntasOpciones: Pregunta[];
 };
-type Pregunta = {
-    enunciado: string;
-    opciones: Opcion[];
-}
-type Opcion = {
-    contenido: string;
-    es_correcta: boolean;
-}
 
 const MIN_PREGUNTAS = 5, MAX_PREGUNTAS = 15;
 const MIN_OPCIONES = 3, MAX_OPCIONES = 4;
@@ -39,7 +28,6 @@ export default function TestsCreate(
     { oposicion: Oposicion, temario: Tema[] }
 ) {
 
-
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         post(
@@ -49,11 +37,6 @@ export default function TestsCreate(
             }
         );
     }
-    /* TODO. MENSAJES DE ERROR
-    
-    "preguntasOpciones.0.enunciado": "El campo preguntasOpciones.0.enunciado es obligatorio.",
-    "preguntasOpciones.0.opciones.0.contenido": "El campo preguntasOpciones.0.opciones.0.contenido es obligatorio.",}
-    */
 
 
     /** Dropdown de temas */
@@ -91,9 +74,20 @@ export default function TestsCreate(
 
 
     // ----- Gestión de errores
-    // Lee un error de Laravel por su clave, por ejemplo "preguntasOpciones.0.enunciado"
+    // Errores de Laravel como un objeto de claves de texto,
+    // por ejemplo "preguntasOpciones.0.enunciado"
+    type ErroresLaravel = { [clave: string]: string };
+
     function errorDe(clave: string): string | undefined {
-        return (errors as any)[clave];
+        const erroresLaravel: ErroresLaravel = errors;
+
+        return erroresLaravel[clave];
+    }
+
+    // Quita el error de un campo por su clave, por ejemplo "preguntasOpciones.0.enunciado"
+    function limpiarErrorDe(clave: string) {
+        if (!errorDe(clave)) return;
+        clearErrors(clave as keyof TestsCreateForm);
     }
 
     // ----- Gestión de tema seleccionado
@@ -127,6 +121,9 @@ export default function TestsCreate(
 
     function deletePregunta(indice: number) {
         if (preguntas.length <= MIN_PREGUNTAS) return;
+    
+        clearErrors();
+
         // Guarda todas las preguntas actuales menos la pregunta elegida, según su índice
         setData('preguntasOpciones', preguntas.filter((_, i) => i !== indice));
     }
@@ -137,15 +134,23 @@ export default function TestsCreate(
     function addOpcion(indice: number) {
         // opciones de la pregunta, segun indice de pregunta
         const opciones = preguntas[indice].opciones;
+
         if (opciones.length >= MAX_OPCIONES) return;
+        
         updatePregunta(indice, { opciones: [...opciones, { contenido: '', es_correcta: false }] });
     }
 
     function deleteOpcion(indice: number, indiceOpcion: number) {
         const opciones = preguntas[indice].opciones;
+
         if (opciones.length <= MIN_OPCIONES) return;
+
+        clearErrors();
+
         const restantes = opciones.filter((_, i) => i !== indiceOpcion);
+        
         if (!restantes.some((o) => o.es_correcta)) restantes[0].es_correcta = true;
+        
         updatePregunta(indice, { opciones: restantes });
     }
 
@@ -153,7 +158,10 @@ export default function TestsCreate(
         const opciones = preguntas[indice].opciones.map((opc, i) =>
             i === indiceOpcion ? { ...opc, contenido } : opc,
         );
+
         updatePregunta(indice, { opciones });
+
+        limpiarErrorDe(`preguntasOpciones.${indice}.opciones.${indiceOpcion}.contenido`);
     }
 
     function marcarCorrecta(indice: number, indiceOpcion: number) {
@@ -161,7 +169,10 @@ export default function TestsCreate(
             contenido: opc.contenido,
             es_correcta: i === indiceOpcion,
         }));
+
         updatePregunta(indice, { opciones });
+
+        limpiarErrorDe(`preguntasOpciones.${indice}.opciones`);
     }
 
 
@@ -379,7 +390,10 @@ export default function TestsCreate(
 
                                         <Textarea
                                             value={pregunta.enunciado}
-                                            onChange={(e) => updatePregunta(i, { enunciado: e.target.value })}
+                                            onChange={(e) => {
+                                                updatePregunta(i, { enunciado: e.target.value })
+                                                limpiarErrorDe(`preguntasOpciones.${i}.enunciado`);
+                                            }}
                                             rows={2}
                                             className={`w-full`}
                                             placeholder="Escribe aquí la pregunta"
@@ -425,7 +439,7 @@ export default function TestsCreate(
                                                         name={`pregunta-${i}-correcta`}
                                                         checked={opcion.es_correcta}
                                                         onChange={() => marcarCorrecta(i,j)}
-                                                        aria-label={`Marcar opción ${j + 1} como correcta para la pregunta ${j + 1}`}
+                                                        aria-label={`Marcar opción ${j + 1} como correcta para la pregunta ${i + 1}`}
                                                         className="size-4 shrink-0 accent-primary"
                                                     />
 
