@@ -8,6 +8,13 @@ import { StatCard } from '@/components/ui/StatCard'
 import { CtaCard } from '@/components/ui/CtaCard'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 
+import { DeleteModal } from '@/components/DeleteModal'
+import { useDelete } from '@/hooks/use-delete'
+
+import { usePage } from '@inertiajs/react';
+import { SharedData } from '@/types';
+
+
 // Estadísticas a null para el administrador (no genera intentos)
 type Usuario = {
     oposicion: string,
@@ -32,9 +39,19 @@ export default function TestsIndex({ usuario, tests }: {usuario: Usuario, tests:
     // [listaTests, difficulty, query],
     // )
 
+    /** Eliminar tests (admin) */
+    const deleteTests = useDelete('admin.tests.delete');
+
+    const { auth } = usePage<SharedData>().props;
+    const esAdmin = auth.user.rol === 'administrador';
+
 
   return (
         <AppLayout headTitle={`Tests de ${usuario.oposicion}`}>
+                        
+            {/* Modal eliminar test */}
+            <DeleteModal deletion={deleteTests} title="¿Eliminar este test?" />
+                        
             <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8 lg:py-10">
 
                 <PageHero
@@ -102,7 +119,12 @@ export default function TestsIndex({ usuario, tests }: {usuario: Usuario, tests:
 
                     <div className="mt-5 grid gap-4 lg:grid-cols-2">
                         {tests.map((test) => (
-                            <TestCard key={test.id} test={test} />
+                            <TestCard key={test.id} 
+                                test={test} 
+                                esAdmin={esAdmin} 
+                                onEliminar={() => esAdmin ? deleteTests.open(test.id) : null}
+                                onEditar={esAdmin ? route('admin.tests.edit', test.id) : null}
+                            />
                         ))}
                     </div>
 

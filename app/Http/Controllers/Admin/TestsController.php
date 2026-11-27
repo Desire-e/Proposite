@@ -97,12 +97,13 @@ class TestsController extends Controller
         // ]);
     }
 
+    /**
+     * Eliminar test existente
+     */
     public function delete(Request $request, Test $test): RedirectResponse
     {
-        // Gate::authorize('delete', $comentario);
-
-        // $comentario->delete(); // soft delete: rellena deleted_at
-
-        // return back();
+        Gate::authorize('delete', $test);
+        $test->delete(); 
+        return back();
     }
 }

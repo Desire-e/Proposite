@@ -79,10 +79,10 @@ class TestPolicy
             $mismaOposicion = $oposicionId === $model->temario->oposicion_id;
         }
         else if ($model instanceof Pregunta) {
-            $mismaOposicion = $oposicionId === $pregunta->test->temario->oposicion_id;
+            $mismaOposicion = $oposicionId === $model->test->temario->oposicion_id;
         }
         else {
-            $mismaOposicion = $oposicionId === $opcion->pregunta->test->temario->oposicion_id; 
+            $mismaOposicion = $oposicionId === $model->pregunta->test->temario->oposicion_id; 
         }
 
         return $admin 
