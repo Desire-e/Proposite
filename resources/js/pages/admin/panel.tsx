@@ -1,19 +1,20 @@
 
 import { 
     ArrowRight, BookOpen, FileQuestion,
-    Flag, Link2, Plus, ShieldCheck, Users, BookOpenCheck,
+    Flag, Link2, ShieldCheck, Users, BookOpenCheck,
 } from 'lucide-react'
 
 import AppLayout from '@/layouts/AppLayout';
 
 import { ComunidadDropdown, type ComunidadOption } from '@/components/admin/ComunidadDropdown';
 import { type FormEventHandler } from 'react';
-import { useForm, router } from '@inertiajs/react';
+import { useForm, router, Link } from '@inertiajs/react';
 import { type Oposicion } from '@/types/models';
 
 import AdminPanelCard from '@/components/admin/AdminPanelCard';
 import { type Reporte } from '@/types/models';
 import ReportePendienteCard from '@/components/admin/ReportePendienteCard';
+import { SectionHeading } from '@/components/ui/SectionHeading';
 
 
 type AdminPanelProps = {
@@ -94,21 +95,20 @@ export default function Panel(
 
     return (
         <AppLayout headTitle={`Administración de ${oposicion_moderada.nombre} | Proposite`}>
-            <div className="mx-auto w-full max-w-6xl px-4 py-6">
+            <div className="mx-auto w-full max-w-6xl px-4 py-6 flex flex-col gap-10">
 
-                <div className='flex flex-col mb-8 '>
-                    <p className="mb-2 flex items-center gap-2 text-xs font-bold 
-                    uppercase tracking-[0.16em] text-secondary">
-                        <ShieldCheck className="size-4" />
-                        Vista general · {oposicion_moderada.nombre}
-                    </p>
-
-                    <h1 className="font-heading text-4xl font-bold text-primary lg:text-5xl">
-                        Panel de administración
-                    </h1>
-                </div>
-
-                <form onSubmit={submit} className="relative flex gap-3 mb-5">
+                <SectionHeading 
+                    as='h1' 
+                    eyebrow={`Vista general · ${oposicion_moderada.nombre}`} 
+                    title='Panel de administración' 
+                    size='xl'
+                    titleClassName='text-primary'
+                    eyebrowIcon={
+                        <ShieldCheck className="md:size-4 size-6 text-secondary" />
+                    }
+                />
+                
+                <form onSubmit={submit} className="relative flex gap-3">
                     <ComunidadDropdown
                         comunidades={comunidades}
                         oposicion_id={data.oposicion_id}
@@ -161,18 +161,16 @@ export default function Panel(
                     />
                 </section>
 
-                <div id='reportes-pendientes' className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1fr)_350px]">
-                    <section>
-                        <div className="flex flex-col gap-4 border-b border-border pb-5 pl-0
-                            sm:flex-row sm:items-center sm:justify-between">
-                            <div>
-                                <p className="text-xs font-bold uppercase tracking-[0.14em] text-secondary">
-                                    Cola de moderación
-                                </p>
-                                <h2 className="mt-1 font-heading text-2xl font-bold">
-                                    Reportes pendientes
-                                </h2>
-                            </div>
+                <section id='reportes-pendientes' className="flex gap-7 lg:flex-row flex-col">
+                    <div className='lg:min-w-[67%]'>
+                        <div className="flex flex-col border-b border-border pb-5
+                        sm:flex-row sm:items-center sm:justify-between">
+                            <SectionHeading 
+                                as='h2' 
+                                eyebrow='Cola de moderación' 
+                                title='Reportes pendientes' 
+                                size='md'
+                            />
 
                             {/* <label className="flex items-center gap-2 rounded-xl border border-border px-3 py-2">
                                 <Search className="size-4 text-neutral-foreground" />
@@ -212,44 +210,43 @@ export default function Panel(
                                 </div>
                             )} */}
                         </div>
-                    </section>
+                    </div>
 
-                    <aside className="space-y-6">
-                        <section className="rounded-2xl border border-border bg-tertiary p-5">
-                            <div className="mb-4 flex items-start justify-between">
-                                <div>
-                                <p className="text-xs font-bold uppercase tracking-[0.14em] text-secondary">
-                                    Herramientas
-                                </p>
+                    <aside className="w-full lg:w-auto h-fit">
+                        <section className="flex flex-col gap-2 rounded-xl border border-tertiary-foreground/15! 
+                        bg-tertiary p-5">
+                            <SectionHeading 
+                                as='h3'
+                                eyebrow='Herramientas' 
+                                title='Crear contenido' 
+                                titleClassName='text-primary' 
+                                size='md'
+                            />
 
-                                <h2 className="mt-1 font-heading text-2xl font-bold text-primary">
-                                    Crear contenido
-                                </h2>
-                                </div>
-
-                                <Plus className="size-5 text-primary" />
-                            </div>
-
-                            <p className="text-sm leading-6 text-neutral-foreground">
+                            <p className="text-sm text-tertiary-foreground">
                                 Añade material oficial para que cada comunidad tenga recursos
                                 fiables y actualizados.
                             </p>
 
-                            <div className="mt-5 flex flex-col gap-2">
+                            <div className="flex flex-col gap-2 mt-5">
                                 {/* TODO. */}
-                                <button
-                                    type="button"
-                                    className="flex items-center gap-3 rounded-xl bg-background px-4 py-3 text-left text-sm font-semibold text-foreground hover:bg-secondary hover:text-secondary-foreground"
+                                <Link
+                                    href={route('admin.tests.create')}
+                                    className="flex items-center gap-3 rounded-xl bg-white px-4 
+                                    py-3 text-left text-sm font-semibold text-foreground transition 
+                                    hover:bg-secondary hover:text-secondary-foreground"
                                 >
                                     <FileQuestion className="size-4 text-primary" />
                                     Crear test
                                     <span className="ml-auto">→</span>
-                                </button>
-                                
+                                </Link>
+
                                 {/* TODO. */}
                                 <button
                                     type="button"
-                                    className="flex items-center gap-3 rounded-xl bg-background px-4 py-3 text-left text-sm font-semibold text-foreground hover:bg-secondary hover:text-secondary-foreground"
+                                    className="flex items-center gap-3 rounded-xl bg-white px-4 
+                                    py-3 text-left text-sm font-semibold text-foreground transition
+                                    hover:bg-secondary hover:text-secondary-foreground"
                                 >
                                     <Link2 className="size-4 text-primary" />
                                     Añadir recurso legal
@@ -304,7 +301,7 @@ export default function Panel(
                             </ul>
                         </section> */}
                     </aside>
-                </div>
+                </section>
             </div>
 
         </AppLayout>

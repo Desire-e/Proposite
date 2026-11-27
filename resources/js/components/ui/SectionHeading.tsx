@@ -17,7 +17,7 @@ type SectionHeadingProps = {
     eyebrow: string;
     eyebrowIcon?: React.ReactNode;
     title: string;
-    as?: 'h1' | 'h2';
+    as?: 'h1' | 'h2' | 'h3';
     size?: 'md' | 'lg' | 'xl';
     titleClassName?: string;
     eyebrowClassName?: string;
@@ -27,7 +27,7 @@ type SectionHeadingProps = {
 // Tamaño del título y separación con el antetítulo
 const sizes = {
     md: 'mt-1 text-2xl',
-    lg: 'mt-2 text-3xl',
+    lg: 'mt-2 text-3xl lg:text-4xl',
     xl: 'mt-3 text-4xl lg:text-5xl',
 };
 

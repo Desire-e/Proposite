@@ -54,38 +54,39 @@ export default function ReportePendienteCard(
     const url = urlReportable(reporte);
 
     return (
-        <article className="p-5 rounded-xl bg-white border border-border">
-            <div className="flex gap-4">
+        <article className="flex flex-col gap-3 p-5 rounded-xl bg-white border border-border">
+            
+            <div className="flex gap-3 items-center">
                 <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-tertiary text-primary">
                     <Icon className="size-5" />
                 </div>
 
-                <div className="flex flex-col gap-2 min-w-0 flex-1">
-                    <span className="text-sm font-bold text-tertiary-foreground">
-                        {etiquetaReportable(reporte.reportable_tipo)}
-                    </span>
+                <span className="font-bold text-tertiary-foreground">
+                    {etiquetaReportable(reporte.reportable_tipo)}
+                </span>
+            </div>
 
-                    <p className="text-sm">{reporte.motivo}</p>
+            <div className="flex flex-col gap-2 min-w-0 flex-1">
 
-                    <p className="text-xs text-neutral-foreground">
-                        {formatDMY(reporte.created_at)}
-                    </p>
+                <p className="text-sm">{reporte.motivo}</p>
 
-                    {url && (
-                        <Link 
-                            href={url}
-                            className="inline-flex items-center gap-2 mt-2 text-xs font-medium 
-                            text-tertiary-foreground"
-                        >
-                            Ver {etiquetaReportable(reporte.reportable_tipo)} <ArrowRight className="size-3"/>
-                        </Link>
-                    )}
+                <p className="text-xs text-neutral-foreground">
+                    {formatDMY(reporte.created_at)}
+                </p>
 
-                </div>
+                {url && (
+                    <Link 
+                        href={url}
+                        className="inline-flex items-center gap-2 mt-2 text-xs font-medium 
+                        text-tertiary-foreground"
+                    >
+                        Ver {etiquetaReportable(reporte.reportable_tipo)} <ArrowRight className="size-3"/>
+                    </Link>
+                )}
             </div>
 
 
-            <div className="mt-4 flex flex-wrap md:justify-end gap-2">
+            <div className="mt-4 md:mt-0 flex flex-wrap md:justify-end gap-2">
                 <button
                     type="button"
                     onClick={() => onOmitir?.(reporte)}

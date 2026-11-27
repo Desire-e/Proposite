@@ -2,6 +2,7 @@ import { ShieldCheck, UserRound, UserRoundCheck, UserRoundX } from 'lucide-react
 import AppLayout from '@/layouts/AppLayout';
 import { Link } from '@inertiajs/react';
 import { router } from '@inertiajs/react';
+import { SectionHeading } from '@/components/ui/SectionHeading';
 
 
 type Opositor = {
@@ -46,31 +47,29 @@ export default function OpositoresList(
 
     return (
         <AppLayout headTitle='Usuarios | Proposite'>
-            <div className="mx-auto w-full max-w-6xl px-4 py-6">
-                
-                <div className='flex flex-col mb-4'>
-                    <p className="mb-2 flex items-center gap-2 text-xs font-bold 
-                    uppercase tracking-[0.16em] text-secondary">
-                        <ShieldCheck className="size-4" />
-                        Usuarios · {oposicion}
-                    </p>
-
-                    <h1 className="font-heading text-4xl font-bold text-primary lg:text-5xl">
-                        Gestión de usuarios
-                    </h1>
-                </div>
-
+            <div className="mx-auto w-full max-w-6xl px-4 py-6 flex flex-col gap-5">
+                <SectionHeading 
+                    as='h1' 
+                    eyebrow={`Usuarios · ${oposicion}`} 
+                    title='Gestión de usuarios' 
+                    size='xl'
+                    titleClassName='text-primary'
+                    eyebrowIcon={
+                        <ShieldCheck className="md:size-4 size-6 text-secondary" />
+                    }
+                />
 
                 <section>
-                    <div className="flex flex-col border-b border-border p-5 lg:flex-row lg:items-center lg:justify-between">
-                        <div>
-                            <h2 className="text-2xl font-bold font-heading">Cuentas de la comunidad</h2>
-
-                            <p className="mt-1 text-xs text-neutral-foreground">
-                                {noBaneadosCount} de {usuariosCount} cuentas de usuario en activo
-                            </p>
-                        </div>
-
+                    <div className="flex flex-col border-b border-border">
+                        <SectionHeading 
+                            as='h2' 
+                            eyebrow='' 
+                            title='Usuarios de la comunidad' 
+                            size='md'     
+                        />
+                        <p className="mt-2 mb-7 text-xs text-neutral-foreground">
+                            {noBaneadosCount} de {usuariosCount} cuentas de usuario en activo
+                        </p>
                         {/* <div className="border border-border bg-white flex flex-col gap-3 sm:flex-row">
                             <label className="flex h-11 items-center gap-2 rounded-xl border border-border px-3">
                                 <Search aria-hidden="true" className="size-4 text-neutral-foreground" />

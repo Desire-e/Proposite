@@ -16,7 +16,7 @@ type AdminPanelCardProps = {
 export default function AdminPanelCard({Icon, title, count=0, link = null}: AdminPanelCardProps){
     return(
         <article className="flex flex-col flex-wrap w-full md:w-[48%] lg:w-[23%] p-5 
-        rounded-2xl bg-white border border-border gap-2">
+        rounded-xl bg-white border border-border gap-2">
             
             <div className="flex lg:flex-col gap-2 justify-between">
                 <div className='flex items-center gap-2'>
