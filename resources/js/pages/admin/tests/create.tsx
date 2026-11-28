@@ -6,16 +6,13 @@ import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import Textarea from '@/components/ui/Textarea';
-import { type Tema, type Oposicion } from '@/types/models';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import InputError from '@/components/input-error';
-import { Pregunta } from '@/types/models';
+import { type Tema, type Oposicion, type Pregunta, type Test } from '@/types/models';
 
 
-type TestsCreateForm = {
+export type TestForm = Omit<Test, 'id'> & { // Omite prop id del tipo Test, conserva lo demás
     tema_id: string;
-    titulo: string;
-    descripcion: string;
     preguntasOpciones: Pregunta[];
 };
 
@@ -30,12 +27,7 @@ export default function TestsCreate(
 
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        post(
-            route('admin.tests.store'),
-            {
-                onError: (errores)=>{ console.log('ERROR PREGUNTAS:', errores) }
-            }
-        );
+        post(route('admin.tests.store'));
     }
 
 
@@ -63,7 +55,7 @@ export default function TestsCreate(
      * Formulario completo de creación 
      */
     const { data, setData, post, processing, errors, clearErrors } = 
-        useForm<TestsCreateForm>({ 
+        useForm<TestForm>({ 
             tema_id: '', 
             titulo: '', 
             descripcion: '', 
@@ -87,7 +79,7 @@ export default function TestsCreate(
     // Quita el error de un campo por su clave, por ejemplo "preguntasOpciones.0.enunciado"
     function limpiarErrorDe(clave: string) {
         if (!errorDe(clave)) return;
-        clearErrors(clave as keyof TestsCreateForm);
+        clearErrors(clave as keyof TestForm);
     }
 
     // ----- Gestión de tema seleccionado
@@ -149,7 +141,8 @@ export default function TestsCreate(
 
         const restantes = opciones.filter((_, i) => i !== indiceOpcion);
         
-        if (!restantes.some((o) => o.es_correcta)) restantes[0].es_correcta = true;
+        if (!restantes.some((o) => o.es_correcta)) 
+            restantes[0] = { ...restantes[0], es_correcta: true };
         
         updatePregunta(indice, { opciones: restantes });
     }
@@ -166,7 +159,7 @@ export default function TestsCreate(
 
     function marcarCorrecta(indice: number, indiceOpcion: number) {
         const opciones = preguntas[indice].opciones.map((opc, i) => ({
-            contenido: opc.contenido,
+            ...opc,
             es_correcta: i === indiceOpcion,
         }));
 

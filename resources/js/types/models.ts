@@ -78,13 +78,19 @@ export type Test = {
     id: string;
     titulo: string;
     descripcion: string;
+
+    tema_id: string;
+    preguntasOpciones: Pregunta[];
+}
+
+//  Test del listado
+export type TestShow = Test & {
     numero_tema: string;
     preguntas_count: number;
     intentos_comunidad_count: number;
 }
-
-/** Test del listado, con la última nota del usuario (null si no lo ha hecho) */
-export type TestListado = Test & {
+//  Test del listado, con la última nota del usuario (null si no lo ha hecho) *
+export type TestListado = TestShow & {
     ultima_nota: number | null;
 }
 

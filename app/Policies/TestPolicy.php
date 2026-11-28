@@ -47,9 +47,13 @@ class TestPolicy
 
     public function update(Usuario $usuario, Test|OpcionRespuesta|Pregunta $model): Response
     {
-        return $this->visibleParaUsuario($usuario, $model)
-            ? Response::allow()
-            : Response::denyAsNotFound();
+        if (!$this->visibleParaUsuario($usuario, $model)) {
+            return Response::denyAsNotFound();
+        }
+
+        return $model instanceof Test && $model->intentosTest()->exists()
+            ? Response::deny('No se puede editar un test que ya han realizado usuarios.')
+            : Response::allow();
     }
 
     public function delete(Usuario $usuario, Test|OpcionRespuesta|Pregunta $model): Response

@@ -11,8 +11,8 @@ import { SectionHeading } from '@/components/ui/SectionHeading'
 import { DeleteModal } from '@/components/DeleteModal'
 import { useDelete } from '@/hooks/use-delete'
 
-import { usePage } from '@inertiajs/react';
 import { SharedData } from '@/types';
+import { usePage, router } from '@inertiajs/react';
 
 
 // Estadísticas a null para el administrador (no genera intentos)
@@ -123,7 +123,7 @@ export default function TestsIndex({ usuario, tests }: {usuario: Usuario, tests:
                                 test={test} 
                                 esAdmin={esAdmin} 
                                 onEliminar={() => esAdmin ? deleteTests.open(test.id) : null}
-                                onEditar={esAdmin ? route('admin.tests.edit', test.id) : null}
+                                onEditar={esAdmin ? () => router.visit(route('admin.tests.edit', test.id)) : null}
                             />
                         ))}
                     </div>
