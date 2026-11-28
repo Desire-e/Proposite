@@ -10,8 +10,8 @@ import { EliminarButton } from '../EliminarButton';
 type TestCardProps = {
     test: TestListado;
     esAdmin?: boolean;
-    onEliminar?: () => void | null;
-    onEditar?: string | null;
+    onEliminar?: (() => void) | null;
+    onEditar?: (() => void) | null;
 }
 
 /**
@@ -77,14 +77,17 @@ export function TestCard({ test, esAdmin = false, onEliminar, onEditar }: TestCa
                             { onEliminar && <EliminarButton onEliminar={onEliminar} /> }
 
                             { onEditar &&
-                                <Link
-                                    href={onEditar}
+                                <button
+                                    type="button"
+                                    disabled={test.intentos_comunidad_count > 0}
+                                    onClick={onEditar}
                                     aria-label={`Editar test ${test.titulo}`}
                                     className='flex items-center rounded-xl font-semibold text-xs px-2 py-0! bg-tertiary z-10 
-                                    text-tertiary-foreground border border-tertiary-foreground/80! cursor-pointer h-8 m-0'
+                                    text-tertiary-foreground border border-tertiary-foreground/80! cursor-pointer h-8 m-0
+                                    disabled:opacity-50 disabled:cursor-not-allowed'
                                 >
                                     Editar
-                                </Link>
+                                </button>
                             }
                         </div>
                     }

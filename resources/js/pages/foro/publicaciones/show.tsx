@@ -2,7 +2,7 @@
 import { MessageCircle } from 'lucide-react'
 import { Link, usePage } from '@inertiajs/react';
 import { type SharedData } from '@/types';
-import { type Comentario, type UsuarioBasico } from '@/types/models';
+import { type Comentario, type Usuario } from '@/types/models';
 
 import AppLayout from '@/layouts/AppLayout'
 import UserAvatar from '@/components/ui/UserAvatar'
@@ -31,7 +31,7 @@ type Publicacion = {
 }
 
 type PublicacionProps = {
-    usuario_autor: UsuarioBasico;
+    usuario_autor: Usuario;
     publicacion: Publicacion;
     me_sirvio: number;
     me_sirvio_activo: boolean;

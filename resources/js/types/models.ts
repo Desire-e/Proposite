@@ -3,7 +3,7 @@
  * Los props propios de una sola página se quedan en esa página.
  */
 
-export type UsuarioBasico = {
+export type Usuario = {
     id: string;
     name: string;
 }
@@ -37,7 +37,7 @@ export type PublicacionFeed = {
     id: string;
     contenido: string;
     created_at: string;
-    usuario: UsuarioBasico;
+    usuario: Usuario;
     me_sirvio_count: number;
     comentarios_count: number;
     me_sirvio_activo: boolean;
@@ -49,7 +49,7 @@ export type Comentario = {
     publicacion_id: string;
     contenido: string;
     created_at: string;
-    usuario: UsuarioBasico;
+    usuario: Usuario;
 }
 
 // ====== Temario ======
@@ -78,13 +78,19 @@ export type Test = {
     id: string;
     titulo: string;
     descripcion: string;
+
+    tema_id: string;
+    preguntasOpciones: Pregunta[];
+}
+
+//  Test del listado
+export type TestShow = Test & {
     numero_tema: string;
     preguntas_count: number;
     intentos_comunidad_count: number;
 }
-
-/** Test del listado, con la última nota del usuario (null si no lo ha hecho) */
-export type TestListado = Test & {
+//  Test del listado, con la última nota del usuario (null si no lo ha hecho) *
+export type TestListado = TestShow & {
     ultima_nota: number | null;
 }
 

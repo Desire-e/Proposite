@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/AppLayout';
 import { ArrowRight, CheckCircle2, Clock3, BookOpen, ListChecks, Trophy } from 'lucide-react'
-import { type Test } from '@/types/models';
+import { type TestShow } from '@/types/models';
 
 import { SectionCard } from '@/components/ui/SectionCard';
 import { CtaCard } from '@/components/ui/CtaCard';
@@ -15,7 +15,7 @@ type Usuario = {
 }
 
 
-export default function TestShow({ test, usuario }: { test: Test, usuario: Usuario }) {
+export default function TestShow({ test, usuario }: { test: TestShow, usuario: Usuario }) {
 
     const duracion = duracionRecomendada(test.preguntas_count);
     const { auth } = usePage<SharedData>().props;
